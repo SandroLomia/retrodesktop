@@ -94,7 +94,7 @@ The AI Agent can chat with you and, when **Desktop Control mode** is enabled, ac
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/retrolinux.git
+git clone https://github.com/SandroLomia/retrodesktop.git
 
 # Open in your browser
 open index.html
