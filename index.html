@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetroLinux — Linux Shell / Desktop</title>
+  <meta name="description" content="A nostalgic 2000s Windows XP-style desktop experience in your browser">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&family=MS+Sans+Serif&family=Pixelify+Sans:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Boot Screen -->
+  <div id="boot-screen">
+    <div class="boot-logo">
+      <div class="boot-flag">
+        <div style="font-size: 48px; line-height: 1;">🐧</div>
+      </div>
+      <div class="boot-text">Retro<span class="xp">Linux</span></div>
+    </div>
+    <div class="boot-loader">
+      <div class="boot-loader-bar"></div>
+    </div>
+    <div class="boot-subtitle">Starting up...</div>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" style="display:none;">
+    <div class="login-top-bar"></div>
+    <div class="login-content">
+      <div class="login-header">
+        <div class="login-flag" style="display: flex; align-items: center;">
+          <div style="font-size: 32px; transform: rotate(10deg); margin-top: -12px;">🐧</div>
+        </div>
+        <span>Retro<span class="xp">Linux</span></span>
+      </div>
+      <div class="login-text">To begin, click your username</div>
+      <div class="login-divider"></div>
+      <div class="login-user" id="login-user-btn">
+        <div class="login-avatar">
+          <svg viewBox="0 0 64 64" width="64" height="64">
+            <circle cx="32" cy="24" r="14" fill="#4a7ab5"/>
+            <ellipse cx="32" cy="56" rx="22" ry="14" fill="#4a7ab5"/>
+          </svg>
+        </div>
+        <div class="login-username">User</div>
+      </div>
+      <div class="login-footer">
+        <div class="login-power" id="login-shutdown">Turn off computer</div>
+      </div>
+    </div>
+    <div class="login-bottom-bar"></div>
+  </div>
+
+  <!-- Desktop -->
+  <div id="desktop" style="display:none;">
+    <!-- Desktop Icons -->
+    <div id="desktop-icons">
+      <div class="desktop-icon" data-app="mycomputer" id="icon-mycomputer">
+        <div class="icon-image icon-mycomputer"></div>
+        <span>Computer</span>
+      </div>
+      <div class="desktop-icon" data-app="files" id="icon-mydocuments">
+        <div class="icon-image icon-mydocuments"></div>
+        <span>Files</span>
+      </div>
+      <div class="desktop-icon" data-app="recyclebin" id="icon-recyclebin">
+        <div class="icon-image icon-recyclebin"></div>
+        <span>Trash</span>
+      </div>
+      <div class="desktop-icon" data-app="internet" id="icon-internet">
+        <div class="icon-image icon-internet"></div>
+        <span>Web Browser</span>
+      </div>
+      <div class="desktop-icon" data-app="terminal" id="icon-terminal">
+        <div class="icon-image icon-terminal"></div>
+        <span>Terminal</span>
+      </div>
+      <div class="desktop-icon" data-app="notepad" id="icon-notepad">
+        <div class="icon-image icon-notepad"></div>
+        <span>Text Editor</span>
+      </div>
+      <div class="desktop-icon" data-app="calculator" id="icon-calculator">
+        <div class="icon-image icon-calculator"></div>
+        <span>Calculator</span>
+      </div>
+      <div class="desktop-icon" data-app="paint" id="icon-paint">
+        <div class="icon-image icon-paint"></div>
+        <span>Paint</span>
+      </div>
+      <div class="desktop-icon" data-app="mediaplayer" id="icon-mediaplayer">
+        <div class="icon-image icon-mediaplayer"></div>
+        <span>Media Player</span>
+      </div>
+      <div class="desktop-icon" data-app="minesweeper" id="icon-minesweeper">
+        <div class="icon-image icon-minesweeper"></div>
+        <span>Minesweeper</span>
+      </div>
+      <div class="desktop-icon" data-app="settings" id="icon-settings">
+        <div class="icon-image icon-settings"></div>
+        <span>Settings</span>
+      </div>
+      <div class="desktop-icon" data-app="ide" id="icon-ide">
+        <div class="icon-image icon-ide"></div>
+        <span>Code Studio</span>
+      </div>
+      <div class="desktop-icon" data-app="agent" id="icon-agent">
+        <div class="icon-image icon-agent"></div>
+        <span>AI Agent</span>
+      </div>
+      <div class="desktop-icon" data-app="snake" id="icon-snake">
+        <div class="icon-image icon-snake"></div>
+        <span>Snake</span>
+      </div>
+      <div class="desktop-icon" data-app="tetris" id="icon-tetris">
+        <div class="icon-image icon-tetris"></div>
+        <span>Tetris</span>
+      </div>
+      <div class="desktop-icon" data-app="game2048" id="icon-game2048">
+        <div class="icon-image icon-game2048"></div>
+        <span>2048</span>
+      </div>
+    </div>
+
+    <!-- Windows Container -->
+    <div id="windows-container"></div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+      <button id="start-button">
+        <div class="start-flag" style="display: flex; align-items: center;">
+          <div style="font-size: 15px; transform: rotate(10deg); margin-top: -6px;">🐧</div>
+        </div>
+        <span>menu</span>
+      </button>
+      <div id="taskbar-divider"></div>
+      <div id="taskbar-apps"></div>
+      <div id="system-tray">
+        <div class="tray-icons">
+          <span class="tray-icon" title="Volume">🔊</span>
+          <span class="tray-icon" title="Network">🌐</span>
+        </div>
+        <div id="clock"></div>
+      </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" style="display:none;">
+      <div class="start-menu-header">
+        <div class="start-menu-avatar">
+          <svg viewBox="0 0 40 40" width="40" height="40">
+            <circle cx="20" cy="15" r="9" fill="#fff"/>
+            <ellipse cx="20" cy="36" rx="14" ry="9" fill="#fff"/>
+          </svg>
+        </div>
+        <span class="start-menu-username">User</span>
+      </div>
+      <div class="start-menu-body">
+        <div class="start-menu-left">
+          <div class="start-menu-item pinned" data-app="internet">
+            <div class="smi-icon icon-internet"></div>
+            <div class="smi-text">
+              <div class="smi-title">Web Browser</div>
+              <div class="smi-desc">Browse the web</div>
+            </div>
+          </div>
+          <div class="start-menu-item pinned" data-app="notepad">
+            <div class="smi-icon icon-notepad"></div>
+            <div class="smi-text">
+              <div class="smi-title">Text Editor</div>
+              <div class="smi-desc">Edit config files</div>
+            </div>
+          </div>
+          <div class="start-menu-item pinned" data-app="terminal">
+            <div class="smi-icon icon-terminal"></div>
+            <div class="smi-text">
+              <div class="smi-title">Terminal</div>
+              <div class="smi-desc">BASH emulator</div>
+            </div>
+          </div>
+          <div class="start-menu-item pinned" data-app="files">
+            <div class="smi-icon icon-mydocuments"></div>
+            <div class="smi-text">
+              <div class="smi-title">Files</div>
+              <div class="smi-desc">Browse folders</div>
+            </div>
+          </div>
+          <div class="start-menu-separator"></div>
+          <div class="start-menu-item" data-app="calculator">
+            <div class="smi-icon icon-calculator"></div>
+            <div class="smi-text">
+              <div class="smi-title">Calculator</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="paint">
+            <div class="smi-icon icon-paint"></div>
+            <div class="smi-text">
+              <div class="smi-title">Paint</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="mediaplayer">
+            <div class="smi-icon icon-mediaplayer"></div>
+            <div class="smi-text">
+              <div class="smi-title">Media Player</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="minesweeper">
+            <div class="smi-icon icon-minesweeper"></div>
+            <div class="smi-text">
+              <div class="smi-title">Minesweeper</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="snake">
+            <div class="smi-icon icon-snake"></div>
+            <div class="smi-text">
+              <div class="smi-title">Snake</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="tetris">
+            <div class="smi-icon icon-tetris"></div>
+            <div class="smi-text">
+              <div class="smi-title">Tetris</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="game2048">
+            <div class="smi-icon icon-game2048"></div>
+            <div class="smi-text">
+              <div class="smi-title">2048</div>
+            </div>
+          </div>
+          <div class="start-menu-item" data-app="settings">
+            <div class="smi-icon icon-settings"></div>
+            <div class="smi-text">
+              <div class="smi-title">Settings</div>
+            </div>
+          </div>
+          <div class="start-menu-separator"></div>
+          <div class="start-menu-item pinned" data-app="ide">
+            <div class="smi-icon icon-ide"></div>
+            <div class="smi-text">
+              <div class="smi-title">Code Studio</div>
+              <div class="smi-desc">Web IDE</div>
+            </div>
+          </div>
+          <div class="start-menu-item pinned" data-app="agent">
+            <div class="smi-icon icon-agent"></div>
+            <div class="smi-text">
+              <div class="smi-title">AI Agent</div>
+              <div class="smi-desc">Chat and control desktop</div>
+            </div>
+          </div>
+          <div class="start-menu-separator"></div>
+          <div class="start-menu-item all-programs">
+            <div class="smi-text"><div class="smi-title">All Programs</div></div>
+            <span class="arrow">▶</span>
+          </div>
+        </div>
+        <div class="start-menu-right">
+          <div class="start-menu-item-right" data-app="files">
+            <div class="smi-title">Files</div>
+          </div>
+          <div class="start-menu-item-right" data-app="mycomputer">
+            <div class="smi-title">Computer</div>
+          </div>
+          <div class="start-menu-item-right" data-app="settings">
+            <div class="smi-title">System Settings</div>
+          </div>
+          <div class="start-menu-separator-right"></div>
+          <div class="start-menu-item-right">
+            <div class="smi-title">Help and Support</div>
+          </div>
+          <div class="start-menu-item-right">
+            <div class="smi-title">Search</div>
+          </div>
+          <div class="start-menu-item-right">
+            <div class="smi-title">Run...</div>
+          </div>
+        </div>
+      </div>
+      <div class="start-menu-footer">
+        <div class="start-menu-footer-btn" id="btn-logoff">
+          <span>🔒</span> Log Off
+        </div>
+        <div class="start-menu-footer-btn" id="btn-shutdown">
+          <span>⏻</span> Shut Down
+        </div>
+      </div>
+    </div>
+
+    <!-- Right-click context menu -->
+    <div id="context-menu" style="display:none;">
+      <div class="ctx-item" id="ctx-refresh">🔄 Refresh</div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item ctx-has-sub">New ▸
+        <div class="ctx-submenu">
+          <div class="ctx-item ctx-new-item" data-type="folder">📁 Folder</div>
+          <div class="ctx-separator"></div>
+          <div class="ctx-item ctx-new-item" data-type="txt">📄 Text Document</div>
+          <div class="ctx-item ctx-new-item" data-type="html">🌐 HTML File</div>
+          <div class="ctx-item ctx-new-item" data-type="css">🎨 CSS File</div>
+          <div class="ctx-item ctx-new-item" data-type="js">⚡ JavaScript File</div>
+          <div class="ctx-item ctx-new-item" data-type="json">📋 JSON File</div>
+          <div class="ctx-item ctx-new-item" data-type="md">📝 Markdown File</div>
+        </div>
+      </div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item" id="ctx-open-home">📂 Open Files</div>
+      <div class="ctx-item" id="ctx-open-terminal">🖥️ Open Terminal</div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item" id="ctx-properties">⚙️ Properties</div>
+    </div>
+  </div>
+
+  <!-- Shutdown screen -->
+  <div id="shutdown-screen" style="display:none;">
+    <div class="shutdown-text">It is now safe to turn off your computer.</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
