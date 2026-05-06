@@ -681,7 +681,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4433,10 +4433,27 @@ ${getAgentDesktopState()}`
     });
   }
 
+  // ======= Desktop Background =======
+  function applyDesktopBackground(bgType) {
+    const desktop = document.getElementById('desktop');
+    if (!desktop) return;
+
+    if (bgType === 'bliss') {
+      desktop.style.background = 'url("https://upload.wikimedia.org/wikipedia/en/2/21/Bliss_%28Windows_background%29.jpg") no-repeat center center fixed';
+      desktop.style.backgroundSize = 'cover';
+    } else if (bgType === 'teal') {
+      desktop.style.background = '#008080';
+    } else {
+      desktop.style.background = 'linear-gradient(135deg, #3a223a 0%, #2a1b2a 50%, #1a1a2a 100%)';
+      desktop.style.backgroundSize = 'cover';
+    }
+  }
+
   // ======= SETTINGS =======
   function openSettings() {
+    const currentBg = localStorage.getItem('retro_bg') || 'classic';
     createWindow({
-      title: 'System Settings', width: 320, height: 240, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4444,7 +4461,14 @@ ${getAgentDesktopState()}`
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
-        <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Use this to enable or disable clicks, alerts, and boot sounds in RetroLinux.</p>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
+        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
+          <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
+          <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
+        </select>
+        <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -4452,6 +4476,94 @@ ${getAgentDesktopState()}`
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
+        });
+        const bgSel = body.querySelector('#bg-selector');
+        bgSel.addEventListener('change', (e) => {
+          const bg = e.target.value;
+          localStorage.setItem('retro_bg', bg);
+          applyDesktopBackground(bg);
+        });
+      }
+    });
+  }
+
+  // Init Background
+  applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // ======= TIC TAC TOE =======
+  function openTicTacToe() {
+    createWindow({
+      title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
+      menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
+      body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
+        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
+        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
+          <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="3" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="4" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="5" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="6" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+          <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+        </div>
+        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const cells = body.querySelectorAll('.ttt-cell');
+        const msg = body.querySelector('#ttt-msg');
+        const resetBtn = body.querySelector('#ttt-reset');
+
+        let board = Array(9).fill(null);
+        let xIsNext = true;
+        let gameOver = false;
+
+        function checkWinner() {
+          const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+          for (let line of lines) {
+            const [a,b,c] = line;
+            if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+              return board[a];
+            }
+          }
+          return board.includes(null) ? null : 'Draw';
+        }
+
+        function handleClick(e) {
+          if (gameOver) return;
+          const idx = e.target.dataset.idx;
+          if (board[idx]) return;
+
+          board[idx] = xIsNext ? 'X' : 'O';
+          e.target.textContent = board[idx];
+          e.target.style.color = xIsNext ? '#d9534f' : '#337ab7';
+
+          playSound('click');
+
+          const winner = checkWinner();
+          if (winner) {
+            gameOver = true;
+            msg.textContent = winner === 'Draw' ? "It's a Draw!" : `Player ${winner} Wins!`;
+          } else {
+            xIsNext = !xIsNext;
+            msg.textContent = `Player ${xIsNext ? 'X' : 'O'}'s Turn`;
+          }
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleClick));
+
+        resetBtn.addEventListener('click', () => {
+          board = Array(9).fill(null);
+          xIsNext = true;
+          gameOver = false;
+          msg.textContent = "Player X's Turn";
+          cells.forEach(cell => {
+            cell.textContent = '';
+            cell.style.color = '#333';
+          });
         });
       }
     });
