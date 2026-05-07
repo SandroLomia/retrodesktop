@@ -359,6 +359,7 @@
     updateDesktopIcons();
     updateClock();
     setInterval(updateClock, 1000);
+    document.getElementById('clock').addEventListener('click', () => openApp('clock'));
   });
 
   function updateClock() {
@@ -681,7 +682,8 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1020,7 +1022,7 @@
     // Handle simple output redirection: cmd > file and cmd >> file
     const redirectMatch = trimmed.match(/^(.+?)\s*(>>?)\s*([^\s]+)$/);
 
-    if (redirectMatch && !trimmed.startsWith('echo') === false) {
+    if (redirectMatch && trimmed.startsWith('echo')) {
       const beforeRedir = redirectMatch[1].trim();
       const op = redirectMatch[2];
       const destFile = redirectMatch[3];
@@ -4447,6 +4449,139 @@ ${getAgentDesktopState()}`
       desktop.style.background = 'linear-gradient(135deg, #3a223a 0%, #2a1b2a 50%, #1a1a2a 100%)';
       desktop.style.backgroundSize = 'cover';
     }
+  }
+
+  // ======= RUN DIALOG =======
+  function openRun() {
+    createWindow({
+      title: 'Run', width: 340, height: 180, tbIcon: '🏃',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px;">
+        <div style="font-size: 12px; display: flex; gap: 12px; align-items: flex-start;">
+          <div style="font-size: 32px;">🏃</div>
+          <div>Type the name of a program, folder, document, or Internet resource, and RetroLinux will open it for you.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-size: 12px; font-weight: bold;">Open:</label>
+          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
+          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
+          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('#run-input');
+        const okBtn = body.querySelector('#run-ok-btn');
+        const cancelBtn = body.querySelector('#run-cancel-btn');
+
+        input.focus();
+
+        function executeRun() {
+          const val = input.value.trim();
+          if (!val) return;
+          closeWindow(winId);
+
+          if (val.startsWith('http')) {
+            openInternet(val);
+          } else {
+            const launchers = {
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
+              iexplore: openInternet, wmplayer: openMediaPlayer,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+            };
+            const appCmd = val.toLowerCase();
+            if (launchers[appCmd]) {
+              launchers[appCmd]();
+            } else {
+              const openPath = resolvePath('/home/user', val);
+              const openNode = getNode(openPath);
+              if (isDirectory(openNode)) {
+                openFileExplorer(openPath);
+              } else if (typeof openNode === 'string') {
+                openNotepadWith(getBaseName(openPath), openPath, openNode);
+              } else {
+                alert(`Cannot find '${val}'. Make sure you typed the name correctly, and then try again.`);
+              }
+            }
+          }
+        }
+
+        okBtn.addEventListener('click', executeRun);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') executeRun();
+        });
+        cancelBtn.addEventListener('click', () => closeWindow(winId));
+      }
+    });
+  }
+
+  // ======= HELP AND SUPPORT =======
+  function openHelp() {
+    createWindow({
+      title: 'Help and Support Center', width: 640, height: 480, tbIcon: '❓',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px;">
+        <h2 style="color: #0033cc; margin-top: 0;">Welcome to RetroLinux Help and Support</h2>
+        <p>RetroLinux is a browser-based Linux desktop environment simulator.</p>
+
+        <h3 style="color: #0033cc;">Basic Navigation</h3>
+        <ul style="padding-left: 20px; line-height: 1.5;">
+          <li>Use the <strong>Start Menu</strong> to find applications.</li>
+          <li>Right-click on the desktop to create new files or folders.</li>
+          <li>Double-click desktop icons to open apps or files.</li>
+          <li>Windows can be dragged, resized, minimized, maximized, and closed.</li>
+        </ul>
+
+        <h3 style="color: #0033cc;">Terminal Commands</h3>
+        <p>The terminal emulates a basic bash environment. Try these commands:</p>
+        <ul style="padding-left: 20px; line-height: 1.5; font-family: monospace;">
+          <li>ls - List files</li>
+          <li>cd - Change directory</li>
+          <li>cat - Read a file</li>
+          <li>mkdir - Create a directory</li>
+          <li>echo "text" > file.txt - Write to a file</li>
+          <li>help - See all available commands</li>
+        </ul>
+
+        <h3 style="color: #0033cc;">AI Agent</h3>
+        <p>The built-in AI agent can assist you or even control the desktop directly. Open the <strong>AI Agent</strong> app, configure your API key, and enable "Desktop control mode" to try it out.</p>
+      </div>`
+    });
+  }
+
+  // ======= CLOCK SETTINGS =======
+  function openClockSettings() {
+    createWindow({
+      title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
+        <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
+        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
+        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const timeDisplay = body.querySelector('#clock-display-large');
+        const dateDisplay = body.querySelector('#date-display-large');
+
+        function updateDisplay() {
+          const now = new Date();
+          let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+          const ampm = h >= 12 ? 'PM' : 'AM';
+          h = h % 12 || 12;
+          timeDisplay.textContent = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ${ampm}`;
+          dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        updateDisplay();
+        const interval = setInterval(updateDisplay, 1000);
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
   }
 
   // ======= SETTINGS =======
