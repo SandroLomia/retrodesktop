@@ -1,3 +1,12 @@
+
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 // ======= RetroOS XP - Core System =======
 (function () {
   'use strict';
@@ -50,7 +59,7 @@
   function getFileIcon(name, val) {
     if (typeof val === 'object') return '📁';
     const ext = name.split('.').pop().toLowerCase();
-    const icons = { txt: '📄', html: '🌐', htm: '🌐', css: '🎨', js: '⚡', json: '📋', md: '📝', py: '🐍', jpg: '🖼️', png: '🖼️', gif: '🖼️', mp3: '🎵', wav: '🎵', pdf: '📕' };
+    const icons = { txt: '📄', html: '🌐', htm: '🌐', css: '🎨', js: '⚡', json: '📋', md: '📝', py: '🐍', jpg: '🖼️', png: '🖼️', gif: '🖼️', mp3: '🎵', wav: '🎵', pdf: '📕', zip: '🗜️', tar: '📦', gz: '📦', csv: '📊', sh: '📜', c: '🇨', cpp: '🇨', h: '🇭', exe: '⚙️', xml: '📋' };
     return icons[ext] || '📄';
   }
 
@@ -683,7 +692,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, about: openAbout
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1044,6 +1053,17 @@
     let output = '';
 
     switch (cmd) {
+      case 'theme': {
+        const bg = args[0];
+        if (!bg || !['classic', 'bliss', 'teal'].includes(bg)) {
+          output = 'Usage: theme [classic|bliss|teal]';
+          break;
+        }
+        localStorage.setItem('retro_bg', bg);
+        applyDesktopBackground(bg);
+        output = `Desktop theme changed to ${bg}`;
+        break;
+      }
       case 'clear':
         container.innerHTML = '';
         addPromptLine(container, state);
@@ -4519,6 +4539,31 @@ ${getAgentDesktopState()}`
     });
   }
 
+  // ======= ABOUT RETROLINUX =======
+  function openAbout() {
+    createWindow({
+      title: 'About RetroLinux', width: 420, height: 320, tbIcon: 'ℹ️',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center; gap: 15px; text-align: center;">
+        <div style="font-size: 48px; transform: rotate(10deg); margin-top: 10px;">🐧</div>
+        <h2 style="margin: 0; font-size: 24px;">Retro<span style="color: #f59e0b; font-style: italic;">Linux</span></h2>
+        <p style="margin: 0; color: #555;">Version 1.0 (Vanilla HTML/CSS/JS)</p>
+        <hr style="width: 80%; border: 0; border-top: 1px solid #ccc; margin: 10px 0;">
+        <p style="font-size: 13px; line-height: 1.5; color: #333; margin: 0;">
+          A fully interactive Linux desktop environment simulator built entirely with vanilla web technologies.
+          <br><br>
+          Experience the nostalgia of early 2000s computing right in your browser.
+        </p>
+        <button id="about-ok-btn" style="margin-top: 15px; padding: 4px 20px; min-width: 80px; font-family: 'Tahoma', sans-serif; cursor: pointer;">OK</button>
+      </div>`,
+      onReady: (winId) => {
+        document.getElementById(winId + '-body').querySelector('#about-ok-btn').addEventListener('click', () => {
+          closeWindow(winId);
+        });
+      }
+    });
+  }
+
   // ======= HELP AND SUPPORT =======
   function openHelp() {
     createWindow({
@@ -4587,14 +4632,19 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentCrt = localStorage.getItem('retro_crt') === 'true';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
-        <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
+        <h3 style="margin-top:0; font-size: 16px;">System Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
+        </label>
+        <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
+          <input type="checkbox" id="toggle-crt" ${currentCrt ? 'checked' : ''}>
+          Enable CRT Scanline Effect
         </label>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
@@ -4612,6 +4662,17 @@ ${getAgentDesktopState()}`
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
+        const crtCb = body.querySelector('#toggle-crt');
+        crtCb.addEventListener('change', (e) => {
+          const enabled = e.target.checked;
+          localStorage.setItem('retro_crt', enabled);
+          if (enabled) {
+            document.body.classList.add('crt-effect');
+          } else {
+            document.body.classList.remove('crt-effect');
+          }
+          if (soundEnabled) playSound('click');
+        });
         const bgSel = body.querySelector('#bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
@@ -4624,6 +4685,9 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  if (localStorage.getItem('retro_crt') === 'true') {
+    document.body.classList.add('crt-effect');
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
@@ -4926,14 +4990,7 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+
 
         function stashTokens(text, rules) {
           const tokens = [];
