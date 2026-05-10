@@ -290,8 +290,35 @@
   const cmdHistory = [];
   let cmdHistoryIdx = -1;
 
-  let soundEnabled = true;
+  let soundEnabled = localStorage.getItem('retro_sound') !== 'false';
   let audioCtx = null;
+
+  function updateVolumeIcon() {
+    const icon = document.querySelector('.tray-icon[title="Volume"]');
+    if (icon) {
+      icon.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+    const settingsToggle = document.getElementById('toggle-sound');
+    if (settingsToggle) {
+      settingsToggle.checked = soundEnabled;
+    }
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('retro_sound', soundEnabled);
+    updateVolumeIcon();
+    if (soundEnabled) playSound('click');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateVolumeIcon();
+    const volumeIcon = document.querySelector('.tray-icon[title="Volume"]');
+    if (volumeIcon) {
+      volumeIcon.addEventListener('click', toggleSound);
+    }
+  });
+
   function playSound(type) {
     if (!soundEnabled) return;
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -683,7 +710,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1722,6 +1749,69 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
       status: 'Ln 1, Col 1'
+    });
+  }
+
+  // ======= CALENDAR =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 340, height: 360, tbIcon: '📅',
+      menubar: '<div class="window-menubar"><span>View</span><span>Help</span></div>',
+      body: `<div class="calendar-body">
+        <div class="cal-header">
+          <button class="cal-btn" id="cal-prev">◀</button>
+          <div class="cal-title" id="cal-title">Month Year</div>
+          <button class="cal-btn" id="cal-next">▶</button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-day-name">Sun</div><div class="cal-day-name">Mon</div><div class="cal-day-name">Tue</div>
+          <div class="cal-day-name">Wed</div><div class="cal-day-name">Thu</div><div class="cal-day-name">Fri</div><div class="cal-day-name">Sat</div>
+        </div>
+        <div class="cal-grid" id="cal-days"></div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const titleEl = body.querySelector('#cal-title');
+        const daysEl = body.querySelector('#cal-days');
+        let currentDate = new Date();
+
+        function renderCalendar() {
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+          const today = new Date();
+
+          const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          titleEl.textContent = `${monthNames[month]} ${year}`;
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          let html = '';
+          for (let i = 0; i < firstDay; i++) {
+            html += '<div class="cal-day empty"></div>';
+          }
+
+          for (let i = 1; i <= daysInMonth; i++) {
+            const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+            html += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
+          }
+
+          daysEl.innerHTML = html;
+        }
+
+        body.querySelector('#cal-prev').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        body.querySelector('#cal-next').addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        renderCalendar();
+      }
     });
   }
 
@@ -4491,7 +4581,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, calendar: openCalendar
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4610,6 +4700,8 @@ ${getAgentDesktopState()}`
         const cb = body.querySelector('#toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
+          localStorage.setItem('retro_sound', soundEnabled);
+          updateVolumeIcon();
           if (soundEnabled) playSound('click');
         });
         const bgSel = body.querySelector('#bg-selector');

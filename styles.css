@@ -445,6 +445,28 @@ body {
   border-radius: 1px;
 }
 
+.icon-calendar {
+  position: relative;
+}
+.icon-calendar::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border: 2px solid #808080;
+  border-top: 6px solid #d9534f;
+  border-radius: 3px;
+}
+.icon-calendar::after {
+  content: '12';
+  position: absolute;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  top: 8px;
+}
+
 .icon-paint {
   position: relative;
 }
@@ -601,6 +623,15 @@ body {
   height: 7px;
   top: 4px;
 }
+.smi-icon.icon-calendar::before {
+  width: 24px;
+  height: 24px;
+  border-top-width: 4px;
+}
+.smi-icon.icon-calendar::after {
+  font-size: 10px;
+  top: 5px;
+}
 .smi-icon.icon-paint::before {
   width: 24px;
   height: 24px;
@@ -709,7 +740,7 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 8%, #036cd5 10%, #0046aa 50%, #002e85 90%, #002065 100%);
 }
 
 .window:not(.active) .window-titlebar {
@@ -918,7 +949,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #245edb 0%, #3f8cf3 4%, #245edb 6%, #1c52c0 50%, #1448aa 90%, #103c94 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +962,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: linear-gradient(180deg, #43b154 0%, #3a9e47 10%, #33913c 50%, #2c8432 90%, #26772a 100%);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -942,7 +973,7 @@ body {
   cursor: pointer;
   font-family: 'Tahoma', sans-serif;
   text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset -1px -1px 2px rgba(0,0,0,0.2), 2px 0 3px rgba(0,0,0,0.3);
   margin: 3px 0 3px 0;
   transition: filter 0.1s;
 }
@@ -1367,6 +1398,85 @@ body {
   padding: 4px;
   background: #fff;
   color: #000;
+}
+
+/* ======= CALENDAR APP ======= */
+.calendar-body {
+  background: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: linear-gradient(180deg, #ece9d8, #e0dcc2);
+  border-bottom: 1px solid #a0a0a0;
+}
+
+.cal-title {
+  font-weight: bold;
+  font-size: 14px;
+  color: #000;
+}
+
+.cal-btn {
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.cal-btn:hover {
+  border: 1px outset #fff;
+  background: #e8e8e0;
+}
+
+.cal-btn:active {
+  border: 1px inset #fff;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.cal-day-name {
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: bold;
+  background: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  color: #333;
+}
+
+.cal-day {
+  padding: 10px 0;
+  font-size: 12px;
+  cursor: default;
+  border: 1px solid transparent;
+}
+
+.cal-day:hover:not(.empty) {
+  background: #e0e8f0;
+  border: 1px solid #a0c0e0;
+}
+
+.cal-day.today {
+  background: #316ac5;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid #0055e5;
+}
+
+.cal-day.today:hover {
+  background: #316ac5;
 }
 
 /* ======= CALCULATOR APP ======= */
