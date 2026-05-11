@@ -699,7 +699,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfa 90%, #0260e8 100%);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +709,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfa 90%, #0260e8 100%);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: linear-gradient(180deg, #7ba0d7 0%, #90b8f0 4%, #83aff0 6%, #6a9cf0 50%, #5d90e8 90%, #5588d9 100%);
 }
 
 .window-title-icon {
@@ -763,13 +763,19 @@ body {
 }
 
 .window-btn.minimize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #2b7af0, #1860d4);
+  border: 1px solid #1450b3;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
 }
 .window-btn.maximize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #2b7af0, #1860d4);
+  border: 1px solid #1450b3;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
 }
 .window-btn.close {
-  background: linear-gradient(180deg, #d9534f, #c9302c);
+  background: linear-gradient(180deg, #e36a58, #d14231);
+  border: 1px solid #b23525;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
 }
 
 .window-btn:hover {

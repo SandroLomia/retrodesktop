@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1089,6 +1089,7 @@
         const newPath = resolvePath(state.cwd, args[0]);
         const node = getNode(newPath);
         if (isDirectory(node)) { state.cwd = newPath; }
+        else if (node !== undefined) { output = `bash: cd: ${args[0]}: Not a directory`; }
         else { output = `bash: cd: ${args[0]}: No such file or directory`; }
         break;
       }
@@ -1100,11 +1101,15 @@
         break;
       case 'cat': {
         if (!args[0]) { output = 'cat: missing file operand'; break; }
-        const fp = resolvePath(state.cwd, args[0]);
-        const node = getNode(fp);
-        if (node === undefined) output = `cat: ${args[0]}: No such file or directory`;
-        else if (isDirectory(node)) output = `cat: ${args[0]}: Is a directory`;
-        else output = node;
+        const outputs = [];
+        for (const arg of args) {
+          const fp = resolvePath(state.cwd, arg);
+          const node = getNode(fp);
+          if (node === undefined) outputs.push(`cat: ${arg}: No such file or directory`);
+          else if (isDirectory(node)) outputs.push(`cat: ${arg}: Is a directory`);
+          else outputs.push(node);
+        }
+        output = outputs.join('\n');
         break;
       }
       case 'mkdir': {
@@ -1749,7 +1754,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           btn.addEventListener('click', () => {
             const v = btn.dataset.val;
             if ('0123456789'.includes(v)) {
-              current = (current === '0' || reset) ? v : current + v;
+              current = (current === '0' || current === 'Error' || reset) ? v : current + v;
               reset = false;
             } else if (v === '.') {
               if (reset) { current = '0.'; reset = false; }
@@ -1770,6 +1775,48 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
     });
   }
   function calc(a, b, op) { return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0; }
+
+  // ======= CALENDAR =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 300, height: 320, tbIcon: '📅',
+      statusbar: false,
+      body: `<div style="padding: 10px; font-family: 'Tahoma', sans-serif; height: 100%; display: flex; flex-direction: column; background: #fff;">
+        <div id="calendar-header" style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 10px; color: #333;"></div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #555;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 14px; flex: 1;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const header = body.querySelector('#calendar-header');
+        const daysContainer = body.querySelector('#calendar-days');
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const today = now.getDate();
+
+        header.textContent = now.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let html = '';
+        for (let i = 0; i < firstDay; i++) {
+          html += '<div></div>';
+        }
+        for (let i = 1; i <= daysInMonth; i++) {
+          const isToday = i === today;
+          const bg = isToday ? '#316ac5' : '#f0f0f0';
+          const color = isToday ? '#fff' : '#333';
+          html += `<div style="background: ${bg}; color: ${color}; border-radius: 3px; display: flex; align-items: center; justify-content: center; cursor: default;">${i}</div>`;
+        }
+        daysContainer.innerHTML = html;
+      }
+    });
+  }
 
   // ======= PAINT =======
   function openPaint() {
@@ -4491,7 +4538,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, calendar: openCalendar
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
