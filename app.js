@@ -92,7 +92,7 @@
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
           if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          else { const content = getNode(path); if (typeof content === 'string') executeFile(name, path, content); }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -660,8 +660,10 @@
     if (dragState) {
       const w = document.getElementById(dragState.wid);
       if (w) {
-        w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        const newLeft = dragState.origL + e.clientX - dragState.startX;
+        const newTop = dragState.origT + e.clientY - dragState.startY;
+        w.style.left = Math.max(0, Math.min(window.innerWidth - 100, newLeft)) + 'px';
+        w.style.top = Math.max(0, Math.min(window.innerHeight - 50, newTop)) + 'px';
       }
     }
     if (resizeState) {
@@ -1561,7 +1563,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const openNode = getNode(openPath);
         if (openNode === undefined) { output = `open: ${openArg}: No such file or directory`; break; }
         if (isDirectory(openNode)) { openFileExplorer(openPath); output = ''; break; }
-        if (typeof openNode === 'string') { openNotepadWith(getBaseName(openPath), openPath, openNode); output = ''; break; }
+        if (typeof openNode === 'string') { executeFile(getBaseName(openPath), openPath, openNode); output = ''; break; }
         output = `open: cannot open ${openArg}`;
         break;
       }
@@ -1952,7 +1954,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') executeFile(name, fullPath, val);
               }
             });
             // Drag start
@@ -2108,7 +2110,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) openFileExplorer(fullPath);
       else {
         const val = getNode(fullPath);
-        if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+        if (typeof val === 'string') executeFile(name, fullPath, val);
       }
     });
     menu.querySelector('.exp-ctx-rename').addEventListener('click', () => {
@@ -4022,14 +4024,34 @@ ${getAgentDesktopState()}`
   }
 
   // ======= MEDIA PLAYER =======
-  function openMediaPlayer() {
+  function openImageViewer(title, path, dataUrl) {
+    createWindow({
+      title: title + ' - Image Viewer', width: 640, height: 480, tbIcon: '🖼️',
+      menubar: '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: `<div class="imageviewer-body"><img src="${dataUrl}" class="imageviewer-img" alt="${title}"></div>`,
+      status: path
+    });
+  }
+
+  function executeFile(name, fullPath, content) {
+    const ext = name.split('.').pop().toLowerCase();
+    if (['jpg', 'png', 'gif', 'webp'].includes(ext)) {
+      openImageViewer(name, fullPath, content);
+    } else if (['mp3', 'wav'].includes(ext)) {
+      openMediaPlayer(name);
+    } else {
+      openNotepadWith(name, fullPath, content);
+    }
+  }
+
+  function openMediaPlayer(fileName = 'RetroOS Theme — Unknown Artist') {
     let bars = '';
     for (let i = 0; i < 12; i++) bars += '<div class="mp-bar"></div>';
     createWindow({
       title: 'Windows Media Player', width: 360, height: 340, tbIcon: '🎵',
       body: `<div class="mediaplayer-body">
         <div class="mp-visualizer">${bars}</div>
-        <div class="mp-title">♪ RetroOS Theme — Unknown Artist</div>
+        <div class="mp-title">♪ ${fileName}</div>
         <div class="mp-progress"><div class="mp-progress-bar"></div></div>
         <div class="mp-controls">
           <span class="mp-btn">⏮</span><span class="mp-btn">⏪</span>
@@ -4502,7 +4524,7 @@ ${getAgentDesktopState()}`
               if (isDirectory(openNode)) {
                 openFileExplorer(openPath);
               } else if (typeof openNode === 'string') {
-                openNotepadWith(getBaseName(openPath), openPath, openNode);
+                executeFile(getBaseName(openPath), openPath, openNode);
               } else {
                 alert(`Cannot find '${val}'. Make sure you typed the name correctly, and then try again.`);
               }
