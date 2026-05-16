@@ -557,6 +557,7 @@
     w.querySelector('.window-btn.close').addEventListener('click', () => closeWindow(id));
     w.querySelector('.window-btn.minimize').addEventListener('click', () => minimizeWindow(id));
     w.querySelector('.window-btn.maximize').addEventListener('click', () => maximizeWindow(id));
+    w.querySelector('.window-titlebar').addEventListener('dblclick', () => maximizeWindow(id));
     w.addEventListener('mousedown', () => setActiveWindow(id));
 
     if (opts.onReady) opts.onReady(id, w);
@@ -661,7 +662,7 @@
       const w = document.getElementById(dragState.wid);
       if (w) {
         w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        w.style.top = Math.max(0, dragState.origT + e.clientY - dragState.startY) + 'px';
       }
     }
     if (resizeState) {
@@ -683,7 +684,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, sysinfo: openSysInfo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1847,7 +1848,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       addressbar: '<div class="window-address"><label>Address</label><input value="computer:///" readonly><button>Go</button></div>',
       body: `<div class="explorer-body">
         <div class="explorer-sidebar" style="background: #3c3c3c; color: white;"><div class="explorer-sidebar-title" style="color: #93c5fd;">System Links</div>
-          <div class="explorer-sidebar-item">View system information</div>
+          <div class="explorer-sidebar-item" data-app="sysinfo">View system information</div>
           <div class="explorer-sidebar-item" data-app="settings">System settings</div>
         </div>
         <div class="explorer-content">
@@ -4581,6 +4582,29 @@ ${getAgentDesktopState()}`
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
       }
+    });
+  }
+
+  // ======= SYSTEM INFORMATION =======
+  function openSysInfo() {
+    createWindow({
+      title: 'System Properties', width: 420, height: 460, tbIcon: '💻',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
+        <div style="display: flex; gap: 20px; align-items: flex-start;">
+          <div style="font-size: 48px;">💻</div>
+          <div>
+            <h3 style="margin-top:0; color:#0033cc; font-size: 16px;">System:</h3>
+            <p style="margin:4px 0 12px 0;">RetroLinux<br>Version 1.0 (Simulated)<br>Browser Based</p>
+
+            <h3 style="margin-top:0; color:#0033cc; font-size: 16px;">Registered to:</h3>
+            <p style="margin:4px 0 12px 0;">User<br>Local User</p>
+
+            <h3 style="margin-top:0; color:#0033cc; font-size: 16px;">Computer:</h3>
+            <p style="margin:4px 0 12px 0;">Virtual CPU @ 2.40GHz<br>2.00 GB of RAM<br>Infinite Storage</p>
+          </div>
+        </div>
+      </div>`
     });
   }
 
