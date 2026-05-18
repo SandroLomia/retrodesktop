@@ -92,7 +92,16 @@
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
           if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          else {
+            const content = getNode(path);
+            if (typeof content === 'string') {
+              if (name.match(/\.(png|jpe?g|gif|webp)$/i) || content.startsWith('data:image/')) {
+                openImageViewer(name, path, content);
+              } else {
+                openNotepadWith(name, path, content);
+              }
+            }
+          }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -415,6 +424,50 @@
   document.getElementById('ctx-properties').addEventListener('click', () => {
     document.getElementById('context-menu').style.display = 'none';
     openSettings();
+  });
+
+  // Desktop drop file logic
+  const desktopEl = document.getElementById('desktop');
+  desktopEl.addEventListener('dragover', (e) => {
+    if (draggedIcon) return; // internal drag
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+
+  desktopEl.addEventListener('drop', (e) => {
+    if (draggedIcon) return; // internal drop handled elsewhere
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      Array.from(e.dataTransfer.files).forEach(file => {
+        const reader = new FileReader();
+        const ext = file.name.split('.').pop().toLowerCase();
+        const isText = ['txt', 'md', 'html', 'js', 'css', 'json'].includes(ext);
+
+        reader.onload = (event) => {
+          const content = event.target.result;
+          const destPath = joinPath('/home/user/Desktop', file.name);
+          // Try to set node. If it exists, append a number
+          let finalPath = destPath;
+          let counter = 1;
+          while(getNode(finalPath) !== undefined) {
+             const base = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+             const fext = file.name.includes('.') ? file.name.substring(file.name.lastIndexOf('.')) : '';
+             finalPath = joinPath('/home/user/Desktop', `${base} (${counter})${fext}`);
+             counter++;
+          }
+          if (setNode(finalPath, content, { overwrite: false })) {
+            playSound('click');
+            updateDesktopIcons();
+          }
+        };
+
+        if (isText) {
+          reader.readAsText(file);
+        } else {
+          reader.readAsDataURL(file);
+        }
+      });
+    }
   });
 
   // Desktop icon click and drag logic
@@ -1108,13 +1161,43 @@
         break;
       }
       case 'mkdir': {
-        if (!args[0]) { output = 'mkdir: missing operand'; break; }
-        const dirPath = resolvePath(state.cwd, args[0]);
-        const { parent, name } = getParentAndName(dirPath);
-        if (!isValidNodeName(name)) output = `mkdir: cannot create directory '${args[0]}': Invalid name`;
-        else if (!isDirectory(parent)) output = `mkdir: cannot create directory '${args[0]}': No such file or directory`;
-        else if (getNode(dirPath) !== undefined) output = `mkdir: cannot create directory '${args[0]}': File exists`;
-        else setNode(dirPath, {}, { overwrite: false });
+        const createParents = args.includes('-p');
+        const targetDirs = args.filter(a => !a.startsWith('-'));
+        if (targetDirs.length === 0) { output = 'mkdir: missing operand'; break; }
+
+        for (const dirStr of targetDirs) {
+          const dirPath = resolvePath(state.cwd, dirStr);
+          const { parent, name } = getParentAndName(dirPath);
+
+          if (!isValidNodeName(name)) {
+            output = `mkdir: cannot create directory '${dirStr}': Invalid name`;
+            break;
+          }
+
+          if (!isDirectory(parent)) {
+            if (createParents) {
+              // Create all parents logic
+              const parts = dirPath.split('/').filter(Boolean);
+              let currentPath = '/';
+              for (const part of parts) {
+                currentPath = joinPath(currentPath, part);
+                if (getNode(currentPath) === undefined) {
+                  setNode(currentPath, {}, { overwrite: false });
+                }
+              }
+            } else {
+              output = `mkdir: cannot create directory '${dirStr}': No such file or directory`;
+              break;
+            }
+          } else if (getNode(dirPath) !== undefined) {
+             if (!createParents) {
+               output = `mkdir: cannot create directory '${dirStr}': File exists`;
+               break;
+             }
+          } else {
+            setNode(dirPath, {}, { overwrite: false });
+          }
+        }
         break;
       }
       case 'rm': {
@@ -1561,7 +1644,16 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const openNode = getNode(openPath);
         if (openNode === undefined) { output = `open: ${openArg}: No such file or directory`; break; }
         if (isDirectory(openNode)) { openFileExplorer(openPath); output = ''; break; }
-        if (typeof openNode === 'string') { openNotepadWith(getBaseName(openPath), openPath, openNode); output = ''; break; }
+        if (typeof openNode === 'string') {
+          const baseName = getBaseName(openPath);
+          if (baseName.match(/\.(png|jpe?g|gif|webp)$/i) || openNode.startsWith('data:image/')) {
+            openImageViewer(baseName, openPath, openNode);
+          } else {
+            openNotepadWith(baseName, openPath, openNode);
+          }
+          output = '';
+          break;
+        }
         output = `open: cannot open ${openArg}`;
         break;
       }
@@ -1952,7 +2044,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') {
+                  if (name.match(/\.(png|jpe?g|gif|webp)$/i) || val.startsWith('data:image/')) {
+                    openImageViewer(name, fullPath, val);
+                  } else {
+                    openNotepadWith(name, fullPath, val);
+                  }
+                }
               }
             });
             // Drag start
@@ -2170,6 +2268,18 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   }
 
   function removeExplorerCtx() { document.querySelectorAll('.exp-context-menu').forEach(m => m.remove()); }
+
+  // ======= IMAGE VIEWER =======
+  function openImageViewer(name, fullPath, content) {
+    createWindow({
+      title: name + ' - Image Viewer', width: 600, height: 450, tbIcon: '🖼️',
+      menubar: '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: `<div style="display: flex; justify-content: center; align-items: center; height: 100%; background: #fff; overflow: auto; padding: 10px;">
+               <img src="${content}" style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 0 5px rgba(0,0,0,0.3);" draggable="false"/>
+             </div>`,
+      status: fullPath
+    });
+  }
 
   // ======= Open file in Notepad =======
   function openNotepadWith(name, fullPath, content) {
