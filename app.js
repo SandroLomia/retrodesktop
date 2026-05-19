@@ -661,7 +661,7 @@
       const w = document.getElementById(dragState.wid);
       if (w) {
         w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        w.style.top = Math.max(0, dragState.origT + e.clientY - dragState.startY) + 'px';
       }
     }
     if (resizeState) {
@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, taskmanager: openTaskManager
     };
     if (launchers[name]) launchers[name]();
   }
@@ -5701,4 +5701,67 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Windows Task Manager', width: 400, height: 350, tbIcon: '📋',
+      menubar: '<div class="window-menubar"><span>File</span><span>Options</span><span>View</span><span>Help</span></div>',
+      body: `<div style="display:flex; flex-direction:column; height:100%; padding: 10px; font-family: 'Tahoma', sans-serif; background: #ece9d8;">
+        <div style="flex: 1; border: 1px solid #7f9db9; background: #fff; overflow-y: auto;" id="task-list"></div>
+        <div style="display:flex; justify-content:flex-end; gap: 8px; margin-top: 10px;">
+          <button id="end-task-btn" style="padding: 4px 16px;">End Task</button>
+        </div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const listEl = body.querySelector('#task-list');
+        const endBtn = body.querySelector('#end-task-btn');
+        let selectedTask = null;
+
+        function renderTasks() {
+          let html = '';
+          const activeRecords = getWindowRecords().filter(r => r.id !== winId && !r.element.classList.contains('closing'));
+          if (activeRecords.length === 0) {
+            html = '<div style="padding: 10px; color: #666; font-size: 12px;">No active applications.</div>';
+          } else {
+            activeRecords.forEach(record => {
+              const isActive = selectedTask === record.id;
+              html += `<div class="task-item" data-winid="${record.id}" style="padding: 4px 8px; font-size: 11px; cursor: pointer; ${isActive ? 'background: #316ac5; color: #fff;' : 'color: #000;'}">
+                ${escapeHtml(record.title)}
+              </div>`;
+            });
+          }
+          listEl.innerHTML = html;
+
+          listEl.querySelectorAll('.task-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+              selectedTask = item.dataset.winid;
+              renderTasks();
+            });
+          });
+          endBtn.disabled = !selectedTask;
+        }
+
+        endBtn.addEventListener('click', () => {
+          if (selectedTask) {
+            closeWindow(selectedTask);
+            selectedTask = null;
+            renderTasks();
+          }
+        });
+
+        renderTasks();
+        const interval = setInterval(() => {
+          if (document.getElementById(winId)) {
+            renderTasks();
+          } else {
+            clearInterval(interval);
+          }
+        }, 1000);
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
 })();
