@@ -68,6 +68,10 @@
         <div class="icon-image icon-recyclebin"></div>
         <span>Trash</span>
       </div>
+      <div class="desktop-icon" data-app="calendar" id="icon-calendar">
+        <div class="icon-image icon-calendar"></div>
+        <span>Calendar</span>
+      </div>
       <div class="desktop-icon" data-app="internet" id="icon-internet">
         <div class="icon-image icon-internet"></div>
         <span>Web Browser</span>
@@ -166,6 +170,13 @@
             <div class="smi-text">
               <div class="smi-title">Web Browser</div>
               <div class="smi-desc">Browse the web</div>
+            </div>
+          </div>
+          <div class="start-menu-item pinned" data-app="calendar">
+            <div class="smi-icon icon-calendar"></div>
+            <div class="smi-text">
+              <div class="smi-title">Calendar</div>
+              <div class="smi-desc">View dates and events</div>
             </div>
           </div>
           <div class="start-menu-item pinned" data-app="notepad">
@@ -300,6 +311,7 @@
     <!-- Right-click context menu -->
     <div id="context-menu" style="display:none;">
       <div class="ctx-item" id="ctx-refresh">🔄 Refresh</div>
+      <div class="ctx-item" id="ctx-wallpaper">🖼️ Change Wallpaper</div>
       <div class="ctx-separator"></div>
       <div class="ctx-item ctx-has-sub">New ▸
         <div class="ctx-submenu">
