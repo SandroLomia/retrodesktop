@@ -396,6 +396,16 @@
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
 
+  document.getElementById('ctx-wallpaper').addEventListener('click', () => {
+    document.getElementById('context-menu').style.display = 'none';
+    const backgrounds = ['classic', 'bliss', 'teal'];
+    let current = localStorage.getItem('retro_bg') || 'classic';
+    let nextIndex = (backgrounds.indexOf(current) + 1) % backgrounds.length;
+    let nextBg = backgrounds[nextIndex];
+    localStorage.setItem('retro_bg', nextBg);
+    applyDesktopBackground(nextBg);
+  });
+
   // Desktop "New" menu items - create in /home/user/Desktop
   document.querySelectorAll('.ctx-new-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -660,8 +670,12 @@
     if (dragState) {
       const w = document.getElementById(dragState.wid);
       if (w) {
-        w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        let newL = dragState.origL + e.clientX - dragState.startX;
+        let newT = dragState.origT + e.clientY - dragState.startY;
+        newL = Math.max(0, Math.min(newL, window.innerWidth - w.offsetWidth));
+        newT = Math.max(0, Math.min(newT, window.innerHeight - w.offsetHeight - 40));
+        w.style.left = newL + 'px';
+        w.style.top = newT + 'px';
       }
     }
     if (resizeState) {
@@ -683,7 +697,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1039,6 +1053,10 @@
       }
     }
     const parts = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+    if (parts.length === 0) {
+      addPromptLine(container, state);
+      return;
+    }
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1).map(a => a.replace(/"/g, ''));
     let output = '';
@@ -1769,7 +1787,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       }
     });
   }
-  function calc(a, b, op) { return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0; }
+  function calc(a, b, op) {
+    const res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0;
+    return typeof res === 'number' ? parseFloat(res.toPrecision(12)) : res;
+  }
 
   // ======= PAINT =======
   function openPaint() {
@@ -4491,7 +4512,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, calendar: openCalendar
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4624,6 +4645,68 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // ======= CALENDAR =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 340, height: 380, tbIcon: '📅',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center; background: #fff; height: 100%;">
+        <h3 style="margin-top:0; font-size: 20px; color: #003399;" id="cal-month-year"></h3>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; width: 100%; max-width: 280px; text-align: center; font-weight: bold; margin-bottom: 10px; color: #666;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="cal-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; width: 100%; max-width: 280px; text-align: center;"></div>
+        <div style="margin-top: auto; padding-top: 20px;">
+          <button id="cal-prev" style="padding: 4px 12px; margin-right: 10px;">&laquo; Prev</button>
+          <button id="cal-next" style="padding: 4px 12px;">Next &raquo;</button>
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const monthYear = body.querySelector('#cal-month-year');
+        const daysContainer = body.querySelector('#cal-days');
+        const prevBtn = body.querySelector('#cal-prev');
+        const nextBtn = body.querySelector('#cal-next');
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+          const today = new Date();
+
+          monthYear.textContent = currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          let daysHtml = '';
+          for (let i = 0; i < firstDay; i++) {
+            daysHtml += `<div></div>`;
+          }
+          for (let i = 1; i <= daysInMonth; i++) {
+            const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+            const style = isToday ? 'background: #0055e5; color: #fff; border-radius: 4px; font-weight: bold;' : 'padding: 4px; border-radius: 4px;';
+            daysHtml += `<div style="${style}">${i}</div>`;
+          }
+          daysContainer.innerHTML = daysHtml;
+        }
+
+        prevBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        nextBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        renderCalendar();
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

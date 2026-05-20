@@ -259,12 +259,16 @@ body {
 }
 
 .desktop-icon:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .desktop-icon.selected {
-  background: rgba(11, 97, 204, 0.45);
-  border: 1px dotted rgba(255,255,255,0.5);
+  background: rgba(11, 97, 204, 0.5);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
 }
 
 .desktop-icon span {
@@ -528,6 +532,24 @@ body {
   font-size: 22px;
 }
 
+.icon-calendar {
+  position: relative;
+}
+.icon-calendar::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  background: linear-gradient(180deg, #fff, #e0e0e0);
+  border-radius: 4px;
+  border: 2px solid #888;
+}
+.icon-calendar::after {
+  content: '📅';
+  position: absolute;
+  font-size: 22px;
+}
+
 .icon-agent {
   position: relative;
 }
@@ -647,13 +669,22 @@ body {
   font-size: 14px;
 }
 
+.smi-icon.icon-calendar::before {
+  width: 24px;
+  height: 24px;
+}
+.smi-icon.icon-calendar::after {
+  content: '📅';
+  font-size: 16px;
+}
+
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  background: #f0f0f0;
+  border: 1px solid rgba(0, 85, 229, 0.4);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -917,12 +948,14 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  height: 40px;
+  background: linear-gradient(180deg, rgba(36,94,219,0.95) 0%, rgba(59,124,245,0.95) 10%, rgba(28,82,192,0.95) 50%, rgba(24,72,168,0.95) 100%);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 #start-button {
@@ -1038,13 +1071,14 @@ body {
 /* ======= START MENU ======= */
 #start-menu {
   position: fixed;
-  bottom: 36px;
+  bottom: 40px;
   left: 0;
   width: 380px;
-  background: #fff;
-  border: 2px solid #0055c0;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 85, 192, 0.5);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 5px 5px 25px rgba(0,0,0,0.3);
   z-index: 99999;
   overflow: hidden;
   animation: startMenuOpen 0.15s ease-out;
