@@ -990,14 +990,6 @@
     return log(`Action ${type} simulated.`);
   }
 
-  function resolvePath(cwd, pathStr) {
-    if (!pathStr) return normalizePath(cwd);
-    if (pathStr === '~') return '/home/user';
-    if (pathStr.startsWith('~/')) return normalizePath('/home/user/' + pathStr.slice(2));
-    if (pathStr.startsWith('/')) return normalizePath(pathStr);
-    return normalizePath(normalizePath(cwd) + '/' + pathStr);
-  }
-
   async function processCommand(container, state, cmdLine) {
     const trimmed = cmdLine.trim();
     if (!trimmed) { addPromptLine(container, state); return; }
@@ -1748,6 +1740,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         body.querySelectorAll('.calc-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const v = btn.dataset.val;
+            if (current === 'Error' && v !== 'C' && v !== 'CE') {
+              current = '0';
+              reset = false;
+            }
             if ('0123456789'.includes(v)) {
               current = (current === '0' || reset) ? v : current + v;
               reset = false;
@@ -4587,8 +4583,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_color_theme') || '';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4596,6 +4593,13 @@ ${getAgentDesktopState()}`
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Color Scheme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="" ${currentTheme === '' ? 'selected' : ''}>Blue (Default)</option>
+          <option value="theme-olive" ${currentTheme === 'theme-olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="theme-silver" ${currentTheme === 'theme-silver' ? 'selected' : ''}>Silver</option>
+        </select>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
         <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
@@ -4612,6 +4616,12 @@ ${getAgentDesktopState()}`
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_color_theme', theme);
+          document.body.className = theme;
+        });
         const bgSel = body.querySelector('#bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
@@ -4624,6 +4634,7 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  document.body.className = localStorage.getItem('retro_color_theme') || '';
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
