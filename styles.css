@@ -1,4 +1,25 @@
 /* ======= RESET & BASE ======= */
+:root {
+  --win-border: #0055e5;
+  --win-title-bg: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfe 90%, #0054e3 100%);
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --start-header-bg: linear-gradient(180deg, #1e6bd6, #0b56b0);
+}
+
+.theme-olive {
+  --win-border: #6d804f;
+  --win-title-bg: linear-gradient(180deg, #a4b378 0%, #d8e5a7 4%, #c0d18d 6%, #94a760 50%, #b2c676 90%, #90a559 100%);
+  --taskbar-bg: linear-gradient(180deg, #819159 0%, #abbb7b 4%, #9bb267 6%, #89a150 50%, #b0c978 90%, #a2ba65 100%);
+  --start-header-bg: linear-gradient(180deg, #aebf81, #7f9157);
+}
+
+.theme-silver {
+  --win-border: #8080b4;
+  --win-title-bg: linear-gradient(180deg, #8080b4 0%, #ced0e4 4%, #b5b7d3 6%, #a3a6cb 50%, #c4c5e3 90%, #878abc 100%);
+  --taskbar-bg: linear-gradient(180deg, #7c7cb1 0%, #c4c5e3 4%, #a4a5cc 6%, #8b8cc1 50%, #bcc0df 90%, #9094c9 100%);
+  --start-header-bg: linear-gradient(180deg, #c4c6e1, #8487ba);
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -651,7 +672,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--win-border, #0055e5);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -709,7 +730,7 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--win-title-bg, linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfe 90%, #0054e3 100%));
 }
 
 .window:not(.active) .window-titlebar {
@@ -918,7 +939,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg, linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%));
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -1062,7 +1083,7 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--start-header-bg, linear-gradient(180deg, #1e6bd6, #0b56b0));
   padding: 8px 12px;
   display: flex;
   align-items: center;
