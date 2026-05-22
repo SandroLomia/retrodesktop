@@ -661,7 +661,7 @@
       const w = document.getElementById(dragState.wid);
       if (w) {
         w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        w.style.top = Math.max(0, dragState.origT + e.clientY - dragState.startY) + 'px';
       }
     }
     if (resizeState) {
@@ -1186,6 +1186,27 @@
       case 'uptime':
         output = ' 12:34:56 up 2 days, 4:20,  1 user,  load average: 0.12, 0.05, 0.02';
         break;
+      case 'neofetch': {
+        const theme = localStorage.getItem('retro_theme') || 'blue';
+        output = `
+       .MMM..:MMMMMMM            user@retrolinux
+      MMMMMMMMMMMMMMMMMM         ---------------
+      MMMMMMMMMMMMMMMMMMMM.      OS: RetroLinux 2024
+     MMMMMMMMMMMMMMMMMMMMMM      Host: Browser Virtual Machine
+    .MMMMMMMMMMMMMMMMMMMMMM      Kernel: 2.4.31
+    MMMMMMMMMMMMMMMMMMMMMMMM     Uptime: 2 days, 4 hours, 20 mins
+    MMMMOOOOOOOOOOOOOOOOOOOO     Packages: 1042 (dpkg)
+    MMMMMMMMMMMMMMMMMMMMMMMM     Shell: bash
+    MMMMMMMMMMMMMMMMMMMMMMMM     Resolution: ${window.innerWidth}x${window.innerHeight}
+    MMMMMMMMMMMMMMMMMMMMMMMM     WM: RetroWM
+    MMMMMMMMMMMMMMMMMMMMMMMM     Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)}
+    MMMMMMMMMMMMMMMMMMMMMMMM     Terminal: xterm-256color
+     MMMMMMMMMMMMMMMMMMMMMM      CPU: Virtualized Core
+      MMMMMMMMMMMMMMMMMMMM       Memory: 840MiB / 2048MiB
+       MMMMMMMMMMMMMMMMMM
+         MMMMMMMMMMMMMM          `;
+        break;
+      }
       case 'uname':
         output = 'Linux RetroLinux 2.4.31 i686 GNU/Linux';
         break;
@@ -4603,6 +4624,14 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Color Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="blue" ${localStorage.getItem('retro_theme') === 'blue' || !localStorage.getItem('retro_theme') ? 'selected' : ''}>Default (Blue)</option>
+          <option value="olive" ${localStorage.getItem('retro_theme') === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${localStorage.getItem('retro_theme') === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4647,22 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.className = theme === 'blue' ? '' : 'theme-' + theme;
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  const savedTheme = localStorage.getItem('retro_theme');
+  if (savedTheme && savedTheme !== 'blue') {
+    document.body.className = 'theme-' + savedTheme;
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
