@@ -1189,6 +1189,23 @@
       case 'uname':
         output = 'Linux RetroLinux 2.4.31 i686 GNU/Linux';
         break;
+      case 'neofetch': {
+        const theme = localStorage.getItem('retro_theme') || 'luna';
+        const color = theme === 'olive' ? '#758d5e' : theme === 'silver' ? '#9297a5' : '#0055e5';
+        output = `
+<span style="color: ${color}; font-weight: bold;">       .---.</span>         <span style="color: ${color}; font-weight: bold;">user</span>@<span style="color: ${color}; font-weight: bold;">retrolinux</span>
+<span style="color: ${color}; font-weight: bold;">      /     \\</span>        -----------------
+<span style="color: ${color}; font-weight: bold;">      \\.@-@./</span>        <span style="color: ${color}; font-weight: bold;">OS</span>: RetroLinux 2.4.31 i686
+<span style="color: ${color}; font-weight: bold;">      /\\_-_/\\</span>        <span style="color: ${color}; font-weight: bold;">Kernel</span>: 2.4.31-generic
+<span style="color: ${color}; font-weight: bold;">     //  _  \\\\</span>       <span style="color: ${color}; font-weight: bold;">Uptime</span>: 2 days, 4 hours, 20 mins
+<span style="color: ${color}; font-weight: bold;">    | \\     / |</span>      <span style="color: ${color}; font-weight: bold;">Packages</span>: 42 (simulated)
+<span style="color: ${color}; font-weight: bold;">    \\_\\_'-'_/_/</span>      <span style="color: ${color}; font-weight: bold;">Shell</span>: bash
+<span style="color: ${color}; font-weight: bold;">      \\_____/</span>        <span style="color: ${color}; font-weight: bold;">Theme</span>: ${theme}
+                     <span style="color: ${color}; font-weight: bold;">CPU</span>: Virtual x86 Processor
+                     <span style="color: ${color}; font-weight: bold;">Memory</span>: 840MiB / 2048MiB
+        `;
+        break;
+      }
       case 'ifconfig':
         output = `eth0      Link encap:Ethernet  HWaddr 00:1A:2B:3C:4D:5E  
           inet addr:192.168.1.${Math.floor(Math.random() * 254) + 1}  Bcast:192.168.1.255  Mask:255.255.255.0
@@ -1606,13 +1623,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   SYSTEM
   date              Current date        uptime           System uptime
   uname             System info         hostname         Hostname
-  whoami            Current user        id               User info
-  ps                Process list        top              Live processes
-  kill <pid>        Kill process        df               Disk free
-  du [path]         Disk usage          env              Environment vars
-  history           Command history     alias            List aliases
-  which <cmd>       Find command        man <cmd>        Manual page
-  chmod/chown       File permissions (simulated)
+  neofetch          System info art     whoami           Current user
+  id                User info           ps               Process list
+  top               Live processes      kill <pid>       Kill process
+  df                Disk free           du [path]        Disk usage
+  env               Environment vars    history          Command history
+  alias             List aliases        which <cmd>      Find command
+  man <cmd>         Manual page         chmod/chown      File permissions
 
   NETWORK
   ifconfig          Network info        ping <host>      Ping
@@ -4587,8 +4604,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4602,6 +4620,13 @@ ${getAgentDesktopState()}`
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
+        </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Color Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna" ${currentTheme === 'luna' ? 'selected' : ''}>Luna (Blue)</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
         </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
@@ -4618,12 +4643,25 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyDesktopTheme(theme);
+        });
       }
     });
   }
 
-  // Init Background
+  function applyDesktopTheme(theme) {
+    document.body.classList.remove('theme-olive', 'theme-silver');
+    if (theme === 'olive') document.body.classList.add('theme-olive');
+    else if (theme === 'silver') document.body.classList.add('theme-silver');
+  }
+
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  applyDesktopTheme(localStorage.getItem('retro_theme') || 'luna');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

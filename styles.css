@@ -1,3 +1,34 @@
+/* ======= THEMES ======= */
+:root {
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --window-border: #0055e5;
+  --titlebar-active: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #0364df 90%, #0050b5 100%);
+  --titlebar-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --selection-bg: #316ac5;
+  --start-menu-header: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  --start-button-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+}
+
+body.theme-olive {
+  --taskbar-bg: linear-gradient(180deg, #9baf7b 0%, #b8c99e 4%, #aebf90 6%, #94a974 50%, #7d945b 90%, #697f48 100%);
+  --window-border: #758d5e;
+  --titlebar-active: linear-gradient(180deg, #bed0a3 0%, #dbeabf 4%, #c9dbab 6%, #aebf90 50%, #95a876 90%, #879868 100%);
+  --titlebar-inactive: linear-gradient(180deg, #c7d1be 0%, #aebda1 20%, #9faf92 80%, #aebda1 100%);
+  --selection-bg: #809660;
+  --start-menu-header: linear-gradient(180deg, #9baf7b, #697f48);
+  --start-button-bg: linear-gradient(180deg, #e3ba71 0%, #e8c68c 40%, #dbaf60 60%, #cf9b44 100%);
+}
+
+body.theme-silver {
+  --taskbar-bg: linear-gradient(180deg, #b0b4bd 0%, #d1d5df 4%, #c3c7d2 6%, #b5b9c5 50%, #a2a6b4 90%, #8b8f9e 100%);
+  --window-border: #9297a5;
+  --titlebar-active: linear-gradient(180deg, #c3c7d2 0%, #e2e6f0 4%, #d3d7e1 6%, #bec2cd 50%, #abb0bd 90%, #989ca9 100%);
+  --titlebar-inactive: linear-gradient(180deg, #d3d5da 0%, #b8bbc3 20%, #a6aab4 80%, #b8bbc3 100%);
+  --selection-bg: #989ca9;
+  --start-menu-header: linear-gradient(180deg, #b0b4bd, #8b8f9e);
+  --start-button-bg: linear-gradient(180deg, #8198b1 0%, #95acc5 40%, #768da5 60%, #60758c 100%);
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -651,7 +682,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -709,11 +740,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--titlebar-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--titlebar-inactive);
 }
 
 .window-title-icon {
@@ -798,7 +829,7 @@ body {
 }
 
 .window-menubar span:hover {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
@@ -918,7 +949,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +962,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--start-button-bg);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -1062,7 +1093,7 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--start-menu-header);
   padding: 8px 12px;
   display: flex;
   align-items: center;
@@ -1116,7 +1147,7 @@ body {
 }
 
 .start-menu-item:hover {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
@@ -1158,7 +1189,7 @@ body {
 }
 
 .start-menu-item-right:hover {
-  background: #316ac5;
+  background: var(--selection-bg);
 }
 
 .start-menu-item-right:hover .smi-title {
@@ -1196,7 +1227,7 @@ body {
 }
 
 .start-menu-footer-btn:hover {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
@@ -1220,7 +1251,7 @@ body {
 }
 
 .ctx-item:hover {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
@@ -1292,7 +1323,7 @@ body {
 }
 .explorer-item.drag-over {
   background: #d0e8ff;
-  border-color: #316ac5;
+  border-color: var(--selection-bg);
   box-shadow: 0 0 6px rgba(49,106,197,0.3);
 }
 .explorer-item[draggable="true"] {
@@ -1583,7 +1614,7 @@ body {
 
 .explorer-content.drag-over {
   background: rgba(49, 106, 197, 0.08);
-  outline: 2px dashed #316ac5;
+  outline: 2px dashed var(--selection-bg);
   outline-offset: -6px;
 }
 
@@ -1999,7 +2030,7 @@ body {
 
 /* ======= SELECTION ======= */
 ::selection {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
