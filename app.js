@@ -1031,7 +1031,12 @@
         const content = beforeRedir.slice(5).replace(/^["']|["']$/g, '');
         const destPath = resolvePath(state.cwd, destFile);
         const existing = getNode(destPath);
-        const newContent = op === '>>' && typeof existing === 'string' ? existing + '\n' + content : content;
+
+        let newContent = content + "\n";
+        if (op === '>>' && typeof existing === 'string') {
+          newContent = (existing ? (existing.endsWith("\n") ? existing : existing + "\n") : "") + content + "\n";
+        }
+
         setNode(destPath, newContent);
         addTermLine(container, '');
         addPromptLine(container, state);
@@ -4587,6 +4592,7 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna';
     createWindow({
       title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
       statusbar: false,
@@ -4603,6 +4609,12 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+        <h3 style="margin-top:20px; font-size: 16px;">System Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna" ${currentTheme === 'luna' ? 'selected' : ''}>Luna (Blue)</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4630,20 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.className = theme === 'luna' ? '' : 'theme-' + theme;
+        });
       }
     });
   }
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  const savedTheme = localStorage.getItem('retro_theme') || 'luna';
+  document.body.className = savedTheme === 'luna' ? '' : 'theme-' + savedTheme;
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
