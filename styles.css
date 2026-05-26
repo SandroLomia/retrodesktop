@@ -16,6 +16,68 @@ body {
   background: #000;
 }
 
+
+:root {
+  /* Luna (Default Blue) */
+  --window-border: #0055e5;
+  --window-bg: #ece9d8;
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --taskbar-divider: linear-gradient(180deg, transparent, rgba(255,255,255,0.2), transparent);
+  --taskbar-app-bg: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  --taskbar-app-hover: linear-gradient(180deg, #4a7fd8, #3568c2);
+  --taskbar-app-active: linear-gradient(180deg, #3362b5, #1e4c9a);
+  --system-tray-bg: linear-gradient(180deg, #1a5ab8, #1248a0);
+  --start-btn-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  --start-menu-border: #0055c0;
+  --start-menu-header: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  --start-menu-right: linear-gradient(180deg, #d6dfe9, #c8d5e3);
+  --start-menu-footer: linear-gradient(180deg, #d6dfe9, #bcc8d8);
+  --start-menu-border-bottom: #f97316;
+  --start-menu-hover: #316ac5;
+  --window-title-bg-active: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --selection-bg: #316ac5;
+}
+
+body.theme-olive {
+  --window-border: #8fa068;
+  --window-bg: #f5f4ea;
+  --taskbar-bg: linear-gradient(180deg, #94a36b 0%, #acbc86 4%, #94a36b 6%, #798755 50%, #616e3e 90%, #616e3e 100%);
+  --taskbar-app-bg: linear-gradient(180deg, #a7b781, #84935e);
+  --taskbar-app-hover: linear-gradient(180deg, #b9c991, #94a36b);
+  --taskbar-app-active: linear-gradient(180deg, #8b9961, #697843);
+  --system-tray-bg: linear-gradient(180deg, #7c8a58, #637042);
+  --start-menu-border: #798755;
+  --start-menu-header: linear-gradient(180deg, #98a96c, #6c7c46);
+  --start-menu-right: linear-gradient(180deg, #e3e6d1, #ced2b5);
+  --start-menu-footer: linear-gradient(180deg, #e3e6d1, #b5b99a);
+  --start-menu-border-bottom: #c95100;
+  --start-menu-hover: #7b8b51;
+  --window-title-bg-active: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #c0c6a5 0%, #a4ac81 20%, #8b9365 80%, #a4ac81 100%);
+  --selection-bg: #7b8b51;
+}
+
+body.theme-silver {
+  --window-border: #9999a9;
+  --window-bg: #fcfcfc;
+  --taskbar-bg: linear-gradient(180deg, #acacb6 0%, #c4c4cd 4%, #acacb6 6%, #8b8b99 50%, #767683 90%, #767683 100%);
+  --taskbar-app-bg: linear-gradient(180deg, #bebeca, #9c9ca9);
+  --taskbar-app-hover: linear-gradient(180deg, #cecedb, #afafbc);
+  --taskbar-app-active: linear-gradient(180deg, #a3a3b0, #80808e);
+  --system-tray-bg: linear-gradient(180deg, #8a8a99, #70707d);
+  --start-btn-bg: linear-gradient(180deg, #8a8a99 0%, #7a7a8a 40%, #70707d 60%, #5d5d6a 100%);
+  --start-menu-border: #8b8b99;
+  --start-menu-header: linear-gradient(180deg, #b0b0bc, #7b7b8a);
+  --start-menu-right: linear-gradient(180deg, #efeff4, #d8d8e1);
+  --start-menu-footer: linear-gradient(180deg, #efeff4, #c2c2ce);
+  --start-menu-border-bottom: #9ca3af;
+  --start-menu-hover: #8b8b99;
+  --window-title-bg-active: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #d3d3d8 0%, #b8b8c1 20%, #9e9ea9 80%, #b8b8c1 100%);
+  --selection-bg: #8b8b99;
+}
+
 /* ======= BOOT SCREEN ======= */
 #boot-screen {
   position: fixed;
@@ -650,8 +712,8 @@ body {
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
+  background: var(--window-bg);
+  border: 2px solid var(--window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -709,11 +771,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--window-title-bg-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--window-title-bg-inactive);
 }
 
 .window-title-icon {
@@ -782,7 +844,7 @@ body {
 
 .window-menubar {
   height: 24px;
-  background: #ece9d8;
+  background: var(--window-bg);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -798,7 +860,7 @@ body {
 }
 
 .window-menubar span:hover {
-  background: #316ac5;
+  background: var(--start-menu-hover);
   color: #fff;
 }
 
@@ -831,7 +893,7 @@ body {
 
 .window-address {
   height: 26px;
-  background: #ece9d8;
+  background: var(--window-bg);
   display: flex;
   align-items: center;
   padding: 0 6px;
@@ -874,7 +936,7 @@ body {
 
 .window-statusbar {
   height: 22px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border-top: 1px solid #c0c0c0;
   display: flex;
   align-items: center;
@@ -918,7 +980,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +993,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--start-btn-bg);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -958,7 +1020,7 @@ body {
 #taskbar-divider {
   width: 2px;
   height: 24px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: var(--taskbar-divider);
   margin: 0 4px;
 }
 
@@ -978,7 +1040,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  background: var(--taskbar-app-bg);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   color: #fff;
@@ -992,12 +1054,12 @@ body {
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
+  background: var(--taskbar-app-active);
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: var(--taskbar-app-hover);
 }
 
 .taskbar-app-icon {
@@ -1013,7 +1075,7 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
+  background: var(--system-tray-bg);
   border-left: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -1042,7 +1104,7 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 2px solid var(--start-menu-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
@@ -1062,12 +1124,12 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--start-menu-header);
   padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 2px solid #f97316;
+  border-bottom: 2px solid var(--start-menu-border-bottom);
 }
 
 .start-menu-avatar {
@@ -1102,7 +1164,7 @@ body {
 .start-menu-right {
   width: 150px;
   padding: 6px 0;
-  background: linear-gradient(180deg, #d6dfe9, #c8d5e3);
+  background: var(--start-menu-right);
   border-left: 1px solid #a0b0c0;
 }
 
@@ -1116,7 +1178,7 @@ body {
 }
 
 .start-menu-item:hover {
-  background: #316ac5;
+  background: var(--start-menu-hover);
   color: #fff;
 }
 
@@ -1158,7 +1220,7 @@ body {
 }
 
 .start-menu-item-right:hover {
-  background: #316ac5;
+  background: var(--start-menu-hover);
 }
 
 .start-menu-item-right:hover .smi-title {
@@ -1176,7 +1238,7 @@ body {
 }
 
 .start-menu-footer {
-  background: linear-gradient(180deg, #d6dfe9, #bcc8d8);
+  background: var(--start-menu-footer);
   padding: 6px 12px;
   display: flex;
   justify-content: flex-end;
@@ -1196,7 +1258,7 @@ body {
 }
 
 .start-menu-footer-btn:hover {
-  background: #316ac5;
+  background: var(--start-menu-hover);
   color: #fff;
 }
 
@@ -1220,7 +1282,7 @@ body {
 }
 
 .ctx-item:hover {
-  background: #316ac5;
+  background: var(--start-menu-hover);
   color: #fff;
 }
 
@@ -1292,7 +1354,7 @@ body {
 }
 .explorer-item.drag-over {
   background: #d0e8ff;
-  border-color: #316ac5;
+  border-color: var(--start-menu-hover);
   box-shadow: 0 0 6px rgba(49,106,197,0.3);
 }
 .explorer-item[draggable="true"] {
@@ -1371,7 +1433,7 @@ body {
 
 /* ======= CALCULATOR APP ======= */
 .calculator-body {
-  background: #ece9d8;
+  background: var(--window-bg);
   padding: 8px;
   height: 100%;
   display: flex;
@@ -1436,14 +1498,14 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #ece9d8;
+  background: var(--window-bg);
 }
 
 .paint-toolbar {
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border-bottom: 1px solid #c0c0c0;
   flex-wrap: wrap;
 }
@@ -1464,14 +1526,14 @@ body {
   display: flex;
   gap: 2px;
   padding: 4px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border-bottom: 1px solid #c0c0c0;
 }
 
 .paint-tool-btn {
   width: 26px;
   height: 26px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid transparent;
   cursor: pointer;
   display: flex;
@@ -1499,7 +1561,7 @@ body {
 .size-btn {
   width: 20px;
   height: 20px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid transparent;
   cursor: pointer;
   display: flex;
@@ -1764,7 +1826,7 @@ body {
 }
 
 .ie-page th {
-  background: #ece9d8;
+  background: var(--window-bg);
 }
 
 @media (max-width: 700px) {
@@ -1975,7 +2037,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid #c0c0c0;
 }
 
@@ -1999,7 +2061,7 @@ body {
 
 /* ======= SELECTION ======= */
 ::selection {
-  background: #316ac5;
+  background: var(--selection-bg);
   color: #fff;
 }
 
@@ -3318,7 +3380,7 @@ body {
 
 .agent-msg.user {
   align-self: flex-end;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid #fff;
   border-right-color: #716f64;
   border-bottom-color: #716f64;
