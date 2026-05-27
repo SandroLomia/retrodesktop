@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "A fully interactive Linux desktop environment simulator built entirely with vanilla HTML, CSS, and JavaScript. Experience the nostalgia of early 2000s computing right in your browser -- complete with a boot sequence, login screen, draggable windows, a working file system, and over a dozen built-in applications.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SandroLomia/retrodesktop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SandroLomia/retrodesktop/issues"
+  },
+  "homepage": "https://github.com/SandroLomia/retrodesktop#readme",
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}
