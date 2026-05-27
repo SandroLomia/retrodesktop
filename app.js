@@ -4587,8 +4587,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4596,6 +4597,13 @@ ${getAgentDesktopState()}`
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Color Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna" ${currentTheme === 'luna' ? 'selected' : ''}>Luna Blue</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
         <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
@@ -4612,6 +4620,12 @@ ${getAgentDesktopState()}`
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyDesktopTheme(theme);
+        });
         const bgSel = body.querySelector('#bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
@@ -4624,6 +4638,15 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // Init Theme
+  function applyDesktopTheme(theme) {
+    document.body.classList.remove('theme-olive', 'theme-silver');
+    if (theme === 'olive') document.body.classList.add('theme-olive');
+    else if (theme === 'silver') document.body.classList.add('theme-silver');
+  }
+  applyDesktopTheme(localStorage.getItem('retro_theme') || 'luna');
+
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

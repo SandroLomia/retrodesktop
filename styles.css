@@ -1,3 +1,58 @@
+/* ======= THEMES ======= */
+:root {
+  --theme-window-border: #0055e5;
+  --theme-window-active-bg: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --theme-window-inactive-bg: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+
+  --theme-taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --theme-start-btn-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+
+  --theme-taskbar-app-bg: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  --theme-taskbar-app-active-bg: linear-gradient(180deg, #3362b5, #1e4c9a);
+  --theme-taskbar-app-hover-bg: linear-gradient(180deg, #4a7fd8, #3568c2);
+
+  --theme-system-tray-bg: linear-gradient(180deg, #1a5ab8, #1248a0);
+
+  --theme-start-menu-border: #0055c0;
+  --theme-start-menu-header-bg: linear-gradient(180deg, #1e6bd6, #0b56b0);
+}
+
+body.theme-olive {
+  --theme-window-border: #9fb275;
+  --theme-window-active-bg: linear-gradient(180deg, #a7b785 0%, #9cb176 50%, #859864 100%);
+  --theme-window-inactive-bg: linear-gradient(180deg, #c7d3a5 0%, #b8c696 20%, #a9b787 80%, #b8c696 100%);
+
+  --theme-taskbar-bg: linear-gradient(180deg, #94a670 0%, #a5b980 4%, #94a670 6%, #7f915b 50%, #6d7f4c 90%, #6d7f4c 100%);
+  --theme-start-btn-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+
+  --theme-taskbar-app-bg: linear-gradient(180deg, #abbc8a, #99a877);
+  --theme-taskbar-app-active-bg: linear-gradient(180deg, #92a373, #829165);
+  --theme-taskbar-app-hover-bg: linear-gradient(180deg, #b9ca99, #a8b988);
+
+  --theme-system-tray-bg: linear-gradient(180deg, #81955b, #70844a);
+
+  --theme-start-menu-border: #80905e;
+  --theme-start-menu-header-bg: linear-gradient(180deg, #94a670, #7f915b);
+}
+
+body.theme-silver {
+  --theme-window-border: #a1a3a6;
+  --theme-window-active-bg: linear-gradient(180deg, #aeb0b4 0%, #9ca0a6 50%, #8e9298 100%);
+  --theme-window-inactive-bg: linear-gradient(180deg, #d3d5d9 0%, #c4c6ca 20%, #b5b7bb 80%, #c4c6ca 100%);
+
+  --theme-taskbar-bg: linear-gradient(180deg, #a0a2a6 0%, #b3b5b9 4%, #a0a2a6 6%, #8b8d91 50%, #76787c 90%, #76787c 100%);
+  --theme-start-btn-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+
+  --theme-taskbar-app-bg: linear-gradient(180deg, #b6b9be, #a3a6ab);
+  --theme-taskbar-app-active-bg: linear-gradient(180deg, #9b9fa4, #8b8e93);
+  --theme-taskbar-app-hover-bg: linear-gradient(180deg, #c7cacf, #b4b7bc);
+
+  --theme-system-tray-bg: linear-gradient(180deg, #8c8f93, #7a7d81);
+
+  --theme-start-menu-border: #898c90;
+  --theme-start-menu-header-bg: linear-gradient(180deg, #a0a2a6, #8b8d91);
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -651,7 +706,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--theme-window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -709,11 +764,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--theme-window-active-bg);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--theme-window-inactive-bg);
 }
 
 .window-title-icon {
@@ -918,7 +973,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--theme-taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +986,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--theme-start-btn-bg);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -978,7 +1033,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  background: var(--theme-taskbar-app-bg);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   color: #fff;
@@ -992,12 +1047,12 @@ body {
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
+  background: var(--theme-taskbar-app-active-bg);
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: var(--theme-taskbar-app-hover-bg);
 }
 
 .taskbar-app-icon {
@@ -1013,7 +1068,7 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
+  background: var(--theme-system-tray-bg);
   border-left: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -1042,7 +1097,7 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 2px solid var(--theme-start-menu-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
@@ -1062,7 +1117,7 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--theme-start-menu-header-bg);
   padding: 8px 12px;
   display: flex;
   align-items: center;
