@@ -683,9 +683,62 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, weather: openWeather
     };
     if (launchers[name]) launchers[name]();
+  }
+
+  // ======= WEATHER =======
+  function openWeather() {
+    createWindow({
+      title: 'Weather Forecast', width: 440, height: 320, tbIcon: '🌤️',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; height: 100%; display: flex; flex-direction: column; background: linear-gradient(180deg, #4da7ff 0%, #89c4ff 100%); color: #fff; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 10px;">
+          <div>
+            <h2 style="margin: 0; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Retro City</h2>
+            <div style="font-size: 14px; opacity: 0.9;">Partly Cloudy</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 48px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">🌤️</div>
+            <div style="font-size: 42px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">72°F</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; flex: 1; text-align: center;">
+          <div style="background: rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; width: 60px;">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">MON</div>
+            <div style="font-size: 24px; margin-bottom: 8px;">☀️</div>
+            <div style="font-size: 14px; font-weight: bold;">75°</div>
+            <div style="font-size: 12px; opacity: 0.8;">58°</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; width: 60px;">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">TUE</div>
+            <div style="font-size: 24px; margin-bottom: 8px;">🌤️</div>
+            <div style="font-size: 14px; font-weight: bold;">72°</div>
+            <div style="font-size: 12px; opacity: 0.8;">56°</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; width: 60px;">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">WED</div>
+            <div style="font-size: 24px; margin-bottom: 8px;">🌧️</div>
+            <div style="font-size: 14px; font-weight: bold;">68°</div>
+            <div style="font-size: 12px; opacity: 0.8;">54°</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; width: 60px;">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">THU</div>
+            <div style="font-size: 24px; margin-bottom: 8px;">☁️</div>
+            <div style="font-size: 14px; font-weight: bold;">65°</div>
+            <div style="font-size: 12px; opacity: 0.8;">52°</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.1); border-radius: 8px; padding: 10px; width: 60px;">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 8px;">FRI</div>
+            <div style="font-size: 24px; margin-bottom: 8px;">☀️</div>
+            <div style="font-size: 14px; font-weight: bold;">70°</div>
+            <div style="font-size: 12px; opacity: 0.8;">55°</div>
+          </div>
+        </div>
+      </div>`
+    });
   }
 
   // ======= TERMINAL =======
@@ -4491,7 +4544,8 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe,
+              weather: openWeather
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4587,8 +4641,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4597,12 +4652,20 @@ ${getAgentDesktopState()}`
           Enable System Sounds
         </label>
 
-        <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
+        <h3 style="margin-top:20px; font-size: 16px;">Wallpaper</h3>
         <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Window Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna" ${currentTheme === 'luna' ? 'selected' : ''}>Luna (Blue)</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4681,28 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyTheme(theme);
+        });
       }
     });
   }
 
-  // Init Background
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-olive', 'theme-silver');
+    if (theme === 'olive') {
+      document.body.classList.add('theme-olive');
+    } else if (theme === 'silver') {
+      document.body.classList.add('theme-silver');
+    }
+  }
+
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  applyTheme(localStorage.getItem('retro_theme') || 'luna');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
