@@ -1,3 +1,26 @@
+:root {
+  /* Default Luna (Blue) Theme */
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --window-border: #0055e5;
+  --window-title-active: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #0364e3 90%, #005ce5 100%);
+  --window-title-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --start-menu-border: #0055c0;
+}
+
+body.theme-olive {
+  --taskbar-bg: linear-gradient(180deg, #9bb073 0%, #c4d693 4%, #aebf7d 6%, #899e57 50%, #758b43 90%, #6a8235 100%);
+  --window-border: #758b43;
+  --window-title-active: linear-gradient(180deg, #9bb073 0%, #c4d693 4%, #aebf7d 6%, #899e57 50%, #758b43 90%, #6a8235 100%);
+  --start-menu-border: #758b43;
+}
+
+body.theme-silver {
+  --taskbar-bg: linear-gradient(180deg, #a4a4b2 0%, #d4d4e0 4%, #c2c2cf 6%, #9e9ea9 50%, #878794 90%, #7d7d8a 100%);
+  --window-border: #878794;
+  --window-title-active: linear-gradient(180deg, #a4a4b2 0%, #d4d4e0 4%, #c2c2cf 6%, #9e9ea9 50%, #878794 90%, #7d7d8a 100%);
+  --start-menu-border: #878794;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -651,7 +674,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -699,7 +722,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: var(--window-title-inactive);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +732,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--window-title-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--window-title-inactive);
 }
 
 .window-title-icon {
@@ -918,7 +941,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -1042,7 +1065,7 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 2px solid var(--start-menu-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
@@ -3412,6 +3435,12 @@ body {
   box-shadow: 1px 1px 0 #000;
   font-size: 24px;
 }
+
+.icon-weather { position: relative; }
+.icon-weather::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(180deg, #3b82f6, #60a5fa); border-radius: 50%; border: 2px solid #2563eb; }
+.icon-weather::after { content: '🌤️'; position: absolute; font-size: 22px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+.smi-icon.icon-weather::before { width: 24px; height: 24px; border-width: 1px; }
+.smi-icon.icon-weather::after { font-size: 16px; left: 6px; top: 6px; }
 
 /* Game icons */
 .icon-tictactoe { position: relative; }
