@@ -1719,9 +1719,22 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   function openNotepad() {
     createWindow({
       title: 'Untitled - Notepad', width: 560, height: 400, tbIcon: '📝',
-      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
+      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span class="np-wrap-btn">Format (Wrap)</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
-      status: 'Ln 1, Col 1'
+      status: 'Ln 1, Col 1',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.notepad-textarea');
+        body.closest('.window').querySelector('.np-wrap-btn').addEventListener('click', () => {
+          if (ta.style.whiteSpace === 'pre-wrap') {
+            ta.style.whiteSpace = 'pre';
+            ta.style.wordWrap = 'normal';
+          } else {
+            ta.style.whiteSpace = 'pre-wrap';
+            ta.style.wordWrap = 'break-word';
+          }
+        });
+      }
     });
   }
 
@@ -1769,7 +1782,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       }
     });
   }
-  function calc(a, b, op) { return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0; }
+  function calc(a, b, op) {
+    const res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0;
+    return typeof res === 'number' ? Number(res.toPrecision(15)) : res;
+  }
 
   // ======= PAINT =======
   function openPaint() {
@@ -2175,7 +2191,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   function openNotepadWith(name, fullPath, content) {
     createWindow({
       title: name + ' - Text Editor', width: 560, height: 400, tbIcon: '📝',
-      menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span>Edit</span><span>Format</span><span>Help</span></div>',
+      menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span>Edit</span><span class="np-wrap-btn">Format (Wrap)</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false"></textarea>',
       status: fullPath,
       onReady: (winId) => {
@@ -2185,6 +2201,15 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         body.closest('.window').querySelector('.np-save-btn').addEventListener('click', () => {
           if (setNode(fullPath, ta.value)) playSound('click');
           else alert(`Could not save "${name}".`);
+        });
+        body.closest('.window').querySelector('.np-wrap-btn').addEventListener('click', () => {
+          if (ta.style.whiteSpace === 'pre-wrap') {
+            ta.style.whiteSpace = 'pre';
+            ta.style.wordWrap = 'normal';
+          } else {
+            ta.style.whiteSpace = 'pre-wrap';
+            ta.style.wordWrap = 'break-word';
+          }
         });
       }
     });
@@ -4556,17 +4581,46 @@ ${getAgentDesktopState()}`
   // ======= CLOCK SETTINGS =======
   function openClockSettings() {
     createWindow({
-      title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
+      title: 'Date and Time Properties', width: 380, height: 420, tbIcon: '🕒',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div style="font-size: 48px; font-weight: bold; margin: 10px 0; color: #333;" id="clock-display-large"></div>
+        <div style="font-size: 18px; color: #666; margin-bottom: 20px;" id="date-display-large"></div>
+        <div id="calendar-container" style="width: 100%; max-width: 300px;"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const timeDisplay = body.querySelector('#clock-display-large');
         const dateDisplay = body.querySelector('#date-display-large');
+        const calendarContainer = body.querySelector('#calendar-container');
+
+        function renderCalendar() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const today = now.getDate();
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+          let html = `<div style="text-align:center; font-weight:bold; margin-bottom:10px;">${monthNames[month]} ${year}</div>`;
+          html += `<table style="width:100%; border-collapse:collapse; text-align:center;">`;
+          html += `<tr>${days.map(d => `<th style="padding:4px; border-bottom:1px solid #ccc; font-weight:normal; color:#666;">${d}</th>`).join('')}</tr><tr>`;
+
+          for (let i = 0; i < firstDay; i++) {
+            html += `<td></td>`;
+          }
+
+          for (let i = 1; i <= daysInMonth; i++) {
+            if ((i + firstDay - 1) % 7 === 0 && i !== 1) html += `</tr><tr>`;
+            const isToday = i === today;
+            html += `<td style="padding:6px; ${isToday ? 'background:#316ac5; color:#fff; font-weight:bold; border-radius:4px;' : 'color:#333;'}">${i}</td>`;
+          }
+          html += `</tr></table>`;
+          calendarContainer.innerHTML = html;
+        }
 
         function updateDisplay() {
           const now = new Date();
@@ -4577,8 +4631,16 @@ ${getAgentDesktopState()}`
           dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
+        renderCalendar();
         updateDisplay();
-        const interval = setInterval(updateDisplay, 1000);
+        const interval = setInterval(() => {
+          updateDisplay();
+          // Re-render calendar at midnight to update "today" highlight
+          const now = new Date();
+          if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
+            renderCalendar();
+          }
+        }, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
       }
     });
