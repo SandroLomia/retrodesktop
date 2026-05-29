@@ -653,7 +653,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -918,7 +918,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #245edb 0%, #3f8cf3 9%, #245edb 18%, #1c52c0 92%, #1848a8 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -1043,7 +1043,7 @@ body {
   width: 380px;
   background: #fff;
   border: 2px solid #0055c0;
-  border-radius: 8px 8px 0 0;
+  border-radius: 5px 5px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
   overflow: hidden;
@@ -1075,7 +1075,7 @@ body {
   height: 44px;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   border-radius: 6px;
-  border: 2px solid #93c5fd;
+  border: 2px solid rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
