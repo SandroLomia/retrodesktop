@@ -370,6 +370,24 @@
     document.getElementById('clock').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
   }
 
+  // Show Desktop
+  let desktopHidden = false;
+  document.getElementById('show-desktop-btn').addEventListener('click', () => {
+    playSound('click');
+    const windows = document.querySelectorAll('.window');
+    const tbApps = document.querySelectorAll('.taskbar-app');
+
+    if (!desktopHidden) {
+      windows.forEach(w => w.classList.add('minimized'));
+      tbApps.forEach(t => t.classList.remove('active'));
+      activeWindowId = null;
+      desktopHidden = true;
+    } else {
+      windows.forEach(w => w.classList.remove('minimized'));
+      desktopHidden = false;
+    }
+  });
+
   // Start menu
   document.getElementById('start-button').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1721,7 +1739,20 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       title: 'Untitled - Notepad', width: 560, height: 400, tbIcon: '📝',
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
-      status: 'Ln 1, Col 1'
+      status: 'Ln 1, Col 1',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.notepad-textarea');
+        const status = body.closest('.window').querySelector('.status-section');
+        const updateStatus = () => {
+          const textBeforeCursor = ta.value.substring(0, ta.selectionStart);
+          const lines = textBeforeCursor.split('\n');
+          const line = lines.length;
+          const col = lines[lines.length - 1].length + 1;
+          if (status) status.textContent = `Ln ${line}, Col ${col}`;
+        };
+        ['keyup', 'click', 'input'].forEach(evt => ta.addEventListener(evt, updateStatus));
+      }
     });
   }
 
@@ -1769,7 +1800,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       }
     });
   }
-  function calc(a, b, op) { return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0; }
+  function calc(a, b, op) {
+    let res = op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? (b === 0 ? 'Error' : a / b) : 0;
+    if (typeof res === 'number') {
+      res = parseFloat(res.toPrecision(15));
+    }
+    return res;
+  }
 
   // ======= PAINT =======
   function openPaint() {
@@ -2177,15 +2214,25 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       title: name + ' - Text Editor', width: 560, height: 400, tbIcon: '📝',
       menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span>Edit</span><span>Format</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false"></textarea>',
-      status: fullPath,
+      status: `Ln 1, Col 1 | ${fullPath}`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const ta = body.querySelector('.notepad-textarea');
+        const status = body.closest('.window').querySelector('.status-section');
         ta.value = content;
         body.closest('.window').querySelector('.np-save-btn').addEventListener('click', () => {
           if (setNode(fullPath, ta.value)) playSound('click');
           else alert(`Could not save "${name}".`);
         });
+        const updateStatus = () => {
+          const textBeforeCursor = ta.value.substring(0, ta.selectionStart);
+          const lines = textBeforeCursor.split('\n');
+          const line = lines.length;
+          const col = lines[lines.length - 1].length + 1;
+          if (status) status.textContent = `Ln ${line}, Col ${col} | ${fullPath}`;
+        };
+        ['keyup', 'click', 'input'].forEach(evt => ta.addEventListener(evt, updateStatus));
+        // Init status properly based on loaded content if it matters, but selectionStart defaults to 0
       }
     });
   }
