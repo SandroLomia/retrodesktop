@@ -1,4 +1,31 @@
 /* ======= RESET & BASE ======= */
+:root {
+  --ui-bg: #ece9d8;
+  --ui-border: #0055e5;
+  --titlebar-active: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfa 100%);
+  --titlebar-inactive: linear-gradient(180deg, #7b9cc0 0%, #6b8bb0 50%, #7b9cc0 100%);
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --taskbar-app-bg: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+}
+
+.theme-olive {
+  --ui-bg: #e6e6cc;
+  --ui-border: #829659;
+  --titlebar-active: linear-gradient(180deg, #c2d2a4 0%, #b3c88c 4%, #a0b870 6%, #89a353 50%, #759239 100%);
+  --titlebar-inactive: linear-gradient(180deg, #c0c8b0 0%, #a0a890 50%, #c0c8b0 100%);
+  --taskbar-bg: linear-gradient(180deg, #9cb376 0%, #b2cb88 4%, #9cb376 6%, #839b5b 50%, #70864a 90%, #70864a 100%);
+  --taskbar-app-bg: linear-gradient(180deg, #8ba860, #6d8548);
+}
+
+.theme-silver {
+  --ui-bg: #e0e0e0;
+  --ui-border: #a2a0a2;
+  --titlebar-active: linear-gradient(180deg, #bcc3c6 0%, #ced5d9 4%, #bdc5c9 6%, #aeb6ba 50%, #909ea2 100%);
+  --titlebar-inactive: linear-gradient(180deg, #e0e0e0 0%, #d0d0d0 50%, #e0e0e0 100%);
+  --taskbar-bg: linear-gradient(180deg, #b8bdc2 0%, #c6ccd1 4%, #a5abb0 6%, #949a9f 50%, #7b8389 90%, #7b8389 100%);
+  --taskbar-app-bg: linear-gradient(180deg, #a4acb0, #838e93);
+}
+
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -650,8 +677,8 @@ body {
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
+  background: var(--ui-bg);
+  border: 2px solid var(--ui-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -699,7 +726,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: var(--titlebar-inactive);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +736,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--titlebar-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--titlebar-inactive);
 }
 
 .window-title-icon {
@@ -918,7 +945,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -978,7 +1005,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  background: var(--taskbar-app-bg);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   color: #fff;

@@ -54,13 +54,17 @@
     return icons[ext] || '📄';
   }
 
-  function updateDesktopIcons() {
+  function updateDesktopIcons(sort = false) {
     const desktopEl = document.getElementById('desktop-icons');
     if (!desktopEl) return;
     document.querySelectorAll('.user-desktop-item').forEach(el => el.remove());
     const desktopNode = getNode('/home/user/Desktop');
     if (desktopNode && typeof desktopNode === 'object') {
-      Object.entries(desktopNode).forEach(([name, val]) => {
+      let entries = Object.entries(desktopNode);
+      if (sort) {
+        entries.sort((a, b) => a[0].localeCompare(b[0]));
+      }
+      entries.forEach(([name, val]) => {
         const isDir = typeof val === 'object';
         const el = document.createElement('div');
         el.className = 'desktop-icon user-desktop-item';
@@ -287,8 +291,14 @@
     if (isDirectory(getNode(currentPath))) return currentPath;
     return '/home/user';
   }
-  const cmdHistory = [];
-  let cmdHistoryIdx = -1;
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   let soundEnabled = true;
   let audioCtx = null;
@@ -395,6 +405,10 @@
   });
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
+  document.getElementById('ctx-sort-name').addEventListener('click', () => {
+    document.getElementById('context-menu').style.display = 'none';
+    updateDesktopIcons(true);
+  });
 
   // Desktop "New" menu items - create in /home/user/Desktop
   document.querySelectorAll('.ctx-new-item').forEach(item => {
@@ -704,7 +718,8 @@
   }
 
   function initTerminal(winId, container, initialCommand = '') {
-    const state = { history: [], histIdx: -1, cwd: '/home/user' };
+    if (!container._cmdHistory) container._cmdHistory = [];
+    const state = { histIdx: container._cmdHistory.length, cwd: '/home/user' };
     addTermLine(container, 'RetroLinux bash [Kernel 2.4.31]');
     addTermLine(container, 'Type "help" to see popular shell commands.\n');
     addPromptLine(container, state);
@@ -714,8 +729,8 @@
       if (inp) {
         inp.value = initialCommand;
         inp.disabled = true;
-        state.history.push(initialCommand);
-        state.histIdx = state.history.length;
+        container._cmdHistory.push(initialCommand);
+        state.histIdx = container._cmdHistory.length;
         processCommand(container, state, initialCommand);
       }
     }
@@ -744,16 +759,14 @@
       if (e.key === 'Enter') {
         const cmd = inp.value;
         inp.disabled = true;
-        state.history.push(cmd);
-        state.histIdx = state.history.length;
         processCommand(container, state, cmd);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        if (state.histIdx > 0) { state.histIdx--; inp.value = state.history[state.histIdx]; }
+        if (state.histIdx > 0) { state.histIdx--; inp.value = container._cmdHistory[state.histIdx]; }
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        if (state.histIdx < state.history.length - 1) { state.histIdx++; inp.value = state.history[state.histIdx]; }
-        else { state.histIdx = state.history.length; inp.value = ''; }
+        if (state.histIdx < container._cmdHistory.length - 1) { state.histIdx++; inp.value = container._cmdHistory[state.histIdx]; }
+        else { state.histIdx = container._cmdHistory.length; inp.value = ''; }
       } else if (e.key === 'Tab') {
         e.preventDefault();
       }
@@ -1017,8 +1030,11 @@
     }
     // Track command history
     if (!container._cmdHistory) container._cmdHistory = [];
-    container._cmdHistory.push(trimmed);
-    if (container._cmdHistory.length > 100) container._cmdHistory.shift();
+    if (trimmed) {
+      container._cmdHistory.push(trimmed);
+      if (container._cmdHistory.length > 100) container._cmdHistory.shift();
+      state.histIdx = container._cmdHistory.length;
+    }
     // Handle simple output redirection: cmd > file and cmd >> file
     const redirectMatch = trimmed.match(/^(.+?)\s*(>>?)\s*([^\s]+)$/);
 
@@ -1421,7 +1437,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         output = `alias ll='ls -la'\nalias la='ls -a'\nalias l='ls'\nalias grep='grep --color=auto'`;
         break;
       case 'which': {
-        const cmds = { ls: 'usr/bin/ls', cat: '/usr/bin/cat', grep: '/usr/bin/grep', find: '/usr/bin/find', nano: '/usr/bin/nano', vi: '/usr/bin/vi', bash: '/usr/bin/bash', python: '/usr/bin/python3', node: '/usr/bin/node', git: '/usr/bin/git', curl: '/usr/bin/curl' };
+        const cmds = { ls: '/usr/bin/ls', cat: '/usr/bin/cat', grep: '/usr/bin/grep', find: '/usr/bin/find', nano: '/usr/bin/nano', vi: '/usr/bin/vi', bash: '/usr/bin/bash', python: '/usr/bin/python3', node: '/usr/bin/node', git: '/usr/bin/git', curl: '/usr/bin/curl' };
         output = args[0] ? (cmds[args[0]] || `which: no ${args[0]} in PATH`) : 'which: missing argument';
         break;
       }
@@ -4587,8 +4603,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'classic';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4602,6 +4619,13 @@ ${getAgentDesktopState()}`
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
+        </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Color Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="classic" ${currentTheme === 'classic' ? 'selected' : ''}>Classic</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
         </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
@@ -4618,12 +4642,28 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyDesktopTheme(theme);
+        });
       }
     });
   }
 
-  // Init Background
+  function applyDesktopTheme(theme) {
+    document.documentElement.classList.remove('theme-olive', 'theme-silver');
+    if (theme === 'olive') {
+      document.documentElement.classList.add('theme-olive');
+    } else if (theme === 'silver') {
+      document.documentElement.classList.add('theme-silver');
+    }
+  }
+
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  applyDesktopTheme(localStorage.getItem('retro_theme') || 'classic');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
@@ -4925,15 +4965,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
