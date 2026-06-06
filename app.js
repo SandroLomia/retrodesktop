@@ -367,8 +367,43 @@
     let h = now.getHours(), m = now.getMinutes();
     const ampm = h >= 12 ? 'PM' : 'AM';
     h = h % 12 || 12;
-    document.getElementById('clock').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+    const clockEl = document.getElementById('clock');
+    clockEl.textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+    clockEl.title = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   }
+
+  // Show Desktop
+  let desktopHidden = false;
+  document.getElementById('ql-show-desktop').addEventListener('click', () => {
+    playSound('click');
+    const allWindows = Object.keys(openWindows).map(id => document.getElementById(id)).filter(w => w);
+    if (!desktopHidden) {
+      // Minimize all
+      allWindows.forEach(w => {
+        if (!w.classList.contains('minimized')) {
+          w.classList.add('minimized');
+          w.dataset.wasMinimizedByShowDesktop = 'true';
+          const tb = document.getElementById('tb-' + w.id);
+          if (tb) tb.classList.remove('active');
+        }
+      });
+      activeWindowId = null;
+      document.querySelectorAll('.taskbar-app').forEach(t => t.classList.remove('active'));
+      desktopHidden = true;
+    } else {
+      // Restore those that were minimized by Show Desktop
+      allWindows.forEach(w => {
+        if (w.dataset.wasMinimizedByShowDesktop === 'true') {
+          w.classList.remove('minimized');
+          delete w.dataset.wasMinimizedByShowDesktop;
+          const tb = document.getElementById('tb-' + w.id);
+          if (tb) tb.classList.add('active'); // active state might be wrong, focusTopmostWindow will fix
+        }
+      });
+      focusTopmostWindow();
+      desktopHidden = false;
+    }
+  });
 
   // Start menu
   document.getElementById('start-button').addEventListener('click', (e) => {
