@@ -651,9 +651,9 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 3px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.4);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -661,6 +661,10 @@ body {
   z-index: 10;
   overflow: hidden;
   animation: windowOpen 0.2s ease-out;
+}
+
+.window:not(.active) {
+  border-color: #7b9cc0;
 }
 
 @keyframes windowOpen {
@@ -699,7 +703,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfe 90%, #0050d5 100%);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,7 +713,7 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288eff 6%, #127dff 50%, #036bfe 90%, #0050d5 100%);
 }
 
 .window:not(.active) .window-titlebar {
