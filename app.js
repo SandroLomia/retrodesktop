@@ -390,8 +390,14 @@
     e.preventDefault();
     const cm = document.getElementById('context-menu');
     cm.style.display = 'block';
-    cm.style.left = e.clientX + 'px';
-    cm.style.top = e.clientY + 'px';
+
+    let x = e.clientX;
+    let y = e.clientY;
+    if (x + cm.offsetWidth > window.innerWidth) x = window.innerWidth - cm.offsetWidth;
+    if (y + cm.offsetHeight > window.innerHeight) y = window.innerHeight - cm.offsetHeight;
+
+    cm.style.left = x + 'px';
+    cm.style.top = y + 'px';
   });
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
@@ -660,8 +666,20 @@
     if (dragState) {
       const w = document.getElementById(dragState.wid);
       if (w) {
-        w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        let newLeft = dragState.origL + e.clientX - dragState.startX;
+        let newTop = dragState.origT + e.clientY - dragState.startY;
+
+        // Boundary checks to keep title bar accessible
+        const minTop = 0;
+        const maxTop = window.innerHeight - 30; // 30px is roughly the height of the title bar
+        const minLeft = -w.offsetWidth + 60; // Keep at least 60px of the window visible on the right
+        const maxLeft = window.innerWidth - 60; // Keep at least 60px visible on the left
+
+        newTop = Math.max(minTop, Math.min(newTop, maxTop));
+        newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+
+        w.style.left = newLeft + 'px';
+        w.style.top = newTop + 'px';
       }
     }
     if (resizeState) {
@@ -683,7 +701,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, todo: openTodoApp
     };
     if (launchers[name]) launchers[name]();
   }
@@ -2093,7 +2111,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
     removeExplorerCtx();
     const menu = document.createElement('div');
     menu.className = 'exp-context-menu';
-    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+
     const fullPath = dirPath === '/' ? '/' + name : dirPath + '/' + name;
     menu.innerHTML = `
       ${isDir ? '<div class="ctx-item exp-ctx-open">📂 Open</div>' : '<div class="ctx-item exp-ctx-open">📄 Open</div>'}
@@ -2103,6 +2121,14 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       <div class="ctx-separator"></div>
       <div class="ctx-item exp-ctx-props">ℹ️ Properties</div>`;
     document.body.appendChild(menu);
+
+    let posX = x;
+    let posY = y;
+    if (posX + menu.offsetWidth > window.innerWidth) posX = window.innerWidth - menu.offsetWidth;
+    if (posY + menu.offsetHeight > window.innerHeight) posY = window.innerHeight - menu.offsetHeight;
+    menu.style.left = posX + 'px';
+    menu.style.top = posY + 'px';
+
     menu.querySelector('.exp-ctx-open').addEventListener('click', () => {
       removeExplorerCtx();
       if (isDir) openFileExplorer(fullPath);
@@ -2149,7 +2175,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
     removeExplorerCtx();
     const menu = document.createElement('div');
     menu.className = 'exp-context-menu';
-    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+
     menu.innerHTML = `
       <div class="ctx-item exp-nctx" data-type="folder">📁 New Folder</div>
       <div class="ctx-separator"></div>
@@ -2162,6 +2188,14 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       <div class="ctx-separator"></div>
       <div class="ctx-item exp-ctx-refresh">🔄 Refresh</div>`;
     document.body.appendChild(menu);
+
+    let posX = x;
+    let posY = y;
+    if (posX + menu.offsetWidth > window.innerWidth) posX = window.innerWidth - menu.offsetWidth;
+    if (posY + menu.offsetHeight > window.innerHeight) posY = window.innerHeight - menu.offsetHeight;
+    menu.style.left = posX + 'px';
+    menu.style.top = posY + 'px';
+
     menu.querySelectorAll('.exp-nctx').forEach(item => {
       item.addEventListener('click', () => { removeExplorerCtx(); createNewItem(dirPath, item.dataset.type, refreshFn); });
     });
@@ -2220,9 +2254,16 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               removeExplorerCtx();
               const menu = document.createElement('div');
               menu.className = 'exp-context-menu';
-              menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
               menu.innerHTML = '<div class="ctx-item trash-restore-one">♻️ Restore</div><div class="ctx-item trash-delete-one">❌ Delete Permanently</div>';
               document.body.appendChild(menu);
+
+              let posX = e.clientX;
+              let posY = e.clientY;
+              if (posX + menu.offsetWidth > window.innerWidth) posX = window.innerWidth - menu.offsetWidth;
+              if (posY + menu.offsetHeight > window.innerHeight) posY = window.innerHeight - menu.offsetHeight;
+              menu.style.left = posX + 'px';
+              menu.style.top = posY + 'px';
+
               menu.querySelector('.trash-restore-one').addEventListener('click', () => {
                 removeExplorerCtx();
                 if (restoreTrashEntry(entry)) {
@@ -4624,6 +4665,93 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // ======= TO-DO APP =======
+  function openTodoApp() {
+    createWindow({
+      title: 'To-Do List', width: 320, height: 400, tbIcon: '✓',
+      body: `<div class="todo-body">
+        <div class="todo-header">
+          <input type="text" class="todo-input" placeholder="What needs to be done?">
+          <button class="todo-add-btn">Add</button>
+        </div>
+        <ul class="todo-list"></ul>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) {
+          todos = [];
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', () => {
+              todos[index].completed = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const text = document.createElement('span');
+            text.className = 'todo-text';
+            text.textContent = todo.text;
+
+            const delBtn = document.createElement('span');
+            delBtn.className = 'todo-delete';
+            delBtn.textContent = '×';
+            delBtn.title = 'Delete';
+            delBtn.addEventListener('click', () => {
+              todos.splice(index, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(text);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+          });
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, completed: false });
+            saveTodos();
+            input.value = '';
+            renderTodos();
+            input.focus();
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
+        input.focus();
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
