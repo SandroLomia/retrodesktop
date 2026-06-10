@@ -750,7 +750,7 @@ body {
 .window-btn {
   width: 21px;
   height: 21px;
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -759,25 +759,30 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+  box-shadow: inset 0 -1px 2px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.4);
 }
 
 .window-btn.minimize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #5394ef 0%, #1e59bc 50%, #083c96 51%, #246ae4 100%);
+  border-color: #fff;
 }
 .window-btn.maximize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #5394ef 0%, #1e59bc 50%, #083c96 51%, #246ae4 100%);
+  border-color: #fff;
 }
 .window-btn.close {
-  background: linear-gradient(180deg, #d9534f, #c9302c);
+  background: linear-gradient(180deg, #e47c72 0%, #cf4c3f 50%, #b8281a 51%, #e55546 100%);
+  border-color: #fff;
 }
 
 .window-btn:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.2);
 }
 
 .window-btn:active {
-  filter: brightness(0.9);
+  filter: brightness(0.8);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .window-menubar {

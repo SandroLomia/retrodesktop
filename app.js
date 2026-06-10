@@ -660,8 +660,17 @@
     if (dragState) {
       const w = document.getElementById(dragState.wid);
       if (w) {
-        w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        const newLeft = dragState.origL + e.clientX - dragState.startX;
+        const newTop = dragState.origT + e.clientY - dragState.startY;
+
+        // Bounds checking to prevent dragging out of the screen completely
+        const maxLeft = window.innerWidth - 50; // Ensure at least 50px is visible on the left
+        const minLeft = -w.offsetWidth + 50; // Ensure at least 50px is visible on the right
+        const maxTop = window.innerHeight - 50; // Ensure at least 50px is visible on the bottom
+        const minTop = 0; // Prevent dragging above the screen
+
+        w.style.left = Math.max(minLeft, Math.min(newLeft, maxLeft)) + 'px';
+        w.style.top = Math.max(minTop, Math.min(newTop, maxTop)) + 'px';
       }
     }
     if (resizeState) {
@@ -4556,17 +4565,85 @@ ${getAgentDesktopState()}`
   // ======= CLOCK SETTINGS =======
   function openClockSettings() {
     createWindow({
-      title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
+      title: 'Date and Time Properties', width: 340, height: 380, tbIcon: '🕒',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <canvas id="analog-clock" width="120" height="120" style="margin-top: 10px;"></canvas>
+        <div style="font-size: 32px; font-weight: bold; margin: 15px 0 5px 0; color: #333;" id="clock-display-large"></div>
+        <div style="font-size: 14px; color: #666;" id="date-display-large"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const timeDisplay = body.querySelector('#clock-display-large');
         const dateDisplay = body.querySelector('#date-display-large');
+        const canvas = body.querySelector('#analog-clock');
+        const ctx = canvas.getContext('2d');
+        const radius = canvas.height / 2;
+        ctx.translate(radius, radius);
+
+        function drawClock() {
+          ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
+
+          // Draw face
+          ctx.beginPath();
+          ctx.arc(0, 0, radius - 2, 0, 2 * Math.PI);
+          ctx.fillStyle = 'white';
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#333';
+          ctx.stroke();
+
+          // Draw center dot
+          ctx.beginPath();
+          ctx.arc(0, 0, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = '#333';
+          ctx.fill();
+
+          // Draw numbers
+          ctx.font = "12px Tahoma";
+          ctx.textBaseline = "middle";
+          ctx.textAlign = "center";
+          for(let num = 1; num <= 12; num++){
+            let ang = num * Math.PI / 6;
+            ctx.rotate(ang);
+            ctx.translate(0, -radius * 0.8);
+            ctx.rotate(-ang);
+            ctx.fillText(num.toString(), 0, 0);
+            ctx.rotate(ang);
+            ctx.translate(0, radius * 0.8);
+            ctx.rotate(-ang);
+          }
+
+          // Get time
+          const now = new Date();
+          let hour = now.getHours();
+          let minute = now.getMinutes();
+          let second = now.getSeconds();
+
+          // Draw Hands
+          hour = hour % 12;
+          hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
+          drawHand(ctx, hour, radius * 0.5, 4);
+
+          minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+          drawHand(ctx, minute, radius * 0.7, 3);
+
+          second = (second * Math.PI / 30);
+          drawHand(ctx, second, radius * 0.8, 1, 'red');
+        }
+
+        function drawHand(ctx, pos, length, width, color = '#333') {
+          ctx.beginPath();
+          ctx.lineWidth = width;
+          ctx.lineCap = "round";
+          ctx.strokeStyle = color;
+          ctx.moveTo(0, 0);
+          ctx.rotate(pos);
+          ctx.lineTo(0, -length);
+          ctx.stroke();
+          ctx.rotate(-pos);
+        }
 
         function updateDisplay() {
           const now = new Date();
@@ -4575,6 +4652,7 @@ ${getAgentDesktopState()}`
           h = h % 12 || 12;
           timeDisplay.textContent = `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')} ${ampm}`;
           dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+          drawClock();
         }
 
         updateDisplay();
