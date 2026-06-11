@@ -382,6 +382,8 @@
       document.getElementById('start-menu').style.display = 'none';
     }
     document.getElementById('context-menu').style.display = 'none';
+    const taskbarCtx = document.getElementById('taskbar-context-menu');
+    if (taskbarCtx) taskbarCtx.style.display = 'none';
   });
 
   // Context menu
@@ -392,6 +394,22 @@
     cm.style.display = 'block';
     cm.style.left = e.clientX + 'px';
     cm.style.top = e.clientY + 'px';
+  });
+
+  document.getElementById('taskbar').addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const cm = document.getElementById('taskbar-context-menu');
+    if (cm) {
+      cm.style.display = 'block';
+      cm.style.left = e.clientX + 'px';
+      cm.style.top = (e.clientY - cm.offsetHeight) + 'px';
+    }
+  });
+
+  document.getElementById('ctx-task-manager').addEventListener('click', () => {
+    document.getElementById('taskbar-context-menu').style.display = 'none';
+    openTaskManager();
   });
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
@@ -683,7 +701,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, taskmanager: openTaskManager
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1245,7 +1263,7 @@
         output = 'Opening 2048...';
         break;
       case 'games':
-        output = `Available games:\n  snake     - Classic snake game\n  tetris    - Tetris\n  2048      - Merge tiles to reach 2048\n  minesweeper - Classic minesweeper (or: mine)`;
+        output = `Available games:\n  snake     - Classic snake game\n  tetris    - Tetris\n  2048      - Merge tiles to reach 2048\n  minesweeper - Classic minesweeper (or: mine)\n  tictactoe - Play Tic Tac Toe`;
         break;
       case 'mine':
       case 'minesweeper':
@@ -1633,8 +1651,8 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   games             List games          snake            Play Snake
   tetris            Play Tetris         2048             Play 2048
   minesweeper       Minesweeper         agent            Interactive AI CLI
-  agent [prompt]    AI execution        exit / logout    Close terminal
-  open / xdg-open   Open file/URL
+  tictactoe         Play Tic Tac Toe    agent [prompt]   AI execution
+  exit / logout     Close terminal      open / xdg-open  Open file/URL
 
   exit / logout     Close terminal      shutdown/reboot  Restart`;
         break;
@@ -1745,6 +1763,21 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const body = document.getElementById(winId + '-body');
         const display = body.querySelector('.calc-display');
         let current = '0', prev = '', op = '', reset = false;
+
+        body.tabIndex = 0;
+        body.focus();
+        body.addEventListener('keydown', (e) => {
+          const keyMap = {
+            'Enter': '=', 'Escape': 'C', 'Backspace': '←',
+            '+': '+', '-': '-', '*': '*', '/': '/', '.': '.'
+          };
+          const val = keyMap[e.key] || (/[0-9]/.test(e.key) && e.key.length === 1 ? e.key : null);
+          if (val) {
+            const btn = body.querySelector(`.calc-btn[data-val="${val}"]`);
+            if (btn) btn.click();
+          }
+        });
+
         body.querySelectorAll('.calc-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const v = btn.dataset.val;
@@ -1783,6 +1816,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           <button class="paint-tool-btn active" data-tool="brush" title="Brush">✏️</button>
           <button class="paint-tool-btn" data-tool="eraser" title="Eraser">🧹</button>
           <button class="paint-tool-btn" data-tool="fill" title="Fill">🪣</button>
+          <button class="paint-tool-btn" data-tool="clear" title="Clear Canvas">🗑️</button>
           <div class="paint-sizes">
             <button class="size-btn active" data-size="2"><div class="size-dot" style="width:4px;height:4px"></div></button>
             <button class="size-btn" data-size="5"><div class="size-dot" style="width:8px;height:8px"></div></button>
@@ -1824,6 +1858,11 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         });
         body.querySelectorAll('.paint-tool-btn').forEach(btn => {
           btn.addEventListener('click', () => {
+            if (btn.dataset.tool === 'clear') {
+              ctx.fillStyle = '#fff';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              return; // Don't change the active tool
+            }
             body.querySelectorAll('.paint-tool-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active'); tool = btn.dataset.tool;
           });
@@ -4491,7 +4530,8 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe,
+              taskmanager: openTaskManager
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4624,6 +4664,36 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Task Manager', width: 400, height: 300, tbIcon: '📊',
+      statusbar: false,
+      body: '<div id="tm-list" style="padding: 10px; font-family: Tahoma, sans-serif; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; height: 100%;"></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const list = body.querySelector('#tm-list');
+        function renderTasks() {
+          list.innerHTML = Object.entries(openWindows)
+            .filter(([id, _]) => id !== winId)
+            .map(([id, info]) => `
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px;">
+                <span style="font-size: 13px;">${info.title}</span>
+                <button class="tm-close-btn" data-winid="${id}" style="font-size: 11px; padding: 2px 6px; cursor: pointer;">End Task</button>
+              </div>
+            `).join('');
+          list.querySelectorAll('.tm-close-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              closeWindow(e.target.dataset.winid);
+              setTimeout(renderTasks, 200); // refresh after close animation
+            });
+          });
+        }
+        renderTasks();
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

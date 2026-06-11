@@ -54,6 +54,11 @@
 
   <!-- Desktop -->
   <div id="desktop" style="display:none;">
+    <!-- Taskbar Context Menu -->
+    <div id="taskbar-context-menu" style="display:none; position:fixed; background:#fff; border:1px solid #a0a0a0; box-shadow:2px 2px 6px rgba(0,0,0,0.15); z-index:99999; min-width:150px; padding:3px 0;">
+      <div class="ctx-item" id="ctx-task-manager">Task Manager</div>
+    </div>
+
     <!-- Desktop Icons -->
     <div id="desktop-icons">
       <div class="desktop-icon" data-app="mycomputer" id="icon-mycomputer">
@@ -135,7 +140,7 @@
         <div class="start-flag" style="display: flex; align-items: center;">
           <div style="font-size: 15px; transform: rotate(10deg); margin-top: -6px;">🐧</div>
         </div>
-        <span>menu</span>
+        <span>start</span>
       </button>
       <div id="taskbar-divider"></div>
       <div id="taskbar-apps"></div>
