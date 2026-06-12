@@ -699,21 +699,21 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #003fdb 10%, #0024d6 50%, #0012c8 100%);
   display: flex;
   align-items: center;
   padding: 0 4px;
   cursor: move;
   flex-shrink: 0;
-  border-radius: 6px 6px 0 0;
+  border-radius: 8px 8px 0 0;
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #003fdb 10%, #0024d6 50%, #0012c8 100%);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: linear-gradient(180deg, #7ba2e7 0%, #638cdc 10%, #517bd6 50%, #4671c8 100%);
 }
 
 .window-title-icon {
@@ -763,13 +763,16 @@ body {
 }
 
 .window-btn.minimize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #2b68ec, #1a4cd8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 .window-btn.maximize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #2b68ec, #1a4cd8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 .window-btn.close {
-  background: linear-gradient(180deg, #d9534f, #c9302c);
+  background: linear-gradient(180deg, #e45749, #ce362b);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .window-btn:hover {
@@ -931,7 +934,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: linear-gradient(180deg, #4eb747 0%, #3a9733 40%, #328b2a 60%, #2e7d32 100%);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -3412,6 +3415,12 @@ body {
   box-shadow: 1px 1px 0 #000;
   font-size: 24px;
 }
+
+.icon-about { position: relative; }
+.icon-about::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #0e7490, #1e3a8a); border-radius: 50%; border: 2px solid #60a5fa; }
+.icon-about::after { content: 'ℹ️'; position: absolute; font-size: 20px; }
+.smi-icon.icon-about::before { width: 24px; height: 24px; }
+.smi-icon.icon-about::after { font-size: 14px; }
 
 /* Game icons */
 .icon-tictactoe { position: relative; }

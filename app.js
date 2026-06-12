@@ -636,6 +636,15 @@
   }
 
   // Drag & Resize
+  document.addEventListener('dblclick', (e) => {
+    const titlebar = e.target.closest('.window-titlebar');
+    if (titlebar && !e.target.closest('.window-btn')) {
+      const wid = titlebar.dataset.winid;
+      maximizeWindow(wid);
+      e.preventDefault();
+    }
+  });
+
   document.addEventListener('mousedown', (e) => {
     const titlebar = e.target.closest('.window-titlebar');
     if (titlebar && !e.target.closest('.window-btn')) {
@@ -683,9 +692,26 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, about: openAbout
     };
     if (launchers[name]) launchers[name]();
+  }
+
+  // ======= ABOUT APP =======
+  function openAbout() {
+    createWindow({
+      title: 'About RetroLinux', width: 400, height: 300, tbIcon: 'ℹ️',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
+        <h2 style="color: #0033cc; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+          <div style="font-size: 32px; transform: rotate(10deg); margin-top: -8px;">🐧</div>
+          RetroLinux
+        </h2>
+        <p>A nostalgic 2000s Windows XP-style desktop experience in your browser.</p>
+        <p>Built with vanilla HTML, CSS, and JavaScript. Zero dependencies. Zero build steps.</p>
+        <p>Features include a working file system, a bash-like terminal, text editor, web browser, games, AI agent integration, and more.</p>
+      </div>`
+    });
   }
 
   // ======= TERMINAL =======
@@ -1748,6 +1774,12 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         body.querySelectorAll('.calc-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const v = btn.dataset.val;
+            if (current === 'Error' && v !== 'C') {
+              current = '0';
+              prev = '';
+              op = '';
+              reset = true;
+            }
             if ('0123456789'.includes(v)) {
               current = (current === '0' || reset) ? v : current + v;
               reset = false;
