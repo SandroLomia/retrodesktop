@@ -352,6 +352,11 @@
     document.getElementById('login-screen').style.display = 'flex';
   }, 3000);
 
+  document.getElementById('login-shutdown').addEventListener('click', () => {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('shutdown-screen').style.display = 'flex';
+  });
+
   document.getElementById('login-user-btn').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('desktop').style.display = 'block';
@@ -390,8 +395,12 @@
     e.preventDefault();
     const cm = document.getElementById('context-menu');
     cm.style.display = 'block';
-    cm.style.left = e.clientX + 'px';
-    cm.style.top = e.clientY + 'px';
+    let x = e.clientX;
+    let y = e.clientY;
+    if (x + cm.offsetWidth > window.innerWidth) x = window.innerWidth - cm.offsetWidth;
+    if (y + cm.offsetHeight > window.innerHeight) y = window.innerHeight - cm.offsetHeight;
+    cm.style.left = x + 'px';
+    cm.style.top = y + 'px';
   });
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
@@ -557,6 +566,7 @@
     w.querySelector('.window-btn.close').addEventListener('click', () => closeWindow(id));
     w.querySelector('.window-btn.minimize').addEventListener('click', () => minimizeWindow(id));
     w.querySelector('.window-btn.maximize').addEventListener('click', () => maximizeWindow(id));
+    w.querySelector('.window-titlebar').addEventListener('dblclick', () => maximizeWindow(id));
     w.addEventListener('mousedown', () => setActiveWindow(id));
 
     if (opts.onReady) opts.onReady(id, w);
@@ -2093,7 +2103,6 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
     removeExplorerCtx();
     const menu = document.createElement('div');
     menu.className = 'exp-context-menu';
-    menu.style.left = x + 'px'; menu.style.top = y + 'px';
     const fullPath = dirPath === '/' ? '/' + name : dirPath + '/' + name;
     menu.innerHTML = `
       ${isDir ? '<div class="ctx-item exp-ctx-open">📂 Open</div>' : '<div class="ctx-item exp-ctx-open">📄 Open</div>'}
@@ -2103,6 +2112,11 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       <div class="ctx-separator"></div>
       <div class="ctx-item exp-ctx-props">ℹ️ Properties</div>`;
     document.body.appendChild(menu);
+    let left = x;
+    let top = y;
+    if (left + menu.offsetWidth > window.innerWidth) left = window.innerWidth - menu.offsetWidth;
+    if (top + menu.offsetHeight > window.innerHeight) top = window.innerHeight - menu.offsetHeight;
+    menu.style.left = left + 'px'; menu.style.top = top + 'px';
     menu.querySelector('.exp-ctx-open').addEventListener('click', () => {
       removeExplorerCtx();
       if (isDir) openFileExplorer(fullPath);
@@ -2149,7 +2163,6 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
     removeExplorerCtx();
     const menu = document.createElement('div');
     menu.className = 'exp-context-menu';
-    menu.style.left = x + 'px'; menu.style.top = y + 'px';
     menu.innerHTML = `
       <div class="ctx-item exp-nctx" data-type="folder">📁 New Folder</div>
       <div class="ctx-separator"></div>
@@ -2162,6 +2175,11 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       <div class="ctx-separator"></div>
       <div class="ctx-item exp-ctx-refresh">🔄 Refresh</div>`;
     document.body.appendChild(menu);
+    let left = x;
+    let top = y;
+    if (left + menu.offsetWidth > window.innerWidth) left = window.innerWidth - menu.offsetWidth;
+    if (top + menu.offsetHeight > window.innerHeight) top = window.innerHeight - menu.offsetHeight;
+    menu.style.left = left + 'px'; menu.style.top = top + 'px';
     menu.querySelectorAll('.exp-nctx').forEach(item => {
       item.addEventListener('click', () => { removeExplorerCtx(); createNewItem(dirPath, item.dataset.type, refreshFn); });
     });
@@ -2220,9 +2238,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               removeExplorerCtx();
               const menu = document.createElement('div');
               menu.className = 'exp-context-menu';
-              menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
               menu.innerHTML = '<div class="ctx-item trash-restore-one">♻️ Restore</div><div class="ctx-item trash-delete-one">❌ Delete Permanently</div>';
               document.body.appendChild(menu);
+              let left = e.clientX;
+              let top = e.clientY;
+              if (left + menu.offsetWidth > window.innerWidth) left = window.innerWidth - menu.offsetWidth;
+              if (top + menu.offsetHeight > window.innerHeight) top = window.innerHeight - menu.offsetHeight;
+              menu.style.left = left + 'px'; menu.style.top = top + 'px';
               menu.querySelector('.trash-restore-one').addEventListener('click', () => {
                 removeExplorerCtx();
                 if (restoreTrashEntry(entry)) {
