@@ -92,7 +92,16 @@
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
           if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          else {
+            const content = getNode(path);
+            if (typeof content === 'string') {
+              if (name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+                openImageViewer(name, path, content);
+              } else {
+                openNotepadWith(name, path, content);
+              }
+            }
+          }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -411,6 +420,10 @@
   document.getElementById('ctx-open-terminal').addEventListener('click', () => {
     document.getElementById('context-menu').style.display = 'none';
     openTerminal();
+  });
+  document.getElementById('ctx-task-manager').addEventListener('click', () => {
+    document.getElementById('context-menu').style.display = 'none';
+    openTaskManager();
   });
   document.getElementById('ctx-properties').addEventListener('click', () => {
     document.getElementById('context-menu').style.display = 'none';
@@ -1952,7 +1965,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') {
+                  if (name.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+                    openImageViewer(name, fullPath, val);
+                  } else {
+                    openNotepadWith(name, fullPath, val);
+                  }
+                }
               }
             });
             // Drag start
@@ -2170,6 +2189,18 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   }
 
   function removeExplorerCtx() { document.querySelectorAll('.exp-context-menu').forEach(m => m.remove()); }
+
+  // ======= Open file in Image Viewer =======
+  function openImageViewer(name, fullPath, content) {
+    // Basic escape for img src to prevent breaking quotes
+    const safeContent = String(content || '').replace(/"/g, '&quot;');
+    createWindow({
+      title: name + ' - Image Viewer', width: 600, height: 400, tbIcon: '🖼️',
+      menubar: '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: '<div style="display:flex;justify-content:center;align-items:center;height:100%;background:#333;"><img src="' + safeContent + '" style="max-width:100%;max-height:100%;object-fit:contain;"></div>',
+      status: fullPath
+    });
+  }
 
   // ======= Open file in Notepad =======
   function openNotepadWith(name, fullPath, content) {
@@ -4580,6 +4611,70 @@ ${getAgentDesktopState()}`
         updateDisplay();
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Task Manager', width: 400, height: 300, tbIcon: '📊',
+      menubar: '<div class="window-menubar"><span>File</span><span>Options</span><span>View</span><span>Help</span></div>',
+      body: `<div style="padding:10px; font-family:'Tahoma',sans-serif; display:flex; flex-direction:column; height:100%; box-sizing:border-box;">
+        <div style="flex:1; border:1px inset #808080; background:#fff; overflow-y:auto; padding:4px;" id="taskmgr-list"></div>
+        <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+          <button id="taskmgr-end" style="padding:4px 12px; font-family:'Tahoma',sans-serif;">End Task</button>
+        </div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const list = body.querySelector('#taskmgr-list');
+        const endBtn = body.querySelector('#taskmgr-end');
+        let selectedId = null;
+
+        function renderTasks() {
+          list.innerHTML = '';
+          selectedId = null;
+          endBtn.disabled = true;
+          Object.entries(openWindows).forEach(([id, info]) => {
+            if (id === winId) return; // don't show task manager itself
+            const item = document.createElement('div');
+            item.style.padding = '2px 4px';
+            item.style.cursor = 'pointer';
+            item.textContent = info.title;
+            item.addEventListener('click', () => {
+              Array.from(list.children).forEach(c => { c.style.background = 'transparent'; c.style.color = '#000'; });
+              item.style.background = '#316ac5';
+              item.style.color = '#fff';
+              selectedId = id;
+              endBtn.disabled = false;
+            });
+            list.appendChild(item);
+          });
+        }
+
+        renderTasks();
+
+        endBtn.addEventListener('click', () => {
+          if (selectedId) {
+            closeWindow(selectedId);
+            renderTasks();
+          }
+        });
+
+        // polling to keep task list somewhat updated
+        const interval = setInterval(() => {
+          if (!document.getElementById(winId)) {
+            clearInterval(interval);
+            return;
+          }
+          // Only re-render if count changed to avoid losing selection too often
+          // Rough approximation
+          if (list.children.length !== Object.keys(openWindows).length - 1) {
+            renderTasks();
+          }
+        }, 1000);
       }
     });
   }
