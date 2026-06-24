@@ -260,6 +260,7 @@ body {
 
 .desktop-icon:hover {
   background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
 }
 
 .desktop-icon.selected {
@@ -653,7 +654,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.3);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -918,11 +919,11 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #3781f8 0%, #1d5ec9 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 -3px 15px rgba(0,0,0,0.4);
 }
 
 #start-button {
@@ -1042,9 +1043,9 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 1px solid #0055c0;
   border-radius: 8px 8px 0 0;
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+  box-shadow: 4px 4px 20px rgba(0,0,0,0.45);
   z-index: 99999;
   overflow: hidden;
   animation: startMenuOpen 0.15s ease-out;
