@@ -673,7 +673,33 @@
     }
   });
 
-  document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
+  document.addEventListener('mouseup', (e) => {
+    if (dragState) {
+      const w = document.getElementById(dragState.wid);
+      if (w) {
+        // Window Snapping Logic
+        const threshold = 15; // pixels from the edge
+        if (e.clientX <= threshold) {
+          // Snap left
+          w.style.left = '0';
+          w.style.top = '0';
+          w.style.width = '50%';
+          w.style.height = 'calc(100vh - 36px)';
+        } else if (e.clientX >= window.innerWidth - threshold) {
+          // Snap right
+          w.style.left = '50%';
+          w.style.top = '0';
+          w.style.width = '50%';
+          w.style.height = 'calc(100vh - 36px)';
+        } else if (e.clientY <= threshold) {
+          // Snap top (maximize)
+          maximizeWindow(dragState.wid);
+        }
+      }
+    }
+    dragState = null;
+    resizeState = null;
+  });
 
   // ======= App Launchers =======
   function openApp(name) {
@@ -4556,17 +4582,19 @@ ${getAgentDesktopState()}`
   // ======= CLOCK SETTINGS =======
   function openClockSettings() {
     createWindow({
-      title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
+      title: 'Date and Time Properties', width: 340, height: 400, tbIcon: '🕒',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
         <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
         <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div id="calendar-container" style="margin-top: 20px; width: 100%;"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const timeDisplay = body.querySelector('#clock-display-large');
         const dateDisplay = body.querySelector('#date-display-large');
+        const calContainer = body.querySelector('#calendar-container');
 
         function updateDisplay() {
           const now = new Date();
@@ -4577,7 +4605,36 @@ ${getAgentDesktopState()}`
           dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
+        function generateCalendar() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const today = now.getDate();
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          let html = \`<table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+            <thead>
+              <tr style="background: #ece9d8;">
+                <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+              </tr>
+            </thead>
+            <tbody><tr>\`;
+
+          for (let i = 0; i < firstDay; i++) {
+            html += '<td></td>';
+          }
+          for (let i = 1; i <= daysInMonth; i++) {
+            if ((i + firstDay - 1) % 7 === 0 && i !== 1) html += '</tr><tr>';
+            const isToday = i === today ? 'font-weight: bold; color: #fff; background: #316ac5; border-radius: 50%;' : '';
+            html += \`<td style="padding: 4px; \${isToday}">\${i}</td>\`;
+          }
+          html += '</tr></tbody></table>';
+          calContainer.innerHTML = html;
+        }
+
         updateDisplay();
+        generateCalendar();
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
       }
