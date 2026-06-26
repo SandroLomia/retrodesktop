@@ -1,0 +1,7 @@
+1. We need to introduce a theme system using CSS variables (`:root`).
+2. Add themes: default (XP Luna-like), olive (XP Olive Green-like), silver (XP Silver-like), dark (Modern Dark Mode).
+3. We'll update styles.css to use these CSS variables.
+4. Add theme selector to the System Settings window.
+5. Persist the chosen theme in `localStorage`.
+6. Fix visual bugs (like the weird dark boot screen vs light desktop theme mismatch) and update start menu padding and sizing.
+7. Add CSS variables to `.taskbar`, `.start-menu`, `.window-header`, etc.
