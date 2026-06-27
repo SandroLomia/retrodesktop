@@ -528,6 +528,25 @@ body {
   font-size: 22px;
 }
 
+.icon-calendar {
+  position: relative;
+}
+.icon-calendar::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(180deg, #ef4444 30%, #f8fafc 30%);
+  border-radius: 4px;
+  border: 2px solid #b91c1c;
+}
+.icon-calendar::after {
+  content: '📅';
+  position: absolute;
+  font-size: 18px;
+  top: 8px;
+}
+
 .icon-agent {
   position: relative;
 }
@@ -635,6 +654,15 @@ body {
 .smi-icon.icon-settings::after {
   font-size: 16px;
 }
+.smi-icon.icon-calendar::before {
+  width: 24px;
+  height: 24px;
+  border-width: 1px;
+}
+.smi-icon.icon-calendar::after {
+  font-size: 12px;
+  top: 5px;
+}
 
 .smi-icon.icon-agent::before {
   width: 24px;
@@ -653,7 +681,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -1044,7 +1072,7 @@ body {
   background: #fff;
   border: 2px solid #0055c0;
   border-radius: 8px 8px 0 0;
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
   z-index: 99999;
   overflow: hidden;
   animation: startMenuOpen 0.15s ease-out;
