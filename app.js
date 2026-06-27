@@ -359,7 +359,7 @@
     updateDesktopIcons();
     updateClock();
     setInterval(updateClock, 1000);
-    document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+    document.getElementById('clock').addEventListener('click', () => openApp('calendar'));
   });
 
   function updateClock() {
@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1748,6 +1748,15 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         body.querySelectorAll('.calc-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             const v = btn.dataset.val;
+
+            // Handle error state
+            if (current === 'Error' && !['C', 'CE'].includes(v)) {
+              current = '0';
+              prev = '';
+              op = '';
+              reset = false;
+            }
+
             if ('0123456789'.includes(v)) {
               current = (current === '0' || reset) ? v : current + v;
               reset = false;
@@ -4491,7 +4500,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, calendar: openCalendar
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4580,6 +4589,89 @@ ${getAgentDesktopState()}`
         updateDisplay();
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
+  // ======= CALENDAR =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 320, height: 350, tbIcon: '📅',
+      statusbar: false,
+      body: `<div style="padding: 15px; font-family: 'Tahoma', sans-serif; height: 100%; display: flex; flex-direction: column; background: #fff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #0055e5; color: white; padding: 10px; border-radius: 4px;">
+          <button id="cal-prev" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">&lt;</button>
+          <div id="cal-month-year" style="font-weight: bold; font-size: 14px;"></div>
+          <button id="cal-next" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">&gt;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-weight: bold; font-size: 11px; margin-bottom: 5px; color: #333;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="cal-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; flex: 1;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const monthYearEl = body.querySelector('#cal-month-year');
+        const daysEl = body.querySelector('#cal-days');
+        const prevBtn = body.querySelector('#cal-prev');
+        const nextBtn = body.querySelector('#cal-next');
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+          daysEl.innerHTML = '';
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+
+          monthYearEl.textContent = new Date(year, month).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          const today = new Date();
+          const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+          for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.style.padding = '5px';
+            daysEl.appendChild(emptyCell);
+          }
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            const cell = document.createElement('div');
+            cell.textContent = day;
+            cell.style.padding = '8px 5px';
+            cell.style.textAlign = 'center';
+            cell.style.fontSize = '12px';
+            cell.style.borderRadius = '2px';
+            cell.style.cursor = 'default';
+
+            if (isCurrentMonth && day === today.getDate()) {
+              cell.style.background = '#0055e5';
+              cell.style.color = 'white';
+              cell.style.fontWeight = 'bold';
+            } else {
+              cell.style.background = '#f0f0f0';
+              cell.style.color = '#333';
+              cell.onmouseover = () => cell.style.background = '#e0e0e0';
+              cell.onmouseout = () => cell.style.background = '#f0f0f0';
+            }
+
+            daysEl.appendChild(cell);
+          }
+        }
+
+        prevBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        nextBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        renderCalendar();
       }
     });
   }
