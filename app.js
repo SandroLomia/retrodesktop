@@ -91,8 +91,18 @@
         });
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
-          if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          if (isDir) {
+            openFileExplorer(path);
+          } else {
+            const content = getNode(path);
+            if (typeof content === 'string') {
+              if (content.startsWith('data:image/')) {
+                openImageViewer(name, content);
+              } else {
+                openNotepadWith(name, path, content);
+              }
+            }
+          }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -469,7 +479,22 @@
     }
   });
 
+
+  document.getElementById('desktop').addEventListener('dragover', (e) => {
+    if (e.dataTransfer.types.includes('Files')) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  });
+
+  document.getElementById('desktop').addEventListener('drop', (e) => {
+    if (e.dataTransfer.types.includes('Files')) {
+      handleHostDrop(e, '/home/user/Desktop', updateDesktopIcons);
+    }
+  });
+
   document.getElementById('desktop').addEventListener('click', (e) => {
+
     if (!e.target.closest('.desktop-icon')) {
       document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
     }
@@ -511,6 +536,33 @@
     document.getElementById('login-screen').style.display = 'flex';
     Object.keys(openWindows).forEach(id => removeWindow(id));
   });
+
+
+  // ======= HOST DRAG & DROP =======
+  function handleHostDrop(e, targetPath, refreshFn) {
+    if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) return false;
+    e.preventDefault();
+    e.stopPropagation();
+
+    Array.from(e.dataTransfer.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target.result;
+        const finalName = getUniqueChildName(targetPath, file.name);
+        setNode(joinPath(targetPath, finalName), result, { overwrite: false });
+        if (refreshFn) refreshFn();
+        playSound('click');
+      };
+
+      const isText = file.type.startsWith('text/') || ['json', 'md', 'js', 'css', 'html'].includes(file.name.split('.').pop().toLowerCase());
+      if (isText) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsDataURL(file);
+      }
+    });
+    return true;
+  }
 
   // ======= Window Management =======
   function createWindow(opts) {
@@ -1561,7 +1613,15 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const openNode = getNode(openPath);
         if (openNode === undefined) { output = `open: ${openArg}: No such file or directory`; break; }
         if (isDirectory(openNode)) { openFileExplorer(openPath); output = ''; break; }
-        if (typeof openNode === 'string') { openNotepadWith(getBaseName(openPath), openPath, openNode); output = ''; break; }
+        if (typeof openNode === 'string') {
+          if (openNode.startsWith('data:image/')) {
+            openImageViewer(getBaseName(openPath), openNode);
+          } else {
+            openNotepadWith(getBaseName(openPath), openPath, openNode);
+          }
+          output = '';
+          break;
+        }
         output = `open: cannot open ${openArg}`;
         break;
       }
@@ -1952,7 +2012,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') {
+                  if (val.startsWith('data:image/')) {
+                    openImageViewer(name, val);
+                  } else {
+                    openNotepadWith(name, fullPath, val);
+                  }
+                }
               }
             });
             // Drag start
@@ -2108,7 +2174,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) openFileExplorer(fullPath);
       else {
         const val = getNode(fullPath);
-        if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+        if (typeof val === 'string') {
+          if (val.startsWith('data:image/')) {
+            openImageViewer(name, val);
+          } else {
+            openNotepadWith(name, fullPath, val);
+          }
+        }
       }
     });
     menu.querySelector('.exp-ctx-rename').addEventListener('click', () => {
@@ -2187,6 +2259,21 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           else alert(`Could not save "${name}".`);
         });
       }
+    });
+  }
+
+
+  // ======= IMAGE VIEWER =======
+  function openImageViewer(name, url) {
+    createWindow({
+      title: name + ' - Image Viewer',
+      width: 640,
+      height: 480,
+      tbIcon: '🖼️',
+      menubar:
+        '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#ece9d8;overflow:auto;"><img src="${url}" style="max-width:100%;max-height:100%;box-shadow:2px 2px 6px rgba(0,0,0,0.3);border:1px solid #a0a0a0;background:#fff;" alt="${name}"></div>`,
+      status: name,
     });
   }
 
@@ -3351,8 +3438,13 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               return `Opened folder: ${path}`;
             }
             if (typeof node === 'string') {
-              openNotepadWith(getBaseName(path), path, node);
-              return `Opened file: ${path}`;
+              if (node.startsWith('data:image/')) {
+                openImageViewer(getBaseName(path), node);
+                return `Opened image: ${path}`;
+              } else {
+                openNotepadWith(getBaseName(path), path, node);
+                return `Opened file: ${path}`;
+              }
             }
             return `open_path failed: unsupported node at ${path}`;
           }
@@ -4502,7 +4594,11 @@ ${getAgentDesktopState()}`
               if (isDirectory(openNode)) {
                 openFileExplorer(openPath);
               } else if (typeof openNode === 'string') {
-                openNotepadWith(getBaseName(openPath), openPath, openNode);
+                if (openNode.startsWith('data:image/')) {
+                  openImageViewer(getBaseName(openPath), openNode);
+                } else {
+                  openNotepadWith(getBaseName(openPath), openPath, openNode);
+                }
               } else {
                 alert(`Cannot find '${val}'. Make sure you typed the name correctly, and then try again.`);
               }
