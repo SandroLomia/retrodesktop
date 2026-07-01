@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -1722,6 +1722,54 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
       status: 'Ln 1, Col 1'
+    });
+  }
+
+  // ======= WORDPAD =======
+  function openWordpad() {
+    createWindow({
+      title: 'Document - WordPad', width: 640, height: 480, tbIcon: '📝',
+      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Help</span></div>',
+      body: `
+        <div class="wordpad-body">
+          <div class="wordpad-toolbar">
+            <button class="wordpad-btn" id="wp-bold" title="Bold"><b>B</b></button>
+            <button class="wordpad-btn" id="wp-italic" title="Italic"><i>I</i></button>
+            <button class="wordpad-btn" id="wp-underline" title="Underline"><u>U</u></button>
+            <div style="width: 1px; background: #c0c0c0; margin: 0 4px; height: 16px;"></div>
+            <button class="wordpad-btn" id="wp-left" title="Align Left">L</button>
+            <button class="wordpad-btn" id="wp-center" title="Center">C</button>
+            <button class="wordpad-btn" id="wp-right" title="Align Right">R</button>
+          </div>
+          <div class="wordpad-editor" contenteditable="true" spellcheck="false"></div>
+        </div>
+      `,
+      status: 'For Help, press F1',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const editor = body.querySelector('.wordpad-editor');
+        const btns = {
+          'wp-bold': 'bold',
+          'wp-italic': 'italic',
+          'wp-underline': 'underline',
+          'wp-left': 'justifyLeft',
+          'wp-center': 'justifyCenter',
+          'wp-right': 'justifyRight'
+        };
+
+        Object.keys(btns).forEach(id => {
+          const btn = body.querySelector('#' + id);
+          if(btn) {
+            btn.addEventListener('mousedown', (e) => {
+              e.preventDefault(); // keep focus on editor
+              document.execCommand(btns[id], false, null);
+              editor.focus();
+            });
+          }
+        });
+
+        editor.focus();
+      }
     });
   }
 
@@ -4487,7 +4535,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
@@ -4560,8 +4608,15 @@ ${getAgentDesktopState()}`
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div id="clock-display-large" style="font-size: 32px; font-weight: bold; margin: 10px 0; color: #000;"></div>
+        <div id="date-display-large" style="font-size: 14px; margin-bottom: 20px; color: #333;"></div>
+        <div style="width: 100%; border-top: 1px solid #c0c0c0; padding-top: 10px;">
+          <label style="font-size: 12px; display: block; margin-bottom: 4px;">Time Zone:</label>
+          <select style="width: 100%; font-family: 'Tahoma', sans-serif; font-size: 11px; padding: 2px;">
+            <option>Local Time</option>
+            <option>UTC</option>
+          </select>
+        </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');

@@ -422,6 +422,30 @@ body {
   box-shadow: 0 5px 0 #94a3b8, 0 10px 0 #94a3b8, 0 15px 0 #94a3b8;
 }
 
+.icon-wordpad {
+  position: relative;
+}
+.icon-wordpad::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 38px;
+  background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+  border: 2px solid #64748b;
+  border-radius: 2px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.icon-wordpad::after {
+  content: 'W';
+  position: absolute;
+  font-family: 'Times New Roman', serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #0284c7;
+  top: 2px;
+  left: 5px;
+}
+
 .icon-calculator {
   position: relative;
 }
@@ -573,6 +597,15 @@ body {
 .smi-icon.icon-notepad::after {
   width: 12px;
   box-shadow: 0 4px 0 #94a3b8, 0 8px 0 #94a3b8;
+}
+.smi-icon.icon-wordpad::before {
+  width: 24px;
+  height: 28px;
+}
+.smi-icon.icon-wordpad::after {
+  font-size: 18px;
+  top: 1px;
+  left: 4px;
 }
 .smi-icon.icon-terminal::before {
   width: 26px;
@@ -1367,6 +1400,61 @@ body {
   padding: 4px;
   background: #fff;
   color: #000;
+}
+
+/* ======= WORDPAD APP ======= */
+.wordpad-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ece9d8;
+}
+
+.wordpad-toolbar {
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+  background: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  border-bottom: 1px solid #c0c0c0;
+  align-items: center;
+}
+
+.wordpad-btn {
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Times New Roman', serif;
+  font-size: 14px;
+  border-radius: 2px;
+}
+
+.wordpad-btn:hover {
+  border-color: #a0a0a0;
+  background: #e0e0e0;
+}
+
+.wordpad-btn:active {
+  border-color: #808080;
+  background: #d0d0d0;
+}
+
+.wordpad-editor {
+  flex: 1;
+  background: #fff;
+  border: 1px inset #c0c0c0;
+  margin: 4px;
+  padding: 12px;
+  overflow-y: auto;
+  font-family: 'Times New Roman', serif;
+  font-size: 14px;
+  outline: none;
+  color: #000;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
 }
 
 /* ======= CALCULATOR APP ======= */
