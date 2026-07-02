@@ -174,6 +174,15 @@
     return { parent: getNode(parentPath), name, parentPath };
   }
 
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function setNode(pathStr, value, options = {}) {
     const { overwrite = true } = options;
     const { parent, name } = getParentAndName(pathStr);
@@ -1888,10 +1897,11 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       status: 'Ready',
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
+        const win = body.closest('.window');
         const content = body.querySelector('.explorer-content');
-        const addr = body.querySelector('.exp-addr');
-        const goBtn = body.querySelector('.exp-go-btn');
-        const statusBar = body.closest('.window').querySelector('.status-section');
+        const addr = win.querySelector('.exp-addr');
+        const goBtn = win.querySelector('.exp-go-btn');
+        const statusBar = win.querySelector('.status-section');
         let curPath = navPath;
         let history = [navPath], histIdx = 0;
         let selectedItem = null;
@@ -2016,9 +2026,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         });
 
         // Navigation buttons
-        body.querySelector('.exp-back-btn').addEventListener('click', () => { if (histIdx > 0) { histIdx--; curPath = history[histIdx]; renderDir(); } });
-        body.querySelector('.exp-fwd-btn').addEventListener('click', () => { if (histIdx < history.length - 1) { histIdx++; curPath = history[histIdx]; renderDir(); } });
-        body.querySelector('.exp-up-btn').addEventListener('click', () => {
+        win.querySelector('.exp-back-btn').addEventListener('click', () => { if (histIdx > 0) { histIdx--; curPath = history[histIdx]; renderDir(); } });
+        win.querySelector('.exp-fwd-btn').addEventListener('click', () => { if (histIdx < history.length - 1) { histIdx++; curPath = history[histIdx]; renderDir(); } });
+        win.querySelector('.exp-up-btn').addEventListener('click', () => {
           const parts = curPath.split('/').filter(Boolean);
           if (parts.length > 0) {
             parts.pop();
@@ -4925,15 +4935,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
