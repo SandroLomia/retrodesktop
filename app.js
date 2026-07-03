@@ -6,6 +6,7 @@
   let activeWindowId = null;
   let dragState = null;
   let resizeState = null;
+  let ctxAbortController = null;
   const openWindows = {};
   const defaultFS = {
     'home': { 'user': { 'Documents': { 'readme.txt': 'Welcome to RetroLinux!\nThis is your home folder.', 'notes.txt': 'Shopping List:\n- Milk\n- Bread\n- Coffee', 'todo.txt': 'TODO:\n1. Learn Bash\n2. Configure dotfiles\n3. Profit!' }, 'Desktop': {}, 'Pictures': {}, 'Downloads': {} } },
@@ -92,7 +93,13 @@
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
           if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          else {
+            const content = getNode(path);
+            if (typeof content === 'string') {
+              if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, path, content);
+              else openNotepadWith(name, path, content);
+            }
+          }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -683,7 +690,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, sysinfo: openSystemInfo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1259,7 +1266,9 @@
         const notePath = resolvePath(state.cwd, args[0]);
         const noteNode = getNode(notePath);
         if (isDirectory(noteNode)) { output = `${cmd}: ${args[0]}: Is a directory`; break; }
-        openNotepadWith(getBaseName(notePath), notePath, typeof noteNode === 'string' ? noteNode : '');
+        const name = getBaseName(notePath);
+        if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, notePath, typeof noteNode === 'string' ? noteNode : '');
+        else openNotepadWith(name, notePath, typeof noteNode === 'string' ? noteNode : '');
         output = '';
         break;
       }
@@ -1561,7 +1570,12 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const openNode = getNode(openPath);
         if (openNode === undefined) { output = `open: ${openArg}: No such file or directory`; break; }
         if (isDirectory(openNode)) { openFileExplorer(openPath); output = ''; break; }
-        if (typeof openNode === 'string') { openNotepadWith(getBaseName(openPath), openPath, openNode); output = ''; break; }
+        if (typeof openNode === 'string') {
+          const name = getBaseName(openPath);
+          if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, openPath, openNode);
+          else openNotepadWith(name, openPath, openNode);
+          output = ''; break;
+        }
         output = `open: cannot open ${openArg}`;
         break;
       }
@@ -1847,7 +1861,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       addressbar: '<div class="window-address"><label>Address</label><input value="computer:///" readonly><button>Go</button></div>',
       body: `<div class="explorer-body">
         <div class="explorer-sidebar" style="background: #3c3c3c; color: white;"><div class="explorer-sidebar-title" style="color: #93c5fd;">System Links</div>
-          <div class="explorer-sidebar-item">View system information</div>
+          <div class="explorer-sidebar-item" data-app="sysinfo">View system information</div>
           <div class="explorer-sidebar-item" data-app="settings">System settings</div>
         </div>
         <div class="explorer-content">
@@ -1952,7 +1966,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') {
+                  if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, fullPath, val);
+                  else openNotepadWith(name, fullPath, val);
+                }
               }
             });
             // Drag start
@@ -2108,7 +2125,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) openFileExplorer(fullPath);
       else {
         const val = getNode(fullPath);
-        if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+        if (typeof val === 'string') {
+          if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, fullPath, val);
+          else openNotepadWith(name, fullPath, val);
+        }
       }
     });
     menu.querySelector('.exp-ctx-rename').addEventListener('click', () => {
@@ -2142,7 +2162,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       const size = typeof node === 'string' ? node.length + ' bytes' : Object.keys(node || {}).length + ' items';
       alert(`Name: ${name}\nType: ${isDir ? 'Folder' : 'File'}\nSize: ${size}\nLocation: ${dirPath}`);
     });
-    setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true }), 10);
+
+    if (ctxAbortController) ctxAbortController.abort();
+    ctxAbortController = new AbortController();
+    setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true, signal: ctxAbortController.signal }), 10);
   }
 
   function showExplorerNewCtx(x, y, dirPath, refreshFn) {
@@ -2166,10 +2189,36 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       item.addEventListener('click', () => { removeExplorerCtx(); createNewItem(dirPath, item.dataset.type, refreshFn); });
     });
     menu.querySelector('.exp-ctx-refresh').addEventListener('click', () => { removeExplorerCtx(); refreshFn(); });
-    setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true }), 10);
+
+    if (ctxAbortController) ctxAbortController.abort();
+    ctxAbortController = new AbortController();
+    setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true, signal: ctxAbortController.signal }), 10);
   }
 
   function removeExplorerCtx() { document.querySelectorAll('.exp-context-menu').forEach(m => m.remove()); }
+
+  // ======= Open file in Image Viewer =======
+  function openImageViewer(name, fullPath, content) {
+    let imgSrc = content;
+    if (!imgSrc || !imgSrc.trim()) {
+      imgSrc = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23ece9d8"/><text x="100" y="100" font-family="Tahoma" font-size="14" fill="%23888" text-anchor="middle" dominant-baseline="middle">Invalid Image</text></svg>';
+    } else if (!imgSrc.startsWith('data:image') && !imgSrc.startsWith('http')) {
+      // Best effort base64 parsing for raw stored data, fallback if it doesn't look like base64
+      if (/^[a-zA-Z0-9+/=]+$/.test(imgSrc) && imgSrc.length > 20) {
+        const ext = name.split('.').pop().toLowerCase();
+        const mime = ext === 'png' ? 'image/png' : ext === 'gif' ? 'image/gif' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+        imgSrc = `data:${mime};base64,${imgSrc}`;
+      }
+    }
+    createWindow({
+      title: name + ' - Image Viewer', width: 600, height: 480, tbIcon: '🖼️',
+      menubar: '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: `<div style="width: 100%; height: 100%; background: #ece9d8; display: flex; align-items: center; justify-content: center; overflow: auto; padding: 10px; box-sizing: border-box;">
+        <img src="${imgSrc}" style="max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 2px 2px 8px rgba(0,0,0,0.3); border: 1px solid #a0a0a0;" alt="${name}">
+      </div>`,
+      status: fullPath
+    });
+  }
 
   // ======= Open file in Notepad =======
   function openNotepadWith(name, fullPath, content) {
@@ -2239,7 +2288,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                 renderTrash();
                 playSound('click');
               });
-              setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true }), 10);
+              if (ctxAbortController) ctxAbortController.abort();
+              ctxAbortController = new AbortController();
+              setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true, signal: ctxAbortController.signal }), 10);
             });
           });
         }
@@ -3351,7 +3402,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               return `Opened folder: ${path}`;
             }
             if (typeof node === 'string') {
-              openNotepadWith(getBaseName(path), path, node);
+              const name = getBaseName(path);
+              if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, path, node);
+              else openNotepadWith(name, path, node);
               return `Opened file: ${path}`;
             }
             return `open_path failed: unsupported node at ${path}`;
@@ -4502,7 +4555,9 @@ ${getAgentDesktopState()}`
               if (isDirectory(openNode)) {
                 openFileExplorer(openPath);
               } else if (typeof openNode === 'string') {
-                openNotepadWith(getBaseName(openPath), openPath, openNode);
+                const name = getBaseName(openPath);
+                if (/\.(jpe?g|png|gif|webp)$/i.test(name)) openImageViewer(name, openPath, openNode);
+                else openNotepadWith(name, openPath, openNode);
               } else {
                 alert(`Cannot find '${val}'. Make sure you typed the name correctly, and then try again.`);
               }
@@ -4580,6 +4635,38 @@ ${getAgentDesktopState()}`
         updateDisplay();
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
+  // ======= SYSTEM INFORMATION =======
+  function openSystemInfo() {
+    createWindow({
+      title: 'System Properties', width: 420, height: 460, tbIcon: 'ℹ️',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px;">
+        <div style="display: flex; gap: 20px; align-items: flex-start; border-bottom: 1px solid #c0c0c0; padding-bottom: 15px;">
+          <div style="font-size: 48px;">🐧</div>
+          <div>
+            <h2 style="margin: 0; color: #0033cc; font-size: 20px;">System</h2>
+            <div style="margin-top: 5px; font-size: 13px;">RetroLinux version 2001<br>Kernel 2.4.31 i686 GNU/Linux</div>
+          </div>
+        </div>
+        <div>
+          <h3 style="margin: 0 0 5px 0; font-size: 13px; color: #0033cc;">Registered to:</h3>
+          <div style="font-size: 13px; margin-left: 10px;">User<br>RetroOS Corporation<br>00000-000-0000000-00000</div>
+        </div>
+        <div>
+          <h3 style="margin: 10px 0 5px 0; font-size: 13px; color: #0033cc;">Computer:</h3>
+          <div style="font-size: 13px; margin-left: 10px;">Intel(R) Pentium(R) 4 CPU<br>2.40GHz<br>2.00 GB of RAM<br>Browser Environment</div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: auto; padding-top: 15px;">
+          <button class="sysinfo-ok-btn" style="padding: 4px 20px; min-width: 80px; font-family: 'Tahoma', sans-serif;">OK</button>
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        body.querySelector('.sysinfo-ok-btn').addEventListener('click', () => closeWindow(winId));
       }
     });
   }
