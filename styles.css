@@ -709,7 +709,7 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0055e5 0%, #0045c5 50%, #0040d0 100%);
 }
 
 .window:not(.active) .window-titlebar {
@@ -760,6 +760,7 @@ body {
   font-weight: 700;
   color: #fff;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  transition: filter 0.15s, transform 0.1s;
 }
 
 .window-btn.minimize {
@@ -967,7 +968,21 @@ body {
   display: flex;
   gap: 3px;
   padding: 0 4px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#taskbar-apps::-webkit-scrollbar {
+  height: 4px;
+}
+
+#taskbar-apps::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#taskbar-apps::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
 }
 
 .taskbar-app {
@@ -988,7 +1003,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background 0.15s, filter 0.15s, transform 0.1s;
 }
 
 .taskbar-app.active {
@@ -1113,6 +1128,7 @@ body {
   padding: 5px 12px;
   cursor: pointer;
   position: relative;
+  transition: filter 0.15s, transform 0.1s;
 }
 
 .start-menu-item:hover {
