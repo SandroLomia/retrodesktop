@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4550,6 +4550,47 @@ ${getAgentDesktopState()}`
         <h3 style="color: #0033cc;">AI Agent</h3>
         <p>The built-in AI agent can assist you or even control the desktop directly. Open the <strong>AI Agent</strong> app, configure your API key, and enable "Desktop control mode" to try it out.</p>
       </div>`
+    });
+  }
+
+  // ======= CALENDAR =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 340, height: 360, tbIcon: '📅',
+      statusbar: false,
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center; background: #fff; height: 100%;">
+        <h3 style="margin-top:0; font-size: 18px; color: #333;" id="cal-month-year"></h3>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; text-align: center; margin-top: 10px; font-weight: bold; color: #555;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="cal-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; width: 100%; text-align: center; margin-top: 10px;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const monthYearEl = body.querySelector('#cal-month-year');
+        const daysEl = body.querySelector('#cal-days');
+
+        const date = new Date();
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        const today = date.getDate();
+
+        monthYearEl.textContent = date.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let daysHtml = '';
+        for (let i = 0; i < firstDay; i++) {
+          daysHtml += '<div></div>';
+        }
+        for (let i = 1; i <= daysInMonth; i++) {
+          const isToday = i === today;
+          const style = isToday ? 'background: #316ac5; color: #fff; border-radius: 50%; width: 24px; height: 24px; line-height: 24px; margin: 0 auto;' : 'line-height: 24px;';
+          daysHtml += `<div><div style="${style}">${i}</div></div>`;
+        }
+        daysEl.innerHTML = daysHtml;
+      }
     });
   }
 
