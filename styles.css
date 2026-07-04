@@ -3413,6 +3413,26 @@ body {
   font-size: 24px;
 }
 
+/* Calendar Icon */
+.icon-calendar { position: relative; }
+.icon-calendar::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 4px;
+  border: 2px solid #316ac5;
+}
+.icon-calendar::after {
+  content: '📅';
+  position: absolute;
+  font-size: 20px;
+  top: 2px;
+}
+.smi-icon.icon-calendar::before { width: 24px; height: 24px; border-width: 2px; }
+.smi-icon.icon-calendar::after { font-size: 14px; top: 1px; }
+
 /* Game icons */
 .icon-tictactoe { position: relative; }
 .icon-tictactoe::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #1f2937, #374151); border-radius: 6px; border: 2px solid #4b5563; }
