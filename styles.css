@@ -1,3 +1,49 @@
+
+:root {
+  --window-bg: #ece9d8;
+  --window-border: #0055e5;
+  --titlebar-bg: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --titlebar-active: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --titlebar-text: #fff;
+  --menubar-bg: #ece9d8;
+  --menubar-text: #333;
+  --menubar-hover: #316ac5;
+  --menubar-hover-text: #fff;
+  --toolbar-bg: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  --toolbar-border: #c0c0c0;
+  --toolbar-btn-hover: #e8e8e0;
+  --address-bg: #ece9d8;
+  --address-text: #333;
+  --address-input-bg: #fff;
+  --address-input-border: #7f9db9;
+  --body-bg: #fff;
+  --statusbar-bg: #ece9d8;
+  --statusbar-border: #c0c0c0;
+  --statusbar-text: #333;
+}
+
+[data-theme="dark"] {
+  --window-bg: #333;
+  --window-border: #555;
+  --titlebar-bg: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --titlebar-active: linear-gradient(180deg, #666 0%, #555 50%, #444 100%);
+  --titlebar-text: #ddd;
+  --menubar-bg: #333;
+  --menubar-text: #ddd;
+  --menubar-hover: #555;
+  --menubar-hover-text: #fff;
+  --toolbar-bg: linear-gradient(180deg, #444, #333);
+  --toolbar-border: #555;
+  --toolbar-btn-hover: #555;
+  --address-bg: #333;
+  --address-text: #ddd;
+  --address-input-bg: #444;
+  --address-input-border: #555;
+  --body-bg: #222;
+  --statusbar-bg: #333;
+  --statusbar-border: #555;
+  --statusbar-text: #ddd;
+}
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -70,7 +116,7 @@ body {
 .boot-text {
   font-size: 48px;
   font-weight: 700;
-  color: #fff;
+  color: var(--titlebar-text);
   letter-spacing: -1px;
   font-family: 'Tahoma', sans-serif;
 }
@@ -650,8 +696,8 @@ body {
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
+  background: var(--window-bg);
+  border: 2px solid var(--window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -709,11 +755,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--titlebar-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--titlebar-bg);
 }
 
 .window-title-icon {
@@ -733,7 +779,7 @@ body {
 
 .window-title-text {
   flex: 1;
-  color: #fff;
+  color: var(--titlebar-text);
   font-size: 12px;
   font-weight: 700;
   text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
@@ -782,13 +828,13 @@ body {
 
 .window-menubar {
   height: 24px;
-  background: #ece9d8;
+  background: var(--window-bg);
   display: flex;
   align-items: center;
   padding: 0 4px;
   border-bottom: 1px solid #c0c0c0;
   font-size: 11px;
-  color: #333;
+  color: var(--menubar-text);
   flex-shrink: 0;
 }
 
@@ -798,23 +844,24 @@ body {
 }
 
 .window-menubar span:hover {
-  background: #316ac5;
-  color: #fff;
+  background: var(--menubar-hover);
+  color: var(--menubar-hover-text);
 }
 
 .window-toolbar {
   height: 28px;
-  background: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  background: var(--toolbar-bg);
   display: flex;
   align-items: center;
   padding: 0 6px;
   gap: 4px;
-  border-bottom: 1px solid #c0c0c0;
+  border-bottom: 1px solid var(--toolbar-border);
   font-size: 11px;
   flex-shrink: 0;
 }
 
 .window-toolbar button {
+  color: var(--menubar-text);
   background: none;
   border: 1px solid transparent;
   padding: 2px 6px;
@@ -825,40 +872,42 @@ body {
 }
 
 .window-toolbar button:hover {
-  border-color: #c0c0c0;
-  background: #e8e8e0;
+  border-color: var(--toolbar-border);
+  background: var(--toolbar-btn-hover);
 }
 
 .window-address {
   height: 26px;
-  background: #ece9d8;
+  background: var(--window-bg);
   display: flex;
   align-items: center;
   padding: 0 6px;
   gap: 6px;
-  border-bottom: 1px solid #c0c0c0;
+  border-bottom: 1px solid var(--toolbar-border);
   font-size: 11px;
   flex-shrink: 0;
 }
 
 .window-address label {
-  color: #333;
+  color: var(--address-text);
 }
 
 .window-address input {
+  color: var(--address-text);
   flex: 1;
   height: 20px;
-  border: 1px solid #7f9db9;
+  border: 1px solid var(--address-input-border);
   padding: 0 4px;
   font-size: 11px;
   font-family: 'Tahoma', sans-serif;
-  background: #fff;
+  background: var(--address-input-bg);
 }
 
 .window-address button {
+  color: var(--menubar-text);
   padding: 2px 10px;
-  background: linear-gradient(180deg, #f4f2e8, #dddbd2);
-  border: 1px solid #a0a0a0;
+  background: var(--toolbar-bg);
+  border: 1px solid var(--toolbar-border);
   font-size: 11px;
   cursor: pointer;
   font-family: 'Tahoma', sans-serif;
@@ -868,25 +917,25 @@ body {
 .window-body {
   flex: 1;
   overflow: auto;
-  background: #fff;
+  background: var(--body-bg);
   position: relative;
 }
 
 .window-statusbar {
   height: 22px;
-  background: #ece9d8;
-  border-top: 1px solid #c0c0c0;
+  background: var(--statusbar-bg);
+  border-top: 1px solid var(--statusbar-border);
   display: flex;
   align-items: center;
   padding: 0 8px;
   font-size: 11px;
-  color: #333;
+  color: var(--statusbar-text);
   flex-shrink: 0;
 }
 
 .window-statusbar .status-section {
   padding: 0 8px;
-  border-right: 1px solid #c0c0c0;
+  border-right: 1px solid var(--statusbar-border);
 }
 
 /* Resize handle */
@@ -1371,7 +1420,7 @@ body {
 
 /* ======= CALCULATOR APP ======= */
 .calculator-body {
-  background: #ece9d8;
+  background: var(--window-bg);
   padding: 8px;
   height: 100%;
   display: flex;
@@ -1382,13 +1431,13 @@ body {
 .calc-display {
   width: 100%;
   height: 28px;
-  background: #fff;
+  background: var(--address-input-bg);
   border: 1px inset #808080;
   text-align: right;
   padding: 0 6px;
   font-size: 16px;
   font-family: 'Tahoma', sans-serif;
-  color: #000;
+  color: var(--menubar-text);
 }
 
 .calc-buttons {
@@ -1399,13 +1448,13 @@ body {
 }
 
 .calc-btn {
-  background: linear-gradient(180deg, #f0efe4, #dddcd0);
+  background: var(--toolbar-bg);
   border: 1px solid #a0a0a0;
   border-radius: 2px;
   font-size: 12px;
   font-family: 'Tahoma', sans-serif;
   cursor: pointer;
-  color: #000;
+  color: var(--menubar-text);
   font-weight: 700;
 }
 
@@ -1436,14 +1485,14 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #ece9d8;
+  background: var(--window-bg);
 }
 
 .paint-toolbar {
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border-bottom: 1px solid #c0c0c0;
   flex-wrap: wrap;
 }
@@ -1464,14 +1513,14 @@ body {
   display: flex;
   gap: 2px;
   padding: 4px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border-bottom: 1px solid #c0c0c0;
 }
 
 .paint-tool-btn {
   width: 26px;
   height: 26px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid transparent;
   cursor: pointer;
   display: flex;
@@ -1499,7 +1548,7 @@ body {
 .size-btn {
   width: 20px;
   height: 20px;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid transparent;
   cursor: pointer;
   display: flex;
@@ -1597,7 +1646,7 @@ body {
 
 .explorer-item-name {
   font-size: 11px;
-  color: #333;
+  color: var(--menubar-text);
   word-break: break-word;
 }
 
@@ -1764,7 +1813,7 @@ body {
 }
 
 .ie-page th {
-  background: #ece9d8;
+  background: var(--window-bg);
 }
 
 @media (max-width: 700px) {
@@ -1975,7 +2024,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid #c0c0c0;
 }
 
@@ -3318,7 +3367,7 @@ body {
 
 .agent-msg.user {
   align-self: flex-end;
-  background: #ece9d8;
+  background: var(--window-bg);
   border: 1px solid #fff;
   border-right-color: #716f64;
   border-bottom-color: #716f64;
