@@ -1889,8 +1889,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const content = body.querySelector('.explorer-content');
-        const addr = body.querySelector('.exp-addr');
-        const goBtn = body.querySelector('.exp-go-btn');
+        const win = body.closest('.window');
+        const addr = win.querySelector('.exp-addr');
+        const goBtn = win.querySelector('.exp-go-btn');
         const statusBar = body.closest('.window').querySelector('.status-section');
         let curPath = navPath;
         let history = [navPath], histIdx = 0;
@@ -2016,9 +2017,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         });
 
         // Navigation buttons
-        body.querySelector('.exp-back-btn').addEventListener('click', () => { if (histIdx > 0) { histIdx--; curPath = history[histIdx]; renderDir(); } });
-        body.querySelector('.exp-fwd-btn').addEventListener('click', () => { if (histIdx < history.length - 1) { histIdx++; curPath = history[histIdx]; renderDir(); } });
-        body.querySelector('.exp-up-btn').addEventListener('click', () => {
+        win.querySelector('.exp-back-btn').addEventListener('click', () => { if (histIdx > 0) { histIdx--; curPath = history[histIdx]; renderDir(); } });
+        win.querySelector('.exp-fwd-btn').addEventListener('click', () => { if (histIdx < history.length - 1) { histIdx++; curPath = history[histIdx]; renderDir(); } });
+        win.querySelector('.exp-up-btn').addEventListener('click', () => {
           const parts = curPath.split('/').filter(Boolean);
           if (parts.length > 0) {
             parts.pop();
@@ -4456,18 +4457,18 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'Run', width: 340, height: 180, tbIcon: '🏃',
       statusbar: false,
-      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px;">
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px; color: var(--menubar-text);">
         <div style="font-size: 12px; display: flex; gap: 12px; align-items: flex-start;">
           <div style="font-size: 32px;">🏃</div>
           <div>Type the name of a program, folder, document, or Internet resource, and RetroLinux will open it for you.</div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: bold;">Open:</label>
-          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif; background: var(--address-input-bg); color: var(--menubar-text); border: 1px solid var(--address-input-border);">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
-          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px; background: var(--toolbar-bg); color: var(--menubar-text); border: 1px solid var(--toolbar-border);">OK</button>
+          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px; background: var(--toolbar-bg); color: var(--menubar-text); border: 1px solid var(--toolbar-border);">Cancel</button>
         </div>
       </div>`,
       onReady: (winId) => {
@@ -4524,11 +4525,11 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'Help and Support Center', width: 640, height: 480, tbIcon: '❓',
       statusbar: false,
-      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px;">
-        <h2 style="color: #0033cc; margin-top: 0;">Welcome to RetroLinux Help and Support</h2>
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; gap: 15px; color: var(--menubar-text);">
+        <h2 style="color: var(--menubar-hover); margin-top: 0;">Welcome to RetroLinux Help and Support</h2>
         <p>RetroLinux is a browser-based Linux desktop environment simulator.</p>
 
-        <h3 style="color: #0033cc;">Basic Navigation</h3>
+        <h3 style="color: var(--menubar-hover);">Basic Navigation</h3>
         <ul style="padding-left: 20px; line-height: 1.5;">
           <li>Use the <strong>Start Menu</strong> to find applications.</li>
           <li>Right-click on the desktop to create new files or folders.</li>
@@ -4536,7 +4537,7 @@ ${getAgentDesktopState()}`
           <li>Windows can be dragged, resized, minimized, maximized, and closed.</li>
         </ul>
 
-        <h3 style="color: #0033cc;">Terminal Commands</h3>
+        <h3 style="color: var(--menubar-hover);">Terminal Commands</h3>
         <p>The terminal emulates a basic bash environment. Try these commands:</p>
         <ul style="padding-left: 20px; line-height: 1.5; font-family: monospace;">
           <li>ls - List files</li>
@@ -4547,7 +4548,7 @@ ${getAgentDesktopState()}`
           <li>help - See all available commands</li>
         </ul>
 
-        <h3 style="color: #0033cc;">AI Agent</h3>
+        <h3 style="color: var(--menubar-hover);">AI Agent</h3>
         <p>The built-in AI agent can assist you or even control the desktop directly. Open the <strong>AI Agent</strong> app, configure your API key, and enable "Desktop control mode" to try it out.</p>
       </div>`
     });
@@ -4558,10 +4559,10 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
       statusbar: false,
-      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center; color: var(--menubar-text);">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: var(--menubar-text);" id="clock-display-large"></div>
+        <div style="font-size: 18px; color: var(--menubar-text); opacity: 0.8;" id="date-display-large"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -4590,20 +4591,27 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
       statusbar: false,
-      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
-        <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; color: var(--menubar-text);">
+        <h3 style="margin-top:0; font-size: 16px; color: var(--menubar-text);">Audio Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
 
-        <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
-        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+        <h3 style="margin-top:20px; font-size: 16px; color: var(--menubar-text);">Desktop Background</h3>
+        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma'; background: var(--address-input-bg); color: var(--menubar-text); border: 1px solid var(--address-input-border);">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
-        <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
+
+        <h3 style="margin-top:20px; font-size: 16px; color: var(--menubar-text);">UI Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma'; background: var(--address-input-bg); color: var(--menubar-text); border: 1px solid var(--address-input-border);">
+          <option value="light" ${localStorage.getItem('retro_theme') !== 'dark' ? 'selected' : ''}>Light (Default)</option>
+          <option value="dark" ${localStorage.getItem('retro_theme') === 'dark' ? 'selected' : ''}>Dark</option>
+        </select>
+
+        <p style="color:var(--menubar-text); opacity:0.7; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -4618,12 +4626,20 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.setAttribute('data-theme', theme);
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  document.body.setAttribute('data-theme', localStorage.getItem('retro_theme') || 'light');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
