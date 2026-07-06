@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, todo: openTodoApp
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1583,6 +1583,10 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         return;
       }
       case 'shutdown':
+        document.getElementById('desktop').style.display = 'none';
+        document.getElementById('start-menu').style.display = 'none';
+        document.getElementById('shutdown-screen').style.display = 'flex';
+        return;
       case 'reboot':
         window.location.reload();
         return;
@@ -4446,7 +4450,7 @@ ${getAgentDesktopState()}`
     } else if (bgType === 'teal') {
       desktop.style.background = '#008080';
     } else {
-      desktop.style.background = 'linear-gradient(135deg, #3a223a 0%, #2a1b2a 50%, #1a1a2a 100%)';
+      desktop.style.background = 'var(--theme-bg-gradient)';
       desktop.style.backgroundSize = 'cover';
     }
   }
@@ -4584,11 +4588,107 @@ ${getAgentDesktopState()}`
     });
   }
 
+  // ======= THEME LOGIC =======
+  function applyTheme(theme) {
+    document.body.dataset.theme = theme;
+  }
+
+  // ======= TASKS APP =======
+  function openTodoApp() {
+    createWindow({
+      title: 'Tasks', width: 340, height: 420, tbIcon: '✓',
+      statusbar: false,
+      body: `<div style="padding: 12px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <input type="text" id="todo-input" placeholder="New task..." style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <button id="todo-add-btn" style="padding: 4px 12px;">Add</button>
+        </div>
+        <div id="todo-list" style="flex: 1; overflow-y: auto; background: #fff; border: 1px inset #808080; padding: 4px;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('#todo-input');
+        const addBtn = body.querySelector('#todo-add-btn');
+        const listEl = body.querySelector('#todo-list');
+        let todos = [];
+
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) {
+          todos = [];
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+          listEl.innerHTML = todos.length === 0
+            ? '<div style="color: #888; font-size: 12px; padding: 8px; text-align: center;">No tasks yet.</div>'
+            : todos.map((todo, idx) => `
+              <div style="display: flex; align-items: center; gap: 8px; padding: 4px; border-bottom: 1px solid #eee; background: ${todo.done ? '#f8f8f8' : 'transparent'};">
+                <input type="checkbox" class="todo-cb" data-idx="${idx}" ${todo.done ? 'checked' : ''}>
+                <span style="flex: 1; font-size: 13px; text-decoration: ${todo.done ? 'line-through' : 'none'}; color: ${todo.done ? '#888' : '#000'};">${escapeHtml(todo.text)}</span>
+                <button class="todo-del-btn" data-idx="${idx}" style="background: none; border: none; color: #d9534f; cursor: pointer; font-size: 16px; padding: 0 4px;" title="Delete">×</button>
+              </div>
+            `).join('');
+
+          listEl.querySelectorAll('.todo-cb').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+              const idx = parseInt(e.target.dataset.idx);
+              todos[idx].done = e.target.checked;
+              saveTodos();
+              renderTodos();
+            });
+          });
+
+          listEl.querySelectorAll('.todo-del-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const idx = parseInt(e.target.dataset.idx);
+              todos.splice(idx, 1);
+              saveTodos();
+              renderTodos();
+            });
+          });
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, done: false });
+            input.value = '';
+            saveTodos();
+            renderTodos();
+            input.focus();
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
+        input.focus();
+
+        function escapeHtml(text) {
+          return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+      }
+    });
+  }
+
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna-blue';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 400, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4603,6 +4703,14 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">System Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna-blue" ${currentTheme === 'luna-blue' ? 'selected' : ''}>Luna Blue (Default)</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4726,19 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyTheme(theme);
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  applyTheme(localStorage.getItem('retro_theme') || 'luna-blue');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
