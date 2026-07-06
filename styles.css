@@ -1,3 +1,44 @@
+/* ======= THEMES ======= */
+:root {
+  /* Luna Blue (Default) */
+  --theme-bg-gradient: linear-gradient(135deg, #3a223a 0%, #2a1b2a 50%, #1a1a2a 100%);
+  --theme-taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --theme-start-btn: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  --theme-start-header: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  --theme-window-active: linear-gradient(180deg, #0058e6 0%, #3a93ff 8%, #288eff 40%, #127dff 88%, #0058e6 100%);
+  --theme-window-inactive: linear-gradient(180deg, #7b9cc0 0%, #9db8d7 8%, #8bb1d3 40%, #759nc0 88%, #6b8bb0 100%);
+  --theme-window-border: #0055e5;
+  --theme-tray-bg: linear-gradient(180deg, #1a5ab8, #1248a0);
+  --theme-start-border: #0055c0;
+  --theme-start-orange: #f97316;
+}
+
+[data-theme="silver"] {
+  --theme-bg-gradient: linear-gradient(135deg, #2c3e50 0%, #1a252f 50%, #0f171e 100%);
+  --theme-taskbar-bg: linear-gradient(180deg, #b0b4ba 0%, #dcdfe4 4%, #b0b4ba 6%, #9a9ea4 50%, #83868c 90%, #83868c 100%);
+  --theme-start-btn: linear-gradient(180deg, #7c8188 0%, #888d95 40%, #7c8188 60%, #686c73 100%);
+  --theme-start-header: linear-gradient(180deg, #9ca1a8, #7c8188);
+  --theme-window-active: linear-gradient(180deg, #8a8e95 0%, #b8bcc2 8%, #a0a4aa 40%, #8a8e95 88%, #787c83 100%);
+  --theme-window-inactive: linear-gradient(180deg, #c4c7cc 0%, #d8dadf 8%, #c4c7cc 40%, #b5b8bd 88%, #a5a8ad 100%);
+  --theme-window-border: #8a8e95;
+  --theme-tray-bg: linear-gradient(180deg, #a0a4aa, #8a8e95);
+  --theme-start-border: #8a8e95;
+  --theme-start-orange: #8a8e95;
+}
+
+[data-theme="olive"] {
+  --theme-bg-gradient: linear-gradient(135deg, #3d3b2f 0%, #2a2921 50%, #191814 100%);
+  --theme-taskbar-bg: linear-gradient(180deg, #99a27d 0%, #c4ccaa 4%, #99a27d 6%, #828c64 50%, #6b754d 90%, #6b754d 100%);
+  --theme-start-btn: linear-gradient(180deg, #b98b48 0%, #d3a45c 40%, #b98b48 60%, #9e7336 100%);
+  --theme-start-header: linear-gradient(180deg, #8a946b, #6b754d);
+  --theme-window-active: linear-gradient(180deg, #758055 0%, #a4b081 8%, #8a946b 40%, #758055 88%, #606b43 100%);
+  --theme-window-inactive: linear-gradient(180deg, #b3ba9d 0%, #ced3bf 8%, #b3ba9d 40%, #a2aa8a 88%, #919978 100%);
+  --theme-window-border: #758055;
+  --theme-tray-bg: linear-gradient(180deg, #8a946b, #758055);
+  --theme-start-border: #758055;
+  --theme-start-orange: #d3a45c;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -651,7 +692,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--theme-window-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -699,7 +740,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: var(--theme-window-active);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +750,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--theme-window-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--theme-window-inactive);
 }
 
 .window-title-icon {
@@ -918,7 +959,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--theme-taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +972,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--theme-start-btn);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -1013,7 +1054,7 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
+  background: var(--theme-tray-bg);
   border-left: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -1042,7 +1083,7 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 2px solid var(--theme-start-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
@@ -1062,12 +1103,12 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--theme-start-header);
   padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 2px solid #f97316;
+  border-bottom: 2px solid var(--theme-start-orange);
 }
 
 .start-menu-avatar {
@@ -3437,6 +3478,12 @@ body {
 .icon-game2048::after { content: '🔢'; position: absolute; font-size: 20px; }
 .smi-icon.icon-game2048::before { width: 24px; height: 24px; }
 .smi-icon.icon-game2048::after { font-size: 14px; }
+
+.icon-todo { position: relative; }
+.icon-todo::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #0284c7, #0369a1); border-radius: 6px; border: 2px solid #0284c7; }
+.icon-todo::after { content: '✓'; position: absolute; font-size: 20px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.4); }
+.smi-icon.icon-todo::before { width: 24px; height: 24px; }
+.smi-icon.icon-todo::after { font-size: 14px; }
 
 #agent-cursor {
   position: fixed;
