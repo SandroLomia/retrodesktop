@@ -422,6 +422,29 @@ body {
   box-shadow: 0 5px 0 #94a3b8, 0 10px 0 #94a3b8, 0 15px 0 #94a3b8;
 }
 
+.icon-wordpad {
+  position: relative;
+}
+.icon-wordpad::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 34px;
+  background: linear-gradient(180deg, #fff, #f0f0f0);
+  border: 2px solid #a0a0a0;
+  border-radius: 2px;
+}
+.icon-wordpad::after {
+  content: 'A';
+  position: absolute;
+  font-family: 'Times New Roman', serif;
+  font-weight: bold;
+  font-size: 24px;
+  color: #c00;
+  left: 8px;
+  top: 4px;
+}
+
 .icon-calculator {
   position: relative;
 }
@@ -709,11 +732,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288cff 6%, #127dff 50%, #036bfe 90%, #0050d5 100%);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: linear-gradient(180deg, #7ea4df 0%, #90bbf3 4%, #80aef0 6%, #77a8e7 50%, #689ae2 90%, #6592db 100%);
 }
 
 .window-title-icon {
@@ -750,7 +773,7 @@ body {
 .window-btn {
   width: 21px;
   height: 21px;
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -759,25 +782,30 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 1px rgba(255,255,255,0.7), 1px 1px 2px rgba(0,0,0,0.2);
 }
 
 .window-btn.minimize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #4b88f6, #1c52c0);
+  border-color: rgba(255,255,255,0.6);
 }
 .window-btn.maximize {
-  background: linear-gradient(180deg, #666, #444);
+  background: linear-gradient(180deg, #4b88f6, #1c52c0);
+  border-color: rgba(255,255,255,0.6);
 }
 .window-btn.close {
-  background: linear-gradient(180deg, #d9534f, #c9302c);
+  background: linear-gradient(180deg, #f07b66, #db422c);
+  border-color: rgba(255,255,255,0.6);
 }
 
 .window-btn:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.2);
 }
 
 .window-btn:active {
-  filter: brightness(0.9);
+  filter: brightness(0.8);
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .window-menubar {
@@ -1367,6 +1395,31 @@ body {
   padding: 4px;
   background: #fff;
   color: #000;
+}
+
+/* ======= WORDPAD APP ======= */
+.wordpad-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+.wordpad-toolbar {
+  padding: 2px 6px;
+}
+.wordpad-toolbar button {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+}
+.wordpad-editor {
+  flex: 1;
+  padding: 8px;
+  outline: none;
+  overflow-y: auto;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 /* ======= CALCULATOR APP ======= */

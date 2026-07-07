@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -1021,24 +1021,16 @@
     if (container._cmdHistory.length > 100) container._cmdHistory.shift();
     // Handle simple output redirection: cmd > file and cmd >> file
     const redirectMatch = trimmed.match(/^(.+?)\s*(>>?)\s*([^\s]+)$/);
+    let commandToProcess = trimmed;
+    let redirectOp = null;
+    let redirectDest = null;
 
-    if (redirectMatch && trimmed.startsWith('echo')) {
-      const beforeRedir = redirectMatch[1].trim();
-      const op = redirectMatch[2];
-      const destFile = redirectMatch[3];
-      // Only handle echo redirection for now
-      if (beforeRedir.startsWith('echo ') || beforeRedir.startsWith('echo\t')) {
-        const content = beforeRedir.slice(5).replace(/^["']|["']$/g, '');
-        const destPath = resolvePath(state.cwd, destFile);
-        const existing = getNode(destPath);
-        const newContent = op === '>>' && typeof existing === 'string' ? existing + '\n' + content : content;
-        setNode(destPath, newContent);
-        addTermLine(container, '');
-        addPromptLine(container, state);
-        return;
-      }
+    if (redirectMatch) {
+      commandToProcess = redirectMatch[1].trim();
+      redirectOp = redirectMatch[2];
+      redirectDest = redirectMatch[3];
     }
-    const parts = trimmed.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+    const parts = commandToProcess.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1).map(a => a.replace(/"/g, ''));
     let output = '';
@@ -1641,7 +1633,26 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       default:
         output = `bash: ${cmd}: command not found\nType 'help' to see available commands.`;
     }
-    if (output) addTermLine(container, output);
+
+    if (redirectOp && redirectDest && cmd !== 'clear' && cmd !== 'exit' && cmd !== 'logout' && cmd !== 'shutdown' && cmd !== 'reboot') {
+      const destPath = resolvePath(state.cwd, redirectDest);
+      const existing = getNode(destPath);
+      // For echo command, handle string quotes specially if they are wrapping the whole arg, to maintain backwards compatibility
+      if (cmd === 'echo' && parts.length > 1) {
+          const rawArgStr = parts.slice(1).join(' ');
+          if ((rawArgStr.startsWith('"') && rawArgStr.endsWith('"')) || (rawArgStr.startsWith("'") && rawArgStr.endsWith("'"))) {
+              output = rawArgStr.slice(1, -1);
+          }
+      }
+      if (existing === undefined || typeof existing === 'string') {
+        const newContent = redirectOp === '>>' && typeof existing === 'string' ? (existing ? existing + '\n' + output : output) : output;
+        setNode(destPath, newContent);
+      } else {
+        addTermLine(container, `bash: ${redirectDest}: Is a directory`);
+      }
+    } else if (output) {
+        addTermLine(container, output);
+    }
     if (!state.agentMode) addPromptLine(container, state);
   }
 
@@ -1722,6 +1733,31 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
       status: 'Ln 1, Col 1'
+    });
+  }
+
+  // ======= WORDPAD =======
+  function openWordpad() {
+    createWindow({
+      title: 'Document - WordPad', width: 600, height: 480, tbIcon: '📝',
+      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Help</span></div>',
+      toolbar: `<div class="window-toolbar wordpad-toolbar">
+        <button data-command="bold" title="Bold"><b>B</b></button>
+        <button data-command="italic" title="Italic"><i>I</i></button>
+        <button data-command="underline" title="Underline"><u>U</u></button>
+      </div>`,
+      body: '<div class="wordpad-body"><div class="wordpad-editor" contenteditable="true"></div></div>',
+      status: 'For Help, press F1',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        body.querySelectorAll('.wordpad-toolbar button').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.execCommand(btn.dataset.command, false, null);
+            body.querySelector('.wordpad-editor').focus();
+          });
+        });
+      }
     });
   }
 
@@ -4487,7 +4523,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
