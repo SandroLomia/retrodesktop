@@ -1,3 +1,44 @@
+/* ======= THEME VARIABLES ======= */
+:root, [data-theme="luna"] {
+  --win-border: #0055e5;
+  --win-title-bg-active: linear-gradient(180deg, #1e6bd6 0%, #0b56b0 50%, #064090 100%);
+  --win-title-bg-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --taskbar-bg: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  --start-btn-bg: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  --start-menu-header-bg: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  --start-menu-border: #0055c0;
+}
+
+[data-theme="silver"] {
+  --win-border: #808080;
+  --win-title-bg-active: linear-gradient(180deg, #e5e5e5 0%, #c0c0c0 50%, #a0a0a0 100%);
+  --win-title-bg-inactive: linear-gradient(180deg, #f0f0f0 0%, #d8d8d8 20%, #cccccc 80%, #d8d8d8 100%);
+  --taskbar-bg: linear-gradient(180deg, #b0b0b0 0%, #d0d0d0 4%, #b0b0b0 6%, #909090 50%, #707070 90%, #707070 100%);
+  --start-btn-bg: linear-gradient(180deg, #888888 0%, #666666 40%, #555555 60%, #444444 100%);
+  --start-menu-header-bg: linear-gradient(180deg, #909090, #707070);
+  --start-menu-border: #606060;
+}
+
+[data-theme="olive"] {
+  --win-border: #6b8e23;
+  --win-title-bg-active: linear-gradient(180deg, #8fbc8f 0%, #6b8e23 50%, #556b2f 100%);
+  --win-title-bg-inactive: linear-gradient(180deg, #c1d2c1 0%, #a9bca9 20%, #90a590 80%, #a9bca9 100%);
+  --taskbar-bg: linear-gradient(180deg, #6b8e23 0%, #8fbc8f 4%, #6b8e23 6%, #556b2f 50%, #455626 90%, #455626 100%);
+  --start-btn-bg: linear-gradient(180deg, #9acd32 0%, #8bbf26 40%, #7caf1c 60%, #6a9b13 100%);
+  --start-menu-header-bg: linear-gradient(180deg, #6b8e23, #556b2f);
+  --start-menu-border: #556b2f;
+}
+
+[data-theme="dark"] {
+  --win-border: #333333;
+  --win-title-bg-active: linear-gradient(180deg, #444444 0%, #222222 50%, #111111 100%);
+  --win-title-bg-inactive: linear-gradient(180deg, #555555 0%, #444444 20%, #333333 80%, #444444 100%);
+  --taskbar-bg: linear-gradient(180deg, #222222 0%, #333333 4%, #222222 6%, #111111 50%, #000000 90%, #000000 100%);
+  --start-btn-bg: linear-gradient(180deg, #555555 0%, #444444 40%, #333333 60%, #222222 100%);
+  --start-menu-header-bg: linear-gradient(180deg, #333333, #111111);
+  --start-menu-border: #222222;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -651,7 +692,7 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
+  border: 2px solid var(--win-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
@@ -699,7 +740,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: var(--win-title-bg-inactive);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +750,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--win-title-bg-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--win-title-bg-inactive);
 }
 
 .window-title-icon {
@@ -918,7 +959,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +972,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--start-btn-bg);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -1042,7 +1083,7 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
+  border: 2px solid var(--start-menu-border);
   border-radius: 8px 8px 0 0;
   box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
   z-index: 99999;
@@ -1062,7 +1103,7 @@ body {
 }
 
 .start-menu-header {
-  background: linear-gradient(180deg, #1e6bd6, #0b56b0);
+  background: var(--start-menu-header-bg);
   padding: 8px 12px;
   display: flex;
   align-items: center;
