@@ -660,8 +660,20 @@
     if (dragState) {
       const w = document.getElementById(dragState.wid);
       if (w) {
-        w.style.left = (dragState.origL + e.clientX - dragState.startX) + 'px';
-        w.style.top = (dragState.origT + e.clientY - dragState.startY) + 'px';
+        let newL = dragState.origL + e.clientX - dragState.startX;
+        let newT = dragState.origT + e.clientY - dragState.startY;
+
+        // Prevent window from being dragged completely off-screen
+        const maxL = window.innerWidth - 30; // Leave 30px visible on the left
+        const minL = 30 - w.offsetWidth;     // Leave 30px visible on the right
+        const maxT = window.innerHeight - 30 - 36; // Leave 30px visible on bottom, accounting for taskbar
+        const minT = 0; // Don't allow going past top
+
+        newL = Math.max(minL, Math.min(newL, maxL));
+        newT = Math.max(minT, Math.min(newT, maxT));
+
+        w.style.left = newL + 'px';
+        w.style.top = newT + 'px';
       }
     }
     if (resizeState) {
@@ -4587,8 +4599,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'luna';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4603,6 +4616,15 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">UI Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="luna" ${currentTheme === 'luna' ? 'selected' : ''}>Luna Blue (Default)</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="dark" ${currentTheme === 'dark' ? 'selected' : ''}>Dark</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4640,19 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.dataset.theme = theme;
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background & Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  document.body.dataset.theme = localStorage.getItem('retro_theme') || 'luna';
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
