@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -1049,7 +1049,8 @@
         addPromptLine(container, state);
         return;
       case 'ls': {
-        const target = args[0] ? resolvePath(state.cwd, args[0]) : state.cwd;
+        const positionalArgs = args.filter(a => !a.startsWith('-'));
+        const target = positionalArgs[0] ? resolvePath(state.cwd, positionalArgs[0]) : state.cwd;
         const node = getNode(target);
         if (node === undefined) {
           output = `ls: cannot access '${args[0]}': No such file or directory`;
@@ -1089,6 +1090,7 @@
         const newPath = resolvePath(state.cwd, args[0]);
         const node = getNode(newPath);
         if (isDirectory(node)) { state.cwd = newPath; }
+        else if (node !== undefined) { output = `bash: cd: ${args[0]}: Not a directory`; }
         else { output = `bash: cd: ${args[0]}: No such file or directory`; }
         break;
       }
@@ -1100,11 +1102,15 @@
         break;
       case 'cat': {
         if (!args[0]) { output = 'cat: missing file operand'; break; }
-        const fp = resolvePath(state.cwd, args[0]);
-        const node = getNode(fp);
-        if (node === undefined) output = `cat: ${args[0]}: No such file or directory`;
-        else if (isDirectory(node)) output = `cat: ${args[0]}: Is a directory`;
-        else output = node;
+        const outputs = [];
+        for (const arg of args) {
+          const fp = resolvePath(state.cwd, arg);
+          const node = getNode(fp);
+          if (node === undefined) outputs.push(`cat: ${arg}: No such file or directory`);
+          else if (isDirectory(node)) outputs.push(`cat: ${arg}: Is a directory`);
+          else outputs.push(node);
+        }
+        output = outputs.join('\n');
         break;
       }
       case 'mkdir': {
@@ -1278,7 +1284,13 @@
         const lineNum = flags.includes('-n');
         const invertMatch = flags.includes('-v');
         const lines = node.split('\n');
-        const regex = new RegExp(pattern, ignoreCase ? 'i' : '');
+        let regex;
+        try {
+          regex = new RegExp(pattern, ignoreCase ? 'i' : '');
+        } catch (e) {
+          const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          regex = new RegExp(escapedPattern, ignoreCase ? 'i' : '');
+        }
         const results = [];
         lines.forEach((line, i) => {
           const matches = regex.test(line);
@@ -1713,6 +1725,23 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) result += buildTree(val, prefix + (isLast ? '    ' : '│   '));
     });
     return result;
+  }
+
+  // ======= WORDPAD =======
+  function openWordpad() {
+    createWindow({
+      title: 'Document - Wordpad', width: 600, height: 450, tbIcon: '📝',
+      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Help</span></div>',
+      body: `<div class="wordpad-body">
+               <div class="wordpad-toolbar">
+                 <button class="wordpad-btn bold" title="Bold" onclick="document.execCommand('bold', false, null)">B</button>
+                 <button class="wordpad-btn italic" title="Italic" onclick="document.execCommand('italic', false, null)">I</button>
+                 <button class="wordpad-btn underline" title="Underline" onclick="document.execCommand('underline', false, null)">U</button>
+               </div>
+               <div class="wordpad-editor" contenteditable="true" spellcheck="false"></div>
+             </div>`,
+      status: 'Ready'
+    });
   }
 
   // ======= NOTEPAD =======
@@ -4487,7 +4516,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, wordpad: openWordpad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
