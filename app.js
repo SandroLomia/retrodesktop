@@ -678,6 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
+      notes: openNotes,
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
@@ -1406,8 +1407,15 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         break;
       }
       case 'history': {
-        const hist = container._cmdHistory || [];
-        output = hist.length ? hist.map((h, i) => `${(i + 1).toString().padStart(4)}  ${h}`).join('\n') : '(no history)';
+        if (args.includes('-c')) {
+          container._cmdHistory = [];
+          if (state.history) { state.history = []; }
+          state.histIdx = -1;
+          output = '';
+        } else {
+          const hist = container._cmdHistory || [];
+          output = hist.length ? hist.map((h, i) => `${(i + 1).toString().padStart(4)}  ${h}`).join('\n') : '(no history)';
+        }
         break;
       }
       case 'env':
@@ -4487,6 +4495,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
+              notes: openNotes,
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
@@ -4624,6 +4633,22 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  function openNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 280, height: 300, tbIcon: '📝',
+      statusbar: false,
+      body: '<div style="background:#fef08a;height:100%;padding:10px;"><textarea class="notes-textarea" spellcheck="false" style="width:100%;height:100%;background:transparent;border:none;outline:none;font-family:\'Comic Sans MS\', cursive, sans-serif;font-size:14px;color:#333;resize:none;"></textarea></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.notes-textarea');
+        ta.value = localStorage.getItem('retro_notes') || '';
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_notes', ta.value);
+        });
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
