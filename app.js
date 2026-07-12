@@ -683,9 +683,78 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, calendar: openCalendar
     };
     if (launchers[name]) launchers[name]();
+  }
+
+  // ======= CALENDAR APP =======
+  function openCalendar() {
+    createWindow({
+      title: 'Calendar', width: 320, height: 340, tbIcon: '📅',
+      statusbar: false,
+      body: `<div style="padding: 16px; font-family: 'Tahoma', sans-serif; background: #ece9d8; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="cal-prev" style="padding: 2px 8px; cursor: pointer;">&lt;</button>
+          <div class="cal-month-year" style="font-weight: bold; font-size: 14px;"></div>
+          <button class="cal-next" style="padding: 2px 8px; cursor: pointer;">&gt;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 8px;">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div class="cal-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; flex: 1; align-content: start;">
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const monthYearEl = body.querySelector('.cal-month-year');
+        const daysEl = body.querySelector('.cal-days');
+        const prevBtn = body.querySelector('.cal-prev');
+        const nextBtn = body.querySelector('.cal-next');
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+          const year = currentDate.getFullYear();
+          const month = currentDate.getMonth();
+
+          const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+          monthYearEl.textContent = `${monthNames[month]} ${year}`;
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          let daysHtml = '';
+
+          for (let i = 0; i < firstDay; i++) {
+            daysHtml += '<div style="padding: 6px; color: #a0a0a0; background: #f4f2e8; border: 1px solid transparent;"></div>';
+          }
+
+          const today = new Date();
+          const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
+          for (let i = 1; i <= daysInMonth; i++) {
+            const isToday = isCurrentMonth && today.getDate() === i;
+            const style = isToday ? 'background: #316ac5; color: #fff; font-weight: bold; border: 1px solid #0b56b0;' : 'background: #fff; border: 1px solid #c0c0c0; color: #333;';
+            daysHtml += `<div style="padding: 6px; cursor: default; ${style}">${i}</div>`;
+          }
+
+          daysEl.innerHTML = daysHtml;
+        }
+
+        prevBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        nextBtn.addEventListener('click', () => {
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        renderCalendar();
+      }
+    });
   }
 
   // ======= TERMINAL =======
