@@ -1,3 +1,18 @@
+:root {
+  --taskbar-bg: #245edb;
+  --start-btn-bg: #3d9c39;
+}
+
+[data-theme="modern-dark"] {
+  --taskbar-bg: #1e1e1e;
+  --start-btn-bg: #333333;
+}
+
+[data-theme="modern-light"] {
+  --taskbar-bg: #e0e0e0;
+  --start-btn-bg: #aaaaaa;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -918,7 +933,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: var(--taskbar-bg);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +946,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: var(--start-btn-bg);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -3412,6 +3427,24 @@ body {
   box-shadow: 1px 1px 0 #000;
   font-size: 24px;
 }
+
+.icon-taskmgr { position: relative; }
+.icon-taskmgr::before {
+  content: '';
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-radius: 6px;
+  border: 2px solid #334155;
+}
+.icon-taskmgr::after {
+  content: '📋';
+  position: absolute;
+  font-size: 20px;
+}
+.smi-icon.icon-taskmgr::before { width: 24px; height: 24px; }
+.smi-icon.icon-taskmgr::after { font-size: 14px; }
 
 /* Game icons */
 .icon-tictactoe { position: relative; }
