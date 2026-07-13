@@ -675,6 +675,61 @@
 
   document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
 
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Task Manager', width: 400, height: 350, tbIcon: '📋',
+      statusbar: false,
+      body: `<div style="padding: 10px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; height: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 14px;">Active Processes</h3>
+          <button class="tm-refresh-btn" style="padding: 2px 8px;">Refresh</button>
+        </div>
+        <div class="tm-process-list" style="flex: 1; background: #fff; border: 1px solid #7f9db9; overflow-y: auto; font-size: 12px;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const processList = body.querySelector('.tm-process-list');
+        const refreshBtn = body.querySelector('.tm-refresh-btn');
+
+        function renderProcesses() {
+          let html = '';
+          const records = Object.keys(openWindows);
+          if (records.length === 0) {
+            html = '<div style="padding: 10px; color: #888;">No active processes.</div>';
+          } else {
+            records.forEach(id => {
+              const info = openWindows[id];
+              const title = info ? info.title : 'Unknown';
+              html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid #eee;">
+                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${escapeHtml(title)}</span>
+                <button class="tm-kill-btn" data-targetid="${escapeHtml(id)}" style="padding: 2px 6px; color: #d9534f; border: 1px solid #d9534f; background: #fff; cursor: pointer; border-radius: 2px;">End Task</button>
+              </div>`;
+            });
+          }
+          processList.innerHTML = html;
+
+          processList.querySelectorAll('.tm-kill-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const targetId = e.target.dataset.targetid;
+              closeWindow(targetId);
+              renderProcesses();
+            });
+          });
+        }
+
+        renderProcesses();
+
+        refreshBtn.addEventListener('click', () => {
+          renderProcesses();
+        });
+
+        const interval = setInterval(renderProcesses, 2000);
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
@@ -683,7 +738,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, taskmgr: openTaskManager
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4560,13 +4615,13 @@ ${getAgentDesktopState()}`
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div class="clock-display-large" style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;"></div>
+        <div class="date-display-large" style="font-size: 18px; color: #666;"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const timeDisplay = body.querySelector('#clock-display-large');
-        const dateDisplay = body.querySelector('#date-display-large');
+        const timeDisplay = body.querySelector('.clock-display-large');
+        const dateDisplay = body.querySelector('.date-display-large');
 
         function updateDisplay() {
           const now = new Date();
@@ -4587,43 +4642,64 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'classic';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
-          <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
+          <input type="checkbox" class="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
-        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+        <select class="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Theme</h3>
+        <select class="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="classic" ${currentTheme === 'classic' ? 'selected' : ''}>Classic Retro</option>
+          <option value="modern-dark" ${currentTheme === 'modern-dark' ? 'selected' : ''}>Modern Dark</option>
+          <option value="modern-light" ${currentTheme === 'modern-light' ? 'selected' : ''}>Modern Light</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const cb = body.querySelector('#toggle-sound');
+        const cb = body.querySelector('.toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
-        const bgSel = body.querySelector('#bg-selector');
+        const bgSel = body.querySelector('.bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('.theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          if (theme === 'classic') {
+             document.body.removeAttribute('data-theme');
+          } else {
+             document.body.dataset.theme = theme;
+          }
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  const initTheme = localStorage.getItem('retro_theme') || 'classic';
+  if (initTheme !== 'classic') document.body.dataset.theme = initTheme;
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
