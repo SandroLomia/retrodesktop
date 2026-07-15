@@ -683,9 +683,110 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, taskmgr: openTaskManager
     };
     if (launchers[name]) launchers[name]();
+  }
+
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Task Manager', width: 460, height: 420, tbIcon: '📈',
+      menubar: '<div class="window-menubar"><span>File</span><span>Options</span><span>View</span><span>Help</span></div>',
+      body: `<div style="display:flex;flex-direction:column;height:100%;padding:10px;background:#ece9d8;font-family:'Tahoma',sans-serif;">
+        <div style="display:flex;gap:4px;border-bottom:1px solid #c0c0c0;padding-bottom:4px;margin-bottom:8px;">
+          <span style="padding:4px 12px;background:#fff;border:1px solid #999;border-bottom:none;border-top-left-radius:3px;border-top-right-radius:3px;margin-bottom:-5px;z-index:1;font-size:11px;">Performance</span>
+        </div>
+        <div style="flex:1;background:#fff;border:1px solid #999;padding:12px;display:flex;flex-direction:column;gap:16px;">
+
+          <div style="display:flex;gap:12px;height:120px;">
+            <div style="display:flex;flex-direction:column;gap:4px;width:70px;">
+              <span style="font-size:11px;color:#333;">CPU Usage</span>
+              <div id="tm-cpu-txt" style="font-size:18px;color:#22c55e;font-family:monospace;text-align:right;">14%</div>
+            </div>
+            <div style="flex:1;border:1px solid #808080;background:#000;position:relative;">
+              <canvas id="tm-cpu-canvas" width="300" height="100" style="width:100%;height:100%;display:block;"></canvas>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;height:120px;">
+            <div style="display:flex;flex-direction:column;gap:4px;width:70px;">
+              <span style="font-size:11px;color:#333;">Mem Usage</span>
+              <div id="tm-mem-txt" style="font-size:18px;color:#22c55e;font-family:monospace;text-align:right;">840M</div>
+            </div>
+            <div style="flex:1;border:1px solid #808080;background:#000;position:relative;">
+              <canvas id="tm-mem-canvas" width="300" height="100" style="width:100%;height:100%;display:block;"></canvas>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;border-top:1px solid #d4d0c8;padding-top:8px;font-size:11px;color:#333;">
+            <span>Processes: <span id="tm-proc">12</span></span>
+            <span>Up Time: <span id="tm-up">2:04:20:12</span></span>
+          </div>
+
+        </div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const cpuCtx = body.querySelector('#tm-cpu-canvas').getContext('2d');
+        const memCtx = body.querySelector('#tm-mem-canvas').getContext('2d');
+        const cpuTxt = body.querySelector('#tm-cpu-txt');
+        const memTxt = body.querySelector('#tm-mem-txt');
+
+        let cpuHist = Array(30).fill(10);
+        let memHist = Array(30).fill(840);
+
+        function drawGraph(ctx, hist, max, isMem) {
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, 300, 100);
+
+          // Grid
+          ctx.strokeStyle = '#003300';
+          ctx.lineWidth = 1;
+          for(let i=0; i<=300; i+=15) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,100); ctx.stroke(); }
+          for(let i=0; i<=100; i+=15) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(300,i); ctx.stroke(); }
+
+          ctx.strokeStyle = '#22c55e';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          const step = 300 / (hist.length - 1);
+          hist.forEach((val, i) => {
+            const y = 100 - (val / max) * 100;
+            if(i===0) ctx.moveTo(i*step, y);
+            else ctx.lineTo(i*step, y);
+          });
+          ctx.stroke();
+
+          if(isMem) {
+            ctx.fillStyle = 'rgba(34,197,94,0.3)';
+            ctx.lineTo(300, 100);
+            ctx.lineTo(0, 100);
+            ctx.fill();
+          }
+        }
+
+        const interval = setInterval(() => {
+          cpuHist.shift();
+          const newCpu = Math.max(1, Math.min(100, cpuHist[cpuHist.length-1] + (Math.random() * 20 - 10)));
+          cpuHist.push(newCpu);
+          cpuTxt.textContent = Math.round(newCpu) + '%';
+          drawGraph(cpuCtx, cpuHist, 100, false);
+
+          memHist.shift();
+          const newMem = Math.max(500, Math.min(2048, memHist[memHist.length-1] + (Math.random() * 50 - 25)));
+          memHist.push(newMem);
+          memTxt.textContent = Math.round(newMem) + 'M';
+          drawGraph(memCtx, memHist, 2048, true);
+        }, 1000);
+
+        registerWindowCleanup(winId, () => clearInterval(interval));
+
+        // Initial draw
+        drawGraph(cpuCtx, cpuHist, 100, false);
+        drawGraph(memCtx, memHist, 2048, true);
+      }
+    });
   }
 
   // ======= TERMINAL =======
@@ -1089,6 +1190,7 @@
         const newPath = resolvePath(state.cwd, args[0]);
         const node = getNode(newPath);
         if (isDirectory(node)) { state.cwd = newPath; }
+        else if (node !== undefined) { output = `bash: cd: ${args[0]}: Not a directory`; }
         else { output = `bash: cd: ${args[0]}: No such file or directory`; }
         break;
       }
@@ -4491,7 +4593,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, taskmgr: openTaskManager
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
