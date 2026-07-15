@@ -918,7 +918,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #475569, #334155);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,9 +931,9 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: linear-gradient(180deg, #10b981, #059669);
   border: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 4px 4px 0;
   color: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -978,8 +978,8 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
-  border: 1px solid rgba(0,0,0,0.15);
+  background: linear-gradient(180deg, #64748b, #475569);
+  border: 1px solid rgba(0,0,0,0.2);
   border-radius: 3px;
   color: #fff;
   font-size: 11px;
@@ -992,12 +992,12 @@ body {
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  background: linear-gradient(180deg, #475569, #334155);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: linear-gradient(180deg, #94a3b8, #64748b);
 }
 
 .taskbar-app-icon {
@@ -1013,7 +1013,7 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
+  background: linear-gradient(180deg, #334155, #1e293b);
   border-left: 1px solid rgba(255,255,255,0.1);
 }
 
@@ -3412,6 +3412,25 @@ body {
   box-shadow: 1px 1px 0 #000;
   font-size: 24px;
 }
+
+/* Task Manager Icon */
+.icon-taskmgr { position: relative; }
+.icon-taskmgr::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 4px;
+  border: 2px solid #047857;
+}
+.icon-taskmgr::after {
+  content: '📈';
+  position: absolute;
+  font-size: 20px;
+}
+.smi-icon.icon-taskmgr::before { width: 24px; height: 24px; }
+.smi-icon.icon-taskmgr::after { font-size: 14px; }
 
 /* Game icons */
 .icon-tictactoe { position: relative; }
