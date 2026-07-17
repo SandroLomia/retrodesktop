@@ -4463,18 +4463,18 @@ ${getAgentDesktopState()}`
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: bold;">Open:</label>
-          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <input type="text" class="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
-          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+          <button class="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
+          <button class="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const input = body.querySelector('#run-input');
-        const okBtn = body.querySelector('#run-ok-btn');
-        const cancelBtn = body.querySelector('#run-cancel-btn');
+        const input = body.querySelector('.run-input');
+        const okBtn = body.querySelector('.run-ok-btn');
+        const cancelBtn = body.querySelector('.run-cancel-btn');
 
         input.focus();
 
@@ -4560,13 +4560,13 @@ ${getAgentDesktopState()}`
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" class="clock-display-large"></div>
+        <div style="font-size: 18px; color: #666;" class="date-display-large"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const timeDisplay = body.querySelector('#clock-display-large');
-        const dateDisplay = body.querySelector('#date-display-large');
+        const timeDisplay = body.querySelector('.clock-display-large');
+        const dateDisplay = body.querySelector('.date-display-large');
 
         function updateDisplay() {
           const now = new Date();
@@ -4587,36 +4587,50 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'default';
     createWindow({
       title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
-          <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
+          <input type="checkbox" class="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
-        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+        <select class="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">System Theme</h3>
+        <select class="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="default" ${currentTheme === 'default' ? 'selected' : ''}>Default</option>
+          <option value="modern" ${currentTheme === 'modern' ? 'selected' : ''}>Modern Dark</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const cb = body.querySelector('#toggle-sound');
+        const cb = body.querySelector('.toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
-        const bgSel = body.querySelector('#bg-selector');
+        const bgSel = body.querySelector('.bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
+        });
+        const themeSel = body.querySelector('.theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.dataset.theme = theme;
         });
       }
     });
@@ -4624,6 +4638,7 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  document.body.dataset.theme = localStorage.getItem('retro_theme') || 'default';
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
