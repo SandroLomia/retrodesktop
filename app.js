@@ -676,14 +676,111 @@
   document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
 
   // ======= App Launchers =======
-  function openApp(name) {
+
+  // ======= RETRO TODO =======
+  function openTodo() {
+    createWindow({
+      title: 'Retro Todo', width: 320, height: 400, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display:flex;flex-direction:column;height:100%;background:#fff;padding:8px;font-family:'Tahoma',sans-serif;">
+        <div style="display:flex;gap:4px;margin-bottom:8px;">
+          <input type="text" class="todo-input" placeholder="What needs to be done?" style="flex:1;padding:4px;font-family:'Tahoma',sans-serif;border:1px solid #7f9db9;">
+          <button class="todo-add-btn" style="padding:4px 12px;font-family:'Tahoma',sans-serif;">Add</button>
+        </div>
+        <div class="todo-list" style="flex:1;overflow-y:auto;border:1px solid #7f9db9;padding:4px;background:#fff;"></div>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;">
+          <span class="todo-count" style="font-size:11px;color:#666;">0 items</span>
+          <button class="todo-clear-btn" style="padding:2px 8px;font-size:11px;">Clear Completed</button>
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+        const countEl = body.querySelector('.todo-count');
+        const clearBtn = body.querySelector('.todo-clear-btn');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) {
+          todos = [];
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+          renderTodos();
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px;border-bottom:1px solid #eee;';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', () => {
+              todo.completed = checkbox.checked;
+              saveTodos();
+            });
+
+            const text = document.createElement('span');
+            text.textContent = todo.text;
+            text.style.cssText = `flex:1;font-size:12px;${todo.completed ? 'text-decoration:line-through;color:#888;' : 'color:#000;'}`;
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '×';
+            delBtn.style.cssText = 'border:none;background:none;color:#c00;cursor:pointer;font-weight:bold;padding:0 4px;';
+            delBtn.addEventListener('click', () => {
+              todos.splice(index, 1);
+              saveTodos();
+            });
+
+            item.appendChild(checkbox);
+            item.appendChild(text);
+            item.appendChild(delBtn);
+            list.appendChild(item);
+          });
+
+          const activeCount = todos.filter(t => !t.completed).length;
+          countEl.textContent = `${activeCount} item${activeCount !== 1 ? 's' : ''} left`;
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, completed: false });
+            input.value = '';
+            saveTodos();
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        clearBtn.addEventListener('click', () => {
+          todos = todos.filter(t => !t.completed);
+          saveTodos();
+        });
+
+        renderTodos();
+      }
+    });
+  }
+
+function openApp(name) {
     const launchers = {
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, todo: openTodo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -692,12 +789,11 @@
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const tb = body.querySelector('.terminal-body');
-        tb.id = winId + '-term';
         initTerminal(winId, tb, initialCommand);
       }
     });
@@ -4047,11 +4143,10 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
-        body.id = winId + '-mine';
         initMinesweeper(body, rows, cols, mines);
       }
     });
@@ -4087,7 +4182,7 @@ ${getAgentDesktopState()}`
     function render() {
       let html = `<div class="mine-header">
         <div class="mine-counter">${String(mineCount - flagCount).padStart(3, '0')}</div>
-        <div class="mine-face" id="mine-reset">😊</div>
+        <div class="mine-face">😊</div>
         <div class="mine-counter">000</div>
       </div>`;
       html += `<div class="mine-grid" style="grid-template-columns:repeat(${cols},24px)">`;
@@ -4103,7 +4198,7 @@ ${getAgentDesktopState()}`
       }
       html += '</div>';
       container.innerHTML = html;
-      container.querySelector('#mine-reset').addEventListener('click', init);
+      container.querySelector('.mine-face').addEventListener('click', init);
       container.querySelectorAll('.mine-cell').forEach(el => {
         el.addEventListener('click', () => {
           if (gameOver) return;
@@ -4132,12 +4227,12 @@ ${getAgentDesktopState()}`
       if (cell.mine) {
         gameOver = true;
         for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) if (grid[rr][cc].mine) grid[rr][cc].revealed = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😵'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-face'); if (face) face.textContent = '😵'; }, 50);
         return;
       }
       if (revealed === total - mineCount) {
         gameOver = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😎'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-face'); if (face) face.textContent = '😎'; }, 50);
       }
       if (cell.count === 0) {
         for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) revealCell(r + dr, c + dc);
@@ -4463,18 +4558,18 @@ ${getAgentDesktopState()}`
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: bold;">Open:</label>
-          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <input type="text" class="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
-          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+          <button class="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
+          <button class="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const input = body.querySelector('#run-input');
-        const okBtn = body.querySelector('#run-ok-btn');
-        const cancelBtn = body.querySelector('#run-cancel-btn');
+        const input = body.querySelector('.run-input');
+        const okBtn = body.querySelector('.run-ok-btn');
+        const cancelBtn = body.querySelector('.run-cancel-btn');
 
         input.focus();
 
@@ -4491,7 +4586,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {

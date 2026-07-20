@@ -650,10 +650,10 @@ body {
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  background: #f5f5f5;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -699,21 +699,21 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: #e0e0e0;
   display: flex;
   align-items: center;
-  padding: 0 4px;
+  padding: 0 8px;
   cursor: move;
   flex-shrink: 0;
-  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #ccc;
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: #eaeaea;
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: #f0f0f0;
 }
 
 .window-title-icon {
@@ -733,10 +733,9 @@ body {
 
 .window-title-text {
   flex: 1;
-  color: #fff;
+  color: #333;
   font-size: 12px;
-  font-weight: 700;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -917,12 +916,12 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  height: 40px;
+  background: #333333;
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.3);
 }
 
 #start-button {
@@ -965,22 +964,22 @@ body {
 #taskbar-apps {
   flex: 1;
   display: flex;
-  gap: 3px;
-  padding: 0 4px;
+  gap: 6px;
+  padding: 0 8px;
   overflow: hidden;
 }
 
 .taskbar-app {
-  height: 26px;
+  height: 28px;
   min-width: 140px;
   max-width: 180px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 3px;
+  gap: 6px;
+  padding: 0 10px;
+  background: #444444;
+  border: 1px solid transparent;
+  border-radius: 4px;
   color: #fff;
   font-size: 11px;
   cursor: pointer;
@@ -988,16 +987,16 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  background: #555555;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: #4a4a4a;
 }
 
 .taskbar-app-icon {
@@ -3412,6 +3411,13 @@ body {
   box-shadow: 1px 1px 0 #000;
   font-size: 24px;
 }
+
+/* Todo App Icon */
+.icon-todo { position: relative; }
+.icon-todo::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #fef08a, #ca8a04); border-radius: 6px; border: 2px solid #a16207; }
+.icon-todo::after { content: '✓'; position: absolute; font-size: 24px; color: #15803d; top: 1px; left: 6px; font-weight: bold; text-shadow: 1px 1px 0 rgba(255,255,255,0.8); }
+.smi-icon.icon-todo::before { width: 24px; height: 24px; left: 2px; top: 2px; }
+.smi-icon.icon-todo::after { font-size: 16px; top: 1px; left: 5px; }
 
 /* Game icons */
 .icon-tictactoe { position: relative; }
