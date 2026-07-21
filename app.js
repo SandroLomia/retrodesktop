@@ -412,6 +412,10 @@
     document.getElementById('context-menu').style.display = 'none';
     openTerminal();
   });
+  document.getElementById('ctx-change-wallpaper').addEventListener('click', () => {
+    document.getElementById('context-menu').style.display = 'none';
+    openSettings();
+  });
   document.getElementById('ctx-properties').addEventListener('click', () => {
     document.getElementById('context-menu').style.display = 'none';
     openSettings();
@@ -4556,17 +4560,24 @@ ${getAgentDesktopState()}`
   // ======= CLOCK SETTINGS =======
   function openClockSettings() {
     createWindow({
-      title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
+      title: 'Date and Time Properties', width: 340, height: 400, tbIcon: '🕒',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div style="font-size: 48px; font-weight: bold; margin: 10px 0; color: #333;" id="clock-display-large"></div>
+        <div style="font-size: 16px; color: #666; margin-bottom: 20px;" id="date-display-large"></div>
+        <div style="width: 100%; border-top: 1px solid #c0c0c0; padding-top: 15px;">
+          <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; font-weight: bold; color: #333; margin-bottom: 8px;">
+            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+          </div>
+          <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 12px; color: #333;"></div>
+        </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const timeDisplay = body.querySelector('#clock-display-large');
         const dateDisplay = body.querySelector('#date-display-large');
+        const calendarGrid = body.querySelector('#calendar-grid');
 
         function updateDisplay() {
           const now = new Date();
@@ -4577,8 +4588,37 @@ ${getAgentDesktopState()}`
           dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
+        function renderCalendar() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const today = now.getDate();
+
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+          let html = '';
+          for (let i = 0; i < firstDay; i++) {
+            html += `<div></div>`;
+          }
+          for (let i = 1; i <= daysInMonth; i++) {
+            const isToday = i === today;
+            const style = isToday ? 'background: #316ac5; color: #fff; border-radius: 2px; padding: 2px;' : 'padding: 2px;';
+            html += `<div style="${style}">${i}</div>`;
+          }
+          calendarGrid.innerHTML = html;
+        }
+
         updateDisplay();
-        const interval = setInterval(updateDisplay, 1000);
+        renderCalendar();
+        let prevDay = new Date().getDate();
+        const interval = setInterval(() => {
+          updateDisplay();
+          if (new Date().getDate() !== prevDay) {
+            renderCalendar();
+            prevDay = new Date().getDate();
+          }
+        }, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
       }
     });

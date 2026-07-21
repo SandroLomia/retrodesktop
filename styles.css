@@ -259,7 +259,8 @@ body {
 }
 
 .desktop-icon:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
 }
 
 .desktop-icon.selected {
@@ -918,7 +919,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #1c3d70 0%, #152e55 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,9 +932,9 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: linear-gradient(180deg, #388e3c 0%, #2e7d32 100%);
   border: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 4px 8px 8px 4px;
   color: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -980,7 +981,7 @@ body {
   padding: 0 8px;
   background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
   border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 3px;
+  border-radius: 4px;
   color: #fff;
   font-size: 11px;
   cursor: pointer;
@@ -1042,9 +1043,9 @@ body {
   left: 0;
   width: 380px;
   background: #fff;
-  border: 2px solid #0055c0;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+  border: 1px solid #1c3d70;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   z-index: 99999;
   overflow: hidden;
   animation: startMenuOpen 0.15s ease-out;
