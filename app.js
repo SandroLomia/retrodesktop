@@ -1721,7 +1721,25 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       title: 'Untitled - Notepad', width: 560, height: 400, tbIcon: '📝',
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
-      status: 'Ln 1, Col 1'
+      status: 'Ln 1, Col 1 | 0 chars',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.notepad-textarea');
+        const statusBar = body.closest('.window').querySelector('.status-section');
+
+        function updateStatus() {
+          const text = ta.value;
+          const chars = text.length;
+          const lines = text.substr(0, ta.selectionStart).split('\n');
+          const currentLine = lines.length;
+          const currentCol = lines[lines.length - 1].length + 1;
+          if (statusBar) statusBar.textContent = `Ln ${currentLine}, Col ${currentCol} | ${chars} chars`;
+        }
+
+        ta.addEventListener('input', updateStatus);
+        ta.addEventListener('keyup', updateStatus);
+        ta.addEventListener('click', updateStatus);
+      }
     });
   }
 
@@ -2182,6 +2200,24 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const body = document.getElementById(winId + '-body');
         const ta = body.querySelector('.notepad-textarea');
         ta.value = content;
+        const statusBar = body.closest('.window').querySelector('.status-section');
+
+        function updateStatus() {
+          const text = ta.value;
+          const chars = text.length;
+          const lines = text.substr(0, ta.selectionStart).split('\n');
+          const currentLine = lines.length;
+          const currentCol = lines[lines.length - 1].length + 1;
+          if (statusBar) statusBar.textContent = `Ln ${currentLine}, Col ${currentCol} | ${chars} chars`;
+        }
+
+        ta.addEventListener('input', updateStatus);
+        ta.addEventListener('keyup', updateStatus);
+        ta.addEventListener('click', updateStatus);
+
+        // Initial update
+        updateStatus();
+
         body.closest('.window').querySelector('.np-save-btn').addEventListener('click', () => {
           if (setNode(fullPath, ta.value)) playSound('click');
           else alert(`Could not save "${name}".`);
