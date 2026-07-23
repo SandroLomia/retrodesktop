@@ -651,9 +651,9 @@ body {
 .window {
   position: absolute;
   background: #ece9d8;
-  border: 2px solid #0055e5;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  border: 1px solid #ccc;
+  border-radius: 0;
+  /* box-shadow removed */
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -699,21 +699,21 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: #333;
   display: flex;
   align-items: center;
   padding: 0 4px;
   cursor: move;
   flex-shrink: 0;
-  border-radius: 6px 6px 0 0;
+  border-radius: 0;
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: #222;
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: #7b9cc0;
 }
 
 .window-title-icon {
@@ -750,8 +750,9 @@ body {
 .window-btn {
   width: 21px;
   height: 21px;
-  border: 1px solid rgba(0,0,0,0.2);
-  border-radius: 3px;
+  border: none;
+  border-radius: 0;
+  background: #444;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -759,17 +760,17 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #fff;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  /* text-shadow removed */
 }
 
 .window-btn.minimize {
-  background: linear-gradient(180deg, #666, #444);
+  background: #666;
 }
 .window-btn.maximize {
-  background: linear-gradient(180deg, #666, #444);
+  background: #666;
 }
 .window-btn.close {
-  background: linear-gradient(180deg, #d9534f, #c9302c);
+  background: #d9534f;
 }
 
 .window-btn:hover {
@@ -918,11 +919,11 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: #245edb;
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  /* box-shadow removed */
 }
 
 #start-button {
@@ -931,9 +932,9 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: #2e7d32;
   border: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0;
   color: #fff;
   font-size: 13px;
   font-weight: 700;
@@ -942,7 +943,7 @@ body {
   cursor: pointer;
   font-family: 'Tahoma', sans-serif;
   text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+  /* box-shadow removed */
   margin: 3px 0 3px 0;
   transition: filter 0.1s;
 }
@@ -978,9 +979,9 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 3px;
+  background: #2a5ab8;
+  border: none;
+  border-radius: 0;
   color: #fff;
   font-size: 11px;
   cursor: pointer;
@@ -992,12 +993,12 @@ body {
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  background: #1e4c9a;
+  /* box-shadow removed */
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: #3568c2;
 }
 
 .taskbar-app-icon {
@@ -1013,8 +1014,8 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
-  border-left: 1px solid rgba(255,255,255,0.1);
+  background: #1248a0;
+  border-left: none;
 }
 
 .tray-icons {
