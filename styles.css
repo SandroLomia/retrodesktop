@@ -917,42 +917,42 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  height: 38px;
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #start-button {
-  height: 30px;
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  gap: 6px;
+  padding: 0 14px 0 8px;
+  background: #2563eb;
   border: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 6px 6px 0;
   color: #fff;
   font-size: 13px;
-  font-weight: 700;
-  font-style: italic;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   cursor: pointer;
   font-family: 'Tahoma', sans-serif;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
   margin: 3px 0 3px 0;
-  transition: filter 0.1s;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
 }
 
 #start-button:hover {
-  filter: brightness(1.2);
+  background: #3b82f6;
 }
 
 #start-button:active {
-  filter: brightness(0.8);
+  transform: scale(0.98);
 }
 
 #taskbar-divider {
@@ -971,33 +971,35 @@ body {
 }
 
 .taskbar-app {
-  height: 26px;
+  height: 28px;
   min-width: 140px;
   max-width: 180px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 3px;
-  color: #fff;
-  font-size: 11px;
+  gap: 6px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: all 0.2s;
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .taskbar-app:hover {
-  background: linear-gradient(180deg, #4a7fd8, #3568c2);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .taskbar-app-icon {
@@ -3533,4 +3535,54 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #fef08a, #facc15);
+  border-radius: 2px 2px 10px 2px;
+  border: 1px solid #ca8a04;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+  top: 2px;
+  left: 10px;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.smi-icon.icon-stickynotes::before {
+  width: 24px;
+  height: 24px;
+}
+.smi-icon.icon-stickynotes::after {
+  width: 8px;
+  height: 8px;
+  top: 2px;
+  left: 8px;
+}
+
+.sticky-note-body {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  background: #fef08a;
+  color: #1f2937;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+  font-size: 14px;
+  padding: 10px;
+  outline: none;
+  box-sizing: border-box;
 }
