@@ -692,7 +692,7 @@
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -2707,7 +2707,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           <div class="agent-state-box">
             <div class="agent-sidebar-title">Agent Status</div>
-            <div class="agent-status" id="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
+            <div class="agent-status agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
             <div class="agent-sidebar-title">Debug Logs</div>
             <div id="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
             <div class="agent-sidebar-title">Desktop State</div>
@@ -2716,7 +2716,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         </div>
 
         <div class="agent-main">
-          <div class="agent-chat" id="agent-chat"></div>
+          <div class="agent-chat"></div>
           <div class="agent-action-log" id="agent-action-log"></div>
           <div class="agent-compose">
             <textarea id="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
@@ -2802,12 +2802,12 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           clearChat: body.querySelector('#agent-clear-chat'),
           controlToggle: body.querySelector('#agent-control-toggle'),
           statePreview: body.querySelector('#agent-state-preview'),
-          chat: body.querySelector('#agent-chat'),
+          chat: body.querySelector('.agent-chat'),
           actionLog: body.querySelector('#agent-action-log'),
           input: body.querySelector('#agent-input'),
           sendBtn: body.querySelector('#agent-send-btn'),
           status: body.querySelector('#agent-status'),
-          statusLabel: body.querySelector('#agent-status-label'),
+          statusLabel: body.querySelector('.agent-status-label'),
           debugLog: body.querySelector('#agent-debug-log')
         };
         const state = {
@@ -4047,7 +4047,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
