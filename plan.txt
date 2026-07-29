@@ -1,0 +1,13 @@
+1. We will add a Sticky Notes application (`stickynotes`).
+   - We will define the icon (`icon-stickynotes`) and logic to add it to desktop and start menu.
+   - We will write an `openStickyNotes()` function in `app.js` that opens a small, borderless or minimal window displaying notes.
+   - Notes will be saved in `localStorage.getItem('retro_stickynotes')`.
+   - Update `launchers` and index.html to include Sticky Notes.
+
+2. We will improve the system design (modern-retro aesthetic) for the taskbar and windows:
+   - Change window style slightly (more modern drop shadows or rounded corners without breaking XP feel too much).
+   - Taskbar to a flatter but still retro design.
+
+3. Verify changes with Playwright and a local server.
+4. Pre-commit steps.
+5. Submit.
