@@ -290,7 +290,7 @@
   const cmdHistory = [];
   let cmdHistoryIdx = -1;
 
-  let soundEnabled = true;
+  let soundEnabled = localStorage.getItem('retro_sound') !== 'false';
   let audioCtx = null;
   function playSound(type) {
     if (!soundEnabled) return;
@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4610,6 +4610,7 @@ ${getAgentDesktopState()}`
         const cb = body.querySelector('#toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
+          localStorage.setItem('retro_sound', soundEnabled);
           if (soundEnabled) playSound('click');
         });
         const bgSel = body.querySelector('#bg-selector');
@@ -4624,6 +4625,36 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let savedNotes = '';
+    try {
+      savedNotes = localStorage.getItem('retro_stickynotes') || '';
+    } catch (e) {}
+
+    createWindow({
+      title: 'Sticky Notes', width: 260, height: 260, tbIcon: '📝',
+      statusbar: false,
+      body: `<textarea class="stickynotes-textarea" style="width:100%;height:100%;resize:none;border:none;background:#fef08a;padding:12px;font-family:'Segoe Print', 'Comic Sans MS', cursive, sans-serif;font-size:14px;color:#333;outline:none;box-sizing:border-box;line-height:1.4;" placeholder="Type your notes here..."></textarea>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.value = savedNotes;
+
+        let saveTimeout;
+        textarea.addEventListener('input', (e) => {
+          clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            try {
+              localStorage.setItem('retro_stickynotes', e.target.value);
+            } catch (err) {}
+          }, 500);
+        });
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
