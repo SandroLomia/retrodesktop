@@ -453,7 +453,7 @@
 
   document.addEventListener('mouseup', (e) => {
     if (draggedIcon) {
-      const dropTarget = e.target.closest('#icon-recyclebin');
+      const dropTarget = e.target.closest('[data-app="recyclebin"]');
       if (dropTarget && draggedIcon.classList.contains('user-desktop-item')) {
         const name = draggedIcon.dataset.name;
         const srcFull = joinPath('/home/user/Desktop', name);
@@ -683,16 +683,35 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: '<textarea class="sticky-textarea" style="width:100%; height:100%; border:none; background:#ffffcc; padding:10px; font-family:\'Tahoma\', sans-serif; resize:none;" spellcheck="false" placeholder="Type your note here..."></textarea>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.sticky-textarea');
+        const saved = localStorage.getItem('retro_stickynotes');
+        if (saved) ta.value = saved;
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', ta.value);
+        });
+      }
+    });
   }
 
   // ======= TERMINAL =======
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -2360,7 +2379,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const file = element.querySelector('.cs-tab.active .cs-tab-name')?.textContent || 'none';
         detail = `Project: ${workspace} | File: ${file}`;
       } else if (/System Settings/i.test(title)) {
-        detail = element.querySelector('#toggle-sound')?.checked ? 'sound on' : 'sound off';
+        detail = element.querySelector('.toggle-sound')?.checked ? 'sound on' : 'sound off';
       }
 
       return {
@@ -2658,8 +2677,8 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         setActiveWindow(id);
         if (initialPrompt) {
           const body = document.getElementById(id + '-body');
-          const input = body?.querySelector('#agent-input');
-          const sendBtn = body?.querySelector('#agent-send-btn');
+          const input = body?.querySelector('.agent-input');
+          const sendBtn = body?.querySelector('.agent-send-btn');
           if (input && sendBtn) {
             input.value = initialPrompt;
             sendBtn.click();
@@ -2679,25 +2698,25 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
             <button class="agent-provider-btn" data-provider="gemini">Gemini</button>
             <button class="agent-provider-btn" data-provider="claude">Claude</button>
           </div>
-          <div class="agent-provider-help" id="agent-provider-help"></div>
+          <div class="agent-provider-help" class="agent-provider-help"></div>
 
           <label class="agent-field">
             <span>Model</span>
-            <input type="text" id="agent-model-input" placeholder="gpt-4o-mini">
+            <input type="text" class="agent-model-input" placeholder="gpt-4o-mini">
           </label>
 
           <label class="agent-field">
             <span>API Key</span>
-            <input type="password" id="agent-key-input" placeholder="Paste API key">
+            <input type="password" class="agent-key-input" placeholder="Paste API key">
           </label>
 
           <div class="agent-sidebar-actions">
-            <button class="agent-btn primary" id="agent-save-config">Save</button>
-            <button class="agent-btn" id="agent-clear-chat">Clear Chat</button>
+            <button class="agent-btn primary" class="agent-save-config">Save</button>
+            <button class="agent-btn" class="agent-clear-chat">Clear Chat</button>
           </div>
 
           <label class="agent-toggle">
-            <input type="checkbox" id="agent-control-toggle">
+            <input type="checkbox" class="agent-control-toggle">
             <span>Desktop control mode</span>
           </label>
 
@@ -2707,22 +2726,22 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           <div class="agent-state-box">
             <div class="agent-sidebar-title">Agent Status</div>
-            <div class="agent-status" id="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
+            <div class="agent-status" class="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
             <div class="agent-sidebar-title">Debug Logs</div>
-            <div id="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
+            <div class="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
             <div class="agent-sidebar-title">Desktop State</div>
-            <pre id="agent-state-preview"></pre>
+            <pre class="agent-state-preview"></pre>
           </div>
         </div>
 
         <div class="agent-main">
-          <div class="agent-chat" id="agent-chat"></div>
-          <div class="agent-action-log" id="agent-action-log"></div>
+          <div class="agent-chat" class="agent-chat"></div>
+          <div class="agent-action-log" class="agent-action-log"></div>
           <div class="agent-compose">
-            <textarea id="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
+            <textarea class="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
             <div class="agent-compose-actions">
-              <span class="agent-status" id="agent-status">Ready</span>
-              <button class="agent-btn primary" id="agent-send-btn">Send</button>
+              <span class="agent-status" class="agent-status">Ready</span>
+              <button class="agent-btn primary" class="agent-send-btn">Send</button>
             </div>
           </div>
         </div>
@@ -2795,20 +2814,20 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const body = document.getElementById(winId + '-body');
         const refs = {
           providerButtons: Array.from(body.querySelectorAll('.agent-provider-btn')),
-          providerHelp: body.querySelector('#agent-provider-help'),
-          modelInput: body.querySelector('#agent-model-input'),
-          keyInput: body.querySelector('#agent-key-input'),
-          saveConfig: body.querySelector('#agent-save-config'),
-          clearChat: body.querySelector('#agent-clear-chat'),
-          controlToggle: body.querySelector('#agent-control-toggle'),
-          statePreview: body.querySelector('#agent-state-preview'),
-          chat: body.querySelector('#agent-chat'),
-          actionLog: body.querySelector('#agent-action-log'),
-          input: body.querySelector('#agent-input'),
-          sendBtn: body.querySelector('#agent-send-btn'),
-          status: body.querySelector('#agent-status'),
-          statusLabel: body.querySelector('#agent-status-label'),
-          debugLog: body.querySelector('#agent-debug-log')
+          providerHelp: body.querySelector('.agent-provider-help'),
+          modelInput: body.querySelector('.agent-model-input'),
+          keyInput: body.querySelector('.agent-key-input'),
+          saveConfig: body.querySelector('.agent-save-config'),
+          clearChat: body.querySelector('.agent-clear-chat'),
+          controlToggle: body.querySelector('.agent-control-toggle'),
+          statePreview: body.querySelector('.agent-state-preview'),
+          chat: body.querySelector('.agent-chat'),
+          actionLog: body.querySelector('.agent-action-log'),
+          input: body.querySelector('.agent-input'),
+          sendBtn: body.querySelector('.agent-send-btn'),
+          status: body.querySelector('.agent-status'),
+          statusLabel: body.querySelector('.agent-status-label'),
+          debugLog: body.querySelector('.agent-debug-log')
         };
         const state = {
           provider: localStorage.getItem(STORAGE.provider) || 'openai',
@@ -3145,7 +3164,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                   : normalized === 'ide_editor' || normalized === 'active_ide_editor'
                     ? element.querySelector('#cs-code-input')
                     : normalized === 'agent_input' || normalized === 'active_agent_input'
-                      ? element.querySelector('#agent-input')
+                      ? element.querySelector('.agent-input')
                       : null;
             if (targetEl) return { record, element: targetEl };
           }
@@ -3176,9 +3195,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                             : normalized === 'ide_run'
                               ? element.querySelector('#cs-run-btn')
                               : normalized === 'agent_send'
-                                ? element.querySelector('#agent-send-btn')
+                                ? element.querySelector('.agent-send-btn')
                                 : normalized === 'settings_sound_toggle'
-                                  ? element.querySelector('#toggle-sound')
+                                  ? element.querySelector('.toggle-sound')
                                   : null;
             if (targetEl) return { record, element: targetEl };
           }
@@ -3606,7 +3625,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           if (type === 'drag_mouse') {
             const { start_x, start_y, end_x, end_y } = action;
-            const cursor = document.getElementById('agent-cursor');
+            const cursor = document.querySelector('.agent-cursor');
 
             // Move to start
             await animateAgentCursorTo(start_x, start_y);
@@ -3897,12 +3916,12 @@ ${getAgentDesktopState()}`
           <div class="ie-browser-tip">Tip: type a full URL like <code>https://example.com</code> or a search phrase like <code>linux commands</code>.</div>
         </div>
         <div class="ie-browser-frame-wrap" style="display:none;">
-          <div class="ie-browser-note" id="ie-browser-note">
+          <div class="ie-browser-note" class="ie-browser-note">
             Some sites refuse to load inside another webpage. If this tab stays blank, use <strong>Open External</strong>.
           </div>
           <iframe
             class="ie-browser-frame"
-            id="ie-browser-frame"
+            class="ie-browser-frame"
             referrerpolicy="no-referrer"
             sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
           ></iframe>
@@ -3916,10 +3935,10 @@ ${getAgentDesktopState()}`
         const statusEl = win.querySelector('.status-section');
         const addrInput = win.querySelector('.ie-addr-input');
         const goBtn = win.querySelector('.ie-go-btn');
-        const frame = body.querySelector('#ie-browser-frame');
+        const frame = body.querySelector('.ie-browser-frame');
         const startView = body.querySelector('.ie-browser-start');
         const frameWrap = body.querySelector('.ie-browser-frame-wrap');
-        const note = body.querySelector('#ie-browser-note');
+        const note = body.querySelector('.ie-browser-note');
         const history = [];
         let historyIndex = -1;
         let currentUrl = '';
@@ -4047,7 +4066,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
@@ -4087,7 +4106,7 @@ ${getAgentDesktopState()}`
     function render() {
       let html = `<div class="mine-header">
         <div class="mine-counter">${String(mineCount - flagCount).padStart(3, '0')}</div>
-        <div class="mine-face" id="mine-reset">😊</div>
+        <div class="mine-face" class="mine-reset">😊</div>
         <div class="mine-counter">000</div>
       </div>`;
       html += `<div class="mine-grid" style="grid-template-columns:repeat(${cols},24px)">`;
@@ -4103,7 +4122,7 @@ ${getAgentDesktopState()}`
       }
       html += '</div>';
       container.innerHTML = html;
-      container.querySelector('#mine-reset').addEventListener('click', init);
+      container.querySelector('.mine-reset').addEventListener('click', init);
       container.querySelectorAll('.mine-cell').forEach(el => {
         el.addEventListener('click', () => {
           if (gameOver) return;
@@ -4132,12 +4151,12 @@ ${getAgentDesktopState()}`
       if (cell.mine) {
         gameOver = true;
         for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) if (grid[rr][cc].mine) grid[rr][cc].revealed = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😵'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-reset'); if (face) face.textContent = '😵'; }, 50);
         return;
       }
       if (revealed === total - mineCount) {
         gameOver = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😎'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-reset'); if (face) face.textContent = '😎'; }, 50);
       }
       if (cell.count === 0) {
         for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) revealCell(r + dr, c + dc);
@@ -4153,21 +4172,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
-        <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <div class="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
-        const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
+        const msgEl = body.querySelector('.snake-msg');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
@@ -4252,38 +4271,38 @@ ${getAgentDesktopState()}`
       title: 'Tetris', width: 400, height: 560, tbIcon: '🧩',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;gap:12px;align-items:flex-start;height:100%;background:#0a0a0a;padding:10px;justify-content:center;">
-        <canvas id="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
+        <canvas class="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
         <div style="display:flex;flex-direction:column;gap:10px;min-width:110px;">
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">SCORE</div>
-            <div id="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LEVEL</div>
-            <div id="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
+            <div class="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LINES</div>
-            <div id="tet-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tet-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:6px;">NEXT</div>
-            <canvas id="tetris-next" width="80" height="80"></canvas>
+            <canvas class="tetris-next" width="80" height="80"></canvas>
           </div>
-          <button id="tet-start" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <button class="tet-start" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
           <div style="color:#475569;font-family:monospace;font-size:9px;line-height:1.5;">← → Move<br>↑ Rotate<br>↓ Soft drop<br>Space: Drop</div>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#tetris-canvas');
+        const canvas = body.querySelector('.tetris-canvas');
         const ctx = canvas.getContext('2d');
-        const nextCanvas = body.querySelector('#tetris-next');
+        const nextCanvas = body.querySelector('.tetris-next');
         const nctx = nextCanvas.getContext('2d');
-        const scoreEl = body.querySelector('#tet-score');
-        const levelEl = body.querySelector('#tet-level');
-        const linesEl = body.querySelector('#tet-lines');
-        const startBtn = body.querySelector('#tet-start');
+        const scoreEl = body.querySelector('.tet-score');
+        const levelEl = body.querySelector('.tet-level');
+        const linesEl = body.querySelector('.tet-lines');
+        const startBtn = body.querySelector('.tet-start');
         const COLS = 10, ROWS = 20, SZ = 20;
         const PIECES = [
           { shape: [[1, 1, 1, 1]], color: '#22d3ee' },  // I
@@ -4368,25 +4387,25 @@ ${getAgentDesktopState()}`
           <div style="display:flex;gap:8px;">
             <div style="background:#bbada0;border-radius:6px;padding:6px 12px;text-align:center;">
               <div style="font-size:9px;color:#eee4da;font-weight:700;">SCORE</div>
-              <div id="g2048-score" style="font-size:16px;font-weight:700;color:#fff;">0</div>
+              <div class="g2048-score" style="font-size:16px;font-weight:700;color:#fff;">0</div>
             </div>
             <div style="background:#bbada0;border-radius:6px;padding:6px 12px;text-align:center;">
               <div style="font-size:9px;color:#eee4da;font-weight:700;">BEST</div>
-              <div id="g2048-best" style="font-size:16px;font-weight:700;color:#fff;">0</div>
+              <div class="g2048-best" style="font-size:16px;font-weight:700;color:#fff;">0</div>
             </div>
           </div>
         </div>
-        <div id="g2048-msg" style="font-size:12px;color:#776e65;font-family:'Tahoma',sans-serif;">Join the numbers to get 2048! Use arrow keys.</div>
-        <div id="g2048-board" style="background:#bbada0;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,75px);grid-template-rows:repeat(4,75px);gap:8px;width:340px;height:340px;" tabindex="0"></div>
-        <button id="g2048-new" style="background:#8f7a66;color:#fff;border:none;border-radius:6px;padding:8px 24px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tahoma',sans-serif;">New Game</button>
+        <div class="g2048-msg" style="font-size:12px;color:#776e65;font-family:'Tahoma',sans-serif;">Join the numbers to get 2048! Use arrow keys.</div>
+        <div class="g2048-board" style="background:#bbada0;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,75px);grid-template-rows:repeat(4,75px);gap:8px;width:340px;height:340px;" tabindex="0"></div>
+        <button class="g2048-new" style="background:#8f7a66;color:#fff;border:none;border-radius:6px;padding:8px 24px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tahoma',sans-serif;">New Game</button>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const boardEl = body.querySelector('#g2048-board');
-        const scoreEl = body.querySelector('#g2048-score');
-        const bestEl = body.querySelector('#g2048-best');
-        const msgEl = body.querySelector('#g2048-msg');
-        const newBtn = body.querySelector('#g2048-new');
+        const boardEl = body.querySelector('.g2048-board');
+        const scoreEl = body.querySelector('.g2048-score');
+        const bestEl = body.querySelector('.g2048-best');
+        const msgEl = body.querySelector('.g2048-msg');
+        const newBtn = body.querySelector('.g2048-new');
         const COLORS = { 0: '#cdc1b4', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e' };
         const FGCOLORS = { 0: 'transparent', 2: '#776e65', 4: '#776e65', 8: '#f9f6f2', 16: '#f9f6f2', 32: '#f9f6f2', 64: '#f9f6f2', 128: '#f9f6f2', 256: '#f9f6f2', 512: '#f9f6f2', 1024: '#f9f6f2', 2048: '#f9f6f2' };
         let grid, score, best = 0, won = false;
@@ -4463,18 +4482,18 @@ ${getAgentDesktopState()}`
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: bold;">Open:</label>
-          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <input type="text" class="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
-          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+          <button class="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
+          <button class="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const input = body.querySelector('#run-input');
-        const okBtn = body.querySelector('#run-ok-btn');
-        const cancelBtn = body.querySelector('#run-cancel-btn');
+        const input = body.querySelector('.run-input');
+        const okBtn = body.querySelector('.run-ok-btn');
+        const cancelBtn = body.querySelector('.run-cancel-btn');
 
         input.focus();
 
@@ -4560,13 +4579,13 @@ ${getAgentDesktopState()}`
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
         <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" class="clock-display-large"></div>
+        <div style="font-size: 18px; color: #666;" class="date-display-large"></div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const timeDisplay = body.querySelector('#clock-display-large');
-        const dateDisplay = body.querySelector('#date-display-large');
+        const timeDisplay = body.querySelector('.clock-display-large');
+        const dateDisplay = body.querySelector('.date-display-large');
 
         function updateDisplay() {
           const now = new Date();
@@ -4593,12 +4612,12 @@ ${getAgentDesktopState()}`
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
-          <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
+          <input type="checkbox" class="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
-        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+        <select class="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
@@ -4607,12 +4626,12 @@ ${getAgentDesktopState()}`
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const cb = body.querySelector('#toggle-sound');
+        const cb = body.querySelector('.toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
-        const bgSel = body.querySelector('#bg-selector');
+        const bgSel = body.querySelector('.bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
           localStorage.setItem('retro_bg', bg);
@@ -4631,8 +4650,8 @@ ${getAgentDesktopState()}`
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
+        <div class="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
+        <div class="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
           <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
@@ -4643,14 +4662,14 @@ ${getAgentDesktopState()}`
           <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+        <button class="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const cells = body.querySelectorAll('.ttt-cell');
-        const msg = body.querySelector('#ttt-msg');
-        const resetBtn = body.querySelector('#ttt-reset');
+        const msg = body.querySelector('.ttt-msg');
+        const resetBtn = body.querySelector('.ttt-reset');
 
         let board = Array(9).fill(null);
         let xIsNext = true;
@@ -4710,47 +4729,47 @@ ${getAgentDesktopState()}`
       title: 'Code Studio', width: 1080, height: 680, tbIcon: '👨‍💻',
       body: `<div class="cs-root">
         <div class="cs-activitybar">
-          <div class="cs-ab-btn active" id="cs-ab-explorer" title="Explorer">
+          <div class="cs-ab-btn active" class="cs-ab-explorer" title="Explorer">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
           </div>
-          <div class="cs-ab-btn" id="cs-ab-folder" title="Open Folder">
+          <div class="cs-ab-btn" class="cs-ab-folder" title="Open Folder">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>
           </div>
-          <div class="cs-ab-btn" id="cs-ab-agent" title="AI Agent">
+          <div class="cs-ab-btn" class="cs-ab-agent" title="AI Agent">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
           </div>
           <div class="cs-ab-spacer"></div>
-          <div class="cs-ab-btn" id="cs-ab-settings" title="Settings">
+          <div class="cs-ab-btn" class="cs-ab-settings" title="Settings">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           </div>
         </div>
 
-        <div class="cs-sidepanel" id="cs-sidepanel">
+        <div class="cs-sidepanel" class="cs-sidepanel">
           <div class="cs-sp-header">EXPLORER</div>
           <div class="cs-sp-section">
             <div class="cs-sp-section-title">
               <span class="cs-chevron">▾</span> WORKSPACE
             </div>
             <div class="cs-workspace-meta">
-              <div class="cs-workspace-label" id="cs-workspace-label">No folder selected</div>
+              <div class="cs-workspace-label" class="cs-workspace-label">No folder selected</div>
               <div class="cs-workspace-actions">
-                <button class="cs-action-btn primary" id="cs-open-folder-btn">Open Folder</button>
-                <button class="cs-action-btn" id="cs-new-file-btn">New File</button>
-                <button class="cs-action-btn" id="cs-new-folder-btn">New Folder</button>
+                <button class="cs-action-btn primary" class="cs-open-folder-btn">Open Folder</button>
+                <button class="cs-action-btn" class="cs-new-file-btn">New File</button>
+                <button class="cs-action-btn" class="cs-new-folder-btn">New Folder</button>
               </div>
             </div>
-            <div class="cs-filetree" id="cs-filetree"></div>
+            <div class="cs-filetree" class="cs-filetree"></div>
           </div>
         </div>
 
-        <div class="cs-sidepanel" id="cs-agent-panel" style="display:none;">
+        <div class="cs-sidepanel" class="cs-agent-panel" style="display:none;">
           <div class="cs-sp-header">AI AGENT</div>
           <div class="cs-sp-section">
             <div class="cs-sp-section-title">CONFIGURATION</div>
             <div class="cs-agent-config-form">
               <label class="cs-agent-field">
                 <span>Provider</span>
-                <select id="cs-agent-provider">
+                <select class="cs-agent-provider">
                   <option value="openai">OpenAI</option>
                   <option value="gemini">Gemini</option>
                   <option value="claude">Claude</option>
@@ -4758,13 +4777,13 @@ ${getAgentDesktopState()}`
               </label>
               <label class="cs-agent-field">
                 <span>Model</span>
-                <input type="text" id="cs-agent-model" placeholder="gpt-4o-mini">
+                <input type="text" class="cs-agent-model" placeholder="gpt-4o-mini">
               </label>
               <label class="cs-agent-field">
                 <span>API Key</span>
-                <input type="password" id="cs-agent-key" placeholder="••••••••">
+                <input type="password" class="cs-agent-key" placeholder="••••••••">
               </label>
-              <button class="cs-action-btn primary" id="cs-agent-save" style="margin-top:10px; width:100%;">Save & Sync</button>
+              <button class="cs-action-btn primary" class="cs-agent-save" style="margin-top:10px; width:100%;">Save & Sync</button>
             </div>
             <div class="cs-agent-helper-text" style="font-size:11px; color:#888; margin-top:12px; line-height:1.4;">
               Settings are shared with the global AI Agent. Use "agent [prompt]" in the terminal below to interact.
@@ -4774,53 +4793,53 @@ ${getAgentDesktopState()}`
 
         <div class="cs-main">
           <div class="cs-tabbar">
-            <div class="cs-tabs-area" id="cs-tabs-area"></div>
+            <div class="cs-tabs-area" class="cs-tabs-area"></div>
             <div class="cs-tabbar-actions">
-              <button class="cs-action-btn" id="cs-open-folder-top">Open Folder</button>
-              <button class="cs-action-btn" id="cs-save-btn">Save</button>
-              <button class="cs-golive-btn" id="cs-run-btn">
+              <button class="cs-action-btn" class="cs-open-folder-top">Open Folder</button>
+              <button class="cs-action-btn" class="cs-save-btn">Save</button>
+              <button class="cs-golive-btn" class="cs-run-btn">
                 <span class="cs-golive-dot"></span> Go Live
               </button>
             </div>
           </div>
 
-          <div class="cs-breadcrumbs" id="cs-breadcrumbs"></div>
+          <div class="cs-breadcrumbs" class="cs-breadcrumbs"></div>
 
           <div class="cs-editor-area">
             <div class="cs-editor-wrapper">
-              <div class="cs-editor-empty" id="cs-editor-empty">
+              <div class="cs-editor-empty" class="cs-editor-empty">
                 <div class="cs-empty-title">Choose a folder to start editing.</div>
                 <div class="cs-empty-copy">Code Studio now works with real files from your RetroLinux filesystem.</div>
               </div>
-              <div class="cs-editor-pane" id="cs-editor-pane">
-                <div class="cs-line-numbers" id="cs-line-numbers"></div>
+              <div class="cs-editor-pane" class="cs-editor-pane">
+                <div class="cs-line-numbers" class="cs-line-numbers"></div>
                 <div class="cs-code-surface">
-                  <pre class="cs-code-highlight" id="cs-code-highlight"></pre>
-                  <textarea class="cs-code-input" id="cs-code-input" spellcheck="false" wrap="off"></textarea>
+                  <pre class="cs-code-highlight" class="cs-code-highlight"></pre>
+                  <textarea class="cs-code-input" class="cs-code-input" spellcheck="false" wrap="off"></textarea>
                 </div>
               </div>
             </div>
 
-            <div class="cs-preview-panel" id="cs-preview-panel" style="display:none;">
+            <div class="cs-preview-panel" class="cs-preview-panel" style="display:none;">
               <div class="cs-preview-chrome">
                 <div class="cs-preview-tab-bar">
                   <div class="cs-preview-tab">
                     <span class="cs-preview-dot green"></span>
                     <span>Live Preview</span>
                   </div>
-                  <button class="cs-preview-close" id="cs-close-preview">×</button>
+                  <button class="cs-preview-close" class="cs-close-preview">×</button>
                 </div>
                 <div class="cs-preview-addr">
                   <span class="cs-addr-icon">🔒</span>
-                  <span class="cs-addr-text" id="cs-preview-addr-text">Choose a folder first</span>
-                  <span class="cs-addr-reload" id="cs-reload-preview">↻</span>
+                  <span class="cs-addr-text" class="cs-preview-addr-text">Choose a folder first</span>
+                  <span class="cs-addr-reload" class="cs-reload-preview">↻</span>
                 </div>
               </div>
-              <iframe id="cs-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+              <iframe class="cs-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
             </div>
           </div>
 
-          <div class="cs-terminal-panel" id="cs-terminal-panel">
+          <div class="cs-terminal-panel" class="cs-terminal-panel">
             <div class="cs-terminal-tabs">
               <div class="cs-term-tab-group">
                 <span class="cs-term-tab active">TERMINAL</span>
@@ -4828,10 +4847,10 @@ ${getAgentDesktopState()}`
                 <span class="cs-term-tab">OUTPUT</span>
               </div>
               <div class="cs-term-actions">
-                <span class="cs-term-action cs-term-toggle" id="cs-term-toggle" title="Toggle Panel">⌃</span>
+                <span class="cs-term-action cs-term-toggle" class="cs-term-toggle" title="Toggle Panel">⌃</span>
               </div>
             </div>
-            <div class="cs-terminal-body" id="cs-terminal-body"></div>
+            <div class="cs-terminal-body" class="cs-terminal-body"></div>
           </div>
 
           <div class="cs-statusbar">
@@ -4840,32 +4859,32 @@ ${getAgentDesktopState()}`
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 012 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg>
                 workspace
               </span>
-              <span class="cs-sb-item" id="cs-sb-state">Choose a folder to start editing.</span>
+              <span class="cs-sb-item" class="cs-sb-state">Choose a folder to start editing.</span>
             </div>
             <div class="cs-sb-right">
-              <span class="cs-sb-item" id="cs-sb-cursor">Ln 1, Col 1</span>
+              <span class="cs-sb-item" class="cs-sb-cursor">Ln 1, Col 1</span>
               <span class="cs-sb-item">Spaces: 2</span>
               <span class="cs-sb-item">UTF-8</span>
-              <span class="cs-sb-item" id="cs-sb-lang">Plain Text</span>
+              <span class="cs-sb-item" class="cs-sb-lang">Plain Text</span>
               <span class="cs-sb-item cs-sb-prettier">Live Save</span>
             </div>
           </div>
         </div>
 
-        <div class="cs-folder-picker" id="cs-folder-picker">
+        <div class="cs-folder-picker" class="cs-folder-picker">
           <div class="cs-picker-panel">
             <div class="cs-picker-header">Open Folder</div>
             <div class="cs-picker-path">
-              <button class="cs-action-btn" id="cs-picker-root">Root</button>
-              <button class="cs-action-btn" id="cs-picker-home">Home</button>
-              <button class="cs-action-btn" id="cs-picker-up">Up</button>
-              <div class="cs-picker-current" id="cs-picker-current"></div>
+              <button class="cs-action-btn" class="cs-picker-root">Root</button>
+              <button class="cs-action-btn" class="cs-picker-home">Home</button>
+              <button class="cs-action-btn" class="cs-picker-up">Up</button>
+              <div class="cs-picker-current" class="cs-picker-current"></div>
             </div>
             <div class="cs-picker-copy">Choose the folder you want to edit, then open it as your workspace.</div>
-            <div class="cs-picker-list" id="cs-picker-list"></div>
+            <div class="cs-picker-list" class="cs-picker-list"></div>
             <div class="cs-picker-actions">
-              <button class="cs-action-btn" id="cs-picker-cancel">Cancel</button>
-              <button class="cs-action-btn primary" id="cs-picker-open">Open Current Folder</button>
+              <button class="cs-action-btn" class="cs-picker-cancel">Cancel</button>
+              <button class="cs-action-btn primary" class="cs-picker-open">Open Current Folder</button>
             </div>
           </div>
         </div>
@@ -4875,44 +4894,44 @@ ${getAgentDesktopState()}`
         const body = document.getElementById(winId + '-body');
         const refs = {
           root: body.querySelector('.cs-root'),
-          sidePanel: body.querySelector('#cs-sidepanel'),
-          workspaceLabel: body.querySelector('#cs-workspace-label'),
-          fileTree: body.querySelector('#cs-filetree'),
-          tabsArea: body.querySelector('#cs-tabs-area'),
-          breadcrumbs: body.querySelector('#cs-breadcrumbs'),
-          empty: body.querySelector('#cs-editor-empty'),
-          editorPane: body.querySelector('#cs-editor-pane'),
-          lineNumbers: body.querySelector('#cs-line-numbers'),
-          codeHighlight: body.querySelector('#cs-code-highlight'),
-          codeInput: body.querySelector('#cs-code-input'),
-          previewPanel: body.querySelector('#cs-preview-panel'),
-          previewAddr: body.querySelector('#cs-preview-addr-text'),
-          iframe: body.querySelector('#cs-iframe'),
-          terminalPanel: body.querySelector('#cs-terminal-panel'),
-          terminalBody: body.querySelector('#cs-terminal-body'),
-          saveBtn: body.querySelector('#cs-save-btn'),
-          runBtn: body.querySelector('#cs-run-btn'),
-          statusState: body.querySelector('#cs-sb-state'),
-          statusCursor: body.querySelector('#cs-sb-cursor'),
-          statusLang: body.querySelector('#cs-sb-lang'),
-          picker: body.querySelector('#cs-folder-picker'),
-          pickerCurrent: body.querySelector('#cs-picker-current'),
-          pickerList: body.querySelector('#cs-picker-list'),
-          openFolderBtn: body.querySelector('#cs-open-folder-btn'),
-          openFolderTop: body.querySelector('#cs-open-folder-top'),
-          newFileBtn: body.querySelector('#cs-new-file-btn'),
-          newFolderBtn: body.querySelector('#cs-new-folder-btn'),
-          pickerOpen: body.querySelector('#cs-picker-open'),
-          abExplorer: body.querySelector('#cs-ab-explorer'),
-          abAgent: body.querySelector('#cs-ab-agent'),
-          explorerPanel: body.querySelector('#cs-sidepanel'),
-          agentPanel: body.querySelector('#cs-agent-panel'),
-          agentProvider: body.querySelector('#cs-agent-provider'),
-          agentModel: body.querySelector('#cs-agent-model'),
-          agentKey: body.querySelector('#cs-agent-key'),
-          agentSave: body.querySelector('#cs-agent-save'),
-          abFolder: body.querySelector('#cs-ab-folder'),
-          abSettings: body.querySelector('#cs-ab-settings')
+          sidePanel: body.querySelector('.cs-sidepanel'),
+          workspaceLabel: body.querySelector('.cs-workspace-label'),
+          fileTree: body.querySelector('.cs-filetree'),
+          tabsArea: body.querySelector('.cs-tabs-area'),
+          breadcrumbs: body.querySelector('.cs-breadcrumbs'),
+          empty: body.querySelector('.cs-editor-empty'),
+          editorPane: body.querySelector('.cs-editor-pane'),
+          lineNumbers: body.querySelector('.cs-line-numbers'),
+          codeHighlight: body.querySelector('.cs-code-highlight'),
+          codeInput: body.querySelector('.cs-code-input'),
+          previewPanel: body.querySelector('.cs-preview-panel'),
+          previewAddr: body.querySelector('.cs-preview-addr-text'),
+          iframe: body.querySelector('.cs-iframe'),
+          terminalPanel: body.querySelector('.cs-terminal-panel'),
+          terminalBody: body.querySelector('.cs-terminal-body'),
+          saveBtn: body.querySelector('.cs-save-btn'),
+          runBtn: body.querySelector('.cs-run-btn'),
+          statusState: body.querySelector('.cs-sb-state'),
+          statusCursor: body.querySelector('.cs-sb-cursor'),
+          statusLang: body.querySelector('.cs-sb-lang'),
+          picker: body.querySelector('.cs-folder-picker'),
+          pickerCurrent: body.querySelector('.cs-picker-current'),
+          pickerList: body.querySelector('.cs-picker-list'),
+          openFolderBtn: body.querySelector('.cs-open-folder-btn'),
+          openFolderTop: body.querySelector('.cs-open-folder-top'),
+          newFileBtn: body.querySelector('.cs-new-file-btn'),
+          newFolderBtn: body.querySelector('.cs-new-folder-btn'),
+          pickerOpen: body.querySelector('.cs-picker-open'),
+          abExplorer: body.querySelector('.cs-ab-explorer'),
+          abAgent: body.querySelector('.cs-ab-agent'),
+          explorerPanel: body.querySelector('.cs-sidepanel'),
+          agentPanel: body.querySelector('.cs-agent-panel'),
+          agentProvider: body.querySelector('.cs-agent-provider'),
+          agentModel: body.querySelector('.cs-agent-model'),
+          agentKey: body.querySelector('.cs-agent-key'),
+          agentSave: body.querySelector('.cs-agent-save'),
+          abFolder: body.querySelector('.cs-ab-folder'),
+          abSettings: body.querySelector('.cs-ab-settings')
         };
         const state = {
           workspacePath: '',
