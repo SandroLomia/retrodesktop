@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todolist: openTodoList
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1722,6 +1722,115 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
       status: 'Ln 1, Col 1'
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: '<textarea class="stickynotes-textarea" style="width: 100%; height: 100%; border: none; background: #fffacd; resize: none; padding: 10px; box-sizing: border-box; font-family: \'Comic Sans MS\', cursive, sans-serif;"></textarea>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.stickynotes-textarea');
+        ta.value = localStorage.getItem('retro_stickynotes') || '';
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', ta.value);
+        });
+      }
+    });
+  }
+
+  // ======= TODO LIST =======
+  function openTodoList() {
+    createWindow({
+      title: 'Todo List', width: 300, height: 400, tbIcon: '✅',
+      statusbar: false,
+      body: `
+        <div style="display: flex; flex-direction: column; height: 100%; background: #fff; font-family: 'Tahoma', sans-serif;">
+          <div style="display: flex; padding: 10px; border-bottom: 1px solid #ccc; background: #f0f0f0;">
+            <input type="text" id="todo-input" placeholder="Add a new task..." style="flex: 1; padding: 5px; border: 1px solid #ccc;">
+            <button id="todo-add" style="margin-left: 5px; padding: 5px 10px;">Add</button>
+          </div>
+          <ul id="todo-list" style="list-style: none; padding: 0; margin: 0; flex: 1; overflow-y: auto;"></ul>
+        </div>
+      `,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('#todo-input');
+        const addBtn = body.querySelector('#todo-add');
+        const list = body.querySelector('#todo-list');
+
+        let todos = JSON.parse(localStorage.getItem('retrotodo') || '[]');
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.padding = '8px 10px';
+            li.style.borderBottom = '1px solid #eee';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = todo.done;
+            cb.style.marginRight = '10px';
+            cb.addEventListener('change', () => {
+              todos[index].done = cb.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const span = document.createElement('span');
+            span.textContent = todo.text;
+            span.style.flex = '1';
+            if (todo.done) {
+              span.style.textDecoration = 'line-through';
+              span.style.color = '#888';
+            }
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '❌';
+            delBtn.style.background = 'none';
+            delBtn.style.border = 'none';
+            delBtn.style.cursor = 'pointer';
+            delBtn.addEventListener('click', () => {
+              todos.splice(index, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            li.appendChild(cb);
+            li.appendChild(span);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+          });
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, done: false });
+            saveTodos();
+            renderTodos();
+            input.value = '';
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
+      }
     });
   }
 

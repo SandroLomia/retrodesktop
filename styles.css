@@ -918,7 +918,8 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: rgba(20, 20, 20, 0.75);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -931,7 +932,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 12px 0 6px;
-  background: linear-gradient(180deg, #3d9c39 0%, #39872e 40%, #35872e 60%, #2e7d32 100%);
+  background: rgba(255, 255, 255, 0.15);
   border: none;
   border-radius: 0 8px 8px 0;
   color: #fff;
@@ -958,7 +959,7 @@ body {
 #taskbar-divider {
   width: 2px;
   height: 24px;
-  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: rgba(255, 255, 255, 0.2);
   margin: 0 4px;
 }
 
@@ -978,7 +979,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 0 8px;
-  background: linear-gradient(180deg, #3c6fcc, #2a5ab8);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(0,0,0,0.15);
   border-radius: 3px;
   color: #fff;
@@ -992,7 +993,7 @@ body {
 }
 
 .taskbar-app.active {
-  background: linear-gradient(180deg, #3362b5, #1e4c9a);
+  background: rgba(255, 255, 255, 0.25);
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
 }
 
@@ -1013,7 +1014,7 @@ body {
   gap: 8px;
   padding: 0 12px;
   height: 100%;
-  background: linear-gradient(180deg, #1a5ab8, #1248a0);
+  background: transparent;
   border-left: 1px solid rgba(255,255,255,0.1);
 }
 
