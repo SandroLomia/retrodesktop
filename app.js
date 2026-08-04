@@ -370,6 +370,56 @@
     document.getElementById('clock').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
   }
 
+
+  // Taskbar Context Menu
+  const taskbarMenu = document.getElementById('taskbar-context-menu');
+  document.getElementById('taskbar').addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Hide other context menus
+    document.getElementById('context-menu').style.display = 'none';
+    removeExplorerCtx();
+    document.getElementById('start-menu').style.display = 'none';
+
+    taskbarMenu.style.display = 'block';
+
+    // Position it above the taskbar
+    let x = e.clientX;
+    let y = e.clientY;
+
+    taskbarMenu.style.left = x + 'px';
+    taskbarMenu.style.top = (y - taskbarMenu.offsetHeight) + 'px';
+
+    // Adjust if it goes off screen
+    if (x + taskbarMenu.offsetWidth > window.innerWidth) {
+      taskbarMenu.style.left = (window.innerWidth - taskbarMenu.offsetWidth - 5) + 'px';
+    }
+  });
+
+  // Taskbar context menu actions
+  document.getElementById('tb-ctx-properties').addEventListener('click', () => {
+    taskbarMenu.style.display = 'none';
+    openSettings();
+  });
+
+  document.getElementById('tb-ctx-terminal').addEventListener('click', () => {
+    taskbarMenu.style.display = 'none';
+    openTerminal();
+  });
+
+  document.getElementById('tb-ctx-taskmgr').addEventListener('click', () => {
+    taskbarMenu.style.display = 'none';
+    openMyComputer(); // Re-use Computer as Task Manager equivalent for now
+  });
+
+  // Ensure clicking anywhere hides the taskbar context menu
+  document.addEventListener('click', (e) => {
+    if (taskbarMenu && taskbarMenu.style.display === 'block') {
+      taskbarMenu.style.display = 'none';
+    }
+  });
+
   // Start menu
   document.getElementById('start-button').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -692,7 +742,7 @@
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body TERBODY"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -2658,8 +2708,8 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         setActiveWindow(id);
         if (initialPrompt) {
           const body = document.getElementById(id + '-body');
-          const input = body?.querySelector('#agent-input');
-          const sendBtn = body?.querySelector('#agent-send-btn');
+          const input = body?.querySelector('.agent-input');
+          const sendBtn = body?.querySelector('.agent-send-btn');
           if (input && sendBtn) {
             input.value = initialPrompt;
             sendBtn.click();
@@ -2679,25 +2729,25 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
             <button class="agent-provider-btn" data-provider="gemini">Gemini</button>
             <button class="agent-provider-btn" data-provider="claude">Claude</button>
           </div>
-          <div class="agent-provider-help" id="agent-provider-help"></div>
+          <div class="agent-provider-help"></div>
 
           <label class="agent-field">
             <span>Model</span>
-            <input type="text" id="agent-model-input" placeholder="gpt-4o-mini">
+            <input type="text" class="agent-model-input" placeholder="gpt-4o-mini">
           </label>
 
           <label class="agent-field">
             <span>API Key</span>
-            <input type="password" id="agent-key-input" placeholder="Paste API key">
+            <input type="password" class="agent-key-input" placeholder="Paste API key">
           </label>
 
           <div class="agent-sidebar-actions">
-            <button class="agent-btn primary" id="agent-save-config">Save</button>
-            <button class="agent-btn" id="agent-clear-chat">Clear Chat</button>
+            <button class="agent-btn primary agent-save-config">Save</button>
+            <button class="agent-btn agent-clear-chat">Clear Chat</button>
           </div>
 
           <label class="agent-toggle">
-            <input type="checkbox" id="agent-control-toggle">
+            <input type="checkbox" class="agent-control-toggle">
             <span>Desktop control mode</span>
           </label>
 
@@ -2707,22 +2757,22 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           <div class="agent-state-box">
             <div class="agent-sidebar-title">Agent Status</div>
-            <div class="agent-status" id="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
+            <div class="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
             <div class="agent-sidebar-title">Debug Logs</div>
-            <div id="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
+            <div class="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
             <div class="agent-sidebar-title">Desktop State</div>
-            <pre id="agent-state-preview"></pre>
+            <pre class="agent-state-preview"></pre>
           </div>
         </div>
 
         <div class="agent-main">
-          <div class="agent-chat" id="agent-chat"></div>
-          <div class="agent-action-log" id="agent-action-log"></div>
+          <div class="agent-chat"></div>
+          <div class="agent-action-log"></div>
           <div class="agent-compose">
-            <textarea id="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
+            <textarea class="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
             <div class="agent-compose-actions">
-              <span class="agent-status" id="agent-status">Ready</span>
-              <button class="agent-btn primary" id="agent-send-btn">Send</button>
+              <span class="agent-status">Ready</span>
+              <button class="agent-btn primary agent-send-btn">Send</button>
             </div>
           </div>
         </div>
@@ -2795,20 +2845,20 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const body = document.getElementById(winId + '-body');
         const refs = {
           providerButtons: Array.from(body.querySelectorAll('.agent-provider-btn')),
-          providerHelp: body.querySelector('#agent-provider-help'),
-          modelInput: body.querySelector('#agent-model-input'),
-          keyInput: body.querySelector('#agent-key-input'),
-          saveConfig: body.querySelector('#agent-save-config'),
-          clearChat: body.querySelector('#agent-clear-chat'),
-          controlToggle: body.querySelector('#agent-control-toggle'),
-          statePreview: body.querySelector('#agent-state-preview'),
-          chat: body.querySelector('#agent-chat'),
-          actionLog: body.querySelector('#agent-action-log'),
-          input: body.querySelector('#agent-input'),
-          sendBtn: body.querySelector('#agent-send-btn'),
-          status: body.querySelector('#agent-status'),
-          statusLabel: body.querySelector('#agent-status-label'),
-          debugLog: body.querySelector('#agent-debug-log')
+          providerHelp: body.querySelector('.agent-provider-help'),
+          modelInput: body.querySelector('.agent-model-input'),
+          keyInput: body.querySelector('.agent-key-input'),
+          saveConfig: body.querySelector('.agent-save-config'),
+          clearChat: body.querySelector('.agent-clear-chat'),
+          controlToggle: body.querySelector('.agent-control-toggle'),
+          statePreview: body.querySelector('.agent-state-preview'),
+          chat: body.querySelector('.agent-chat'),
+          actionLog: body.querySelector('.agent-action-log'),
+          input: body.querySelector('.agent-input'),
+          sendBtn: body.querySelector('.agent-send-btn'),
+          status: body.querySelector('.agent-status'),
+          statusLabel: body.querySelector('.agent-status-label'),
+          debugLog: body.querySelector('.agent-debug-log')
         };
         const state = {
           provider: localStorage.getItem(STORAGE.provider) || 'openai',
@@ -3145,7 +3195,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                   : normalized === 'ide_editor' || normalized === 'active_ide_editor'
                     ? element.querySelector('#cs-code-input')
                     : normalized === 'agent_input' || normalized === 'active_agent_input'
-                      ? element.querySelector('#agent-input')
+                      ? element.querySelector('.agent-input')
                       : null;
             if (targetEl) return { record, element: targetEl };
           }
@@ -3176,7 +3226,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                             : normalized === 'ide_run'
                               ? element.querySelector('#cs-run-btn')
                               : normalized === 'agent_send'
-                                ? element.querySelector('#agent-send-btn')
+                                ? element.querySelector('.agent-send-btn')
                                 : normalized === 'settings_sound_toggle'
                                   ? element.querySelector('#toggle-sound')
                                   : null;
@@ -4047,7 +4097,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body MINEBODY"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
