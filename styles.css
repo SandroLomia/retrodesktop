@@ -3511,7 +3511,7 @@ body {
 .agent-chat::-webkit-scrollbar,
 .agent-action-log::-webkit-scrollbar,
 .agent-state-box pre::-webkit-scrollbar,
-#agent-debug-log::-webkit-scrollbar {
+.agent-debug-log::-webkit-scrollbar {
   width: 16px;
   height: 16px;
 }
@@ -3519,7 +3519,7 @@ body {
 .agent-chat::-webkit-scrollbar-track,
 .agent-action-log::-webkit-scrollbar-track,
 .agent-state-box pre::-webkit-scrollbar-track,
-#agent-debug-log::-webkit-scrollbar-track {
+.agent-debug-log::-webkit-scrollbar-track {
   background: #eee;
   box-shadow: inset 1px 1px #808080;
 }
@@ -3527,7 +3527,7 @@ body {
 .agent-chat::-webkit-scrollbar-thumb,
 .agent-action-log::-webkit-scrollbar-thumb,
 .agent-state-box pre::-webkit-scrollbar-thumb,
-#agent-debug-log::-webkit-scrollbar-thumb {
+.agent-debug-log::-webkit-scrollbar-thumb {
   background: #d4d0c8;
   border: 1px solid #fff;
   border-right-color: #808080;
