@@ -390,8 +390,17 @@
     e.preventDefault();
     const cm = document.getElementById('context-menu');
     cm.style.display = 'block';
-    cm.style.left = e.clientX + 'px';
-    cm.style.top = e.clientY + 'px';
+
+    // Boundary check
+    let x = e.clientX;
+    let y = e.clientY;
+    const cw = cm.offsetWidth;
+    const ch = cm.offsetHeight;
+    if (x + cw > window.innerWidth) x = window.innerWidth - cw;
+    if (y + ch > window.innerHeight) y = window.innerHeight - ch;
+
+    cm.style.left = x + 'px';
+    cm.style.top = y + 'px';
   });
 
   document.getElementById('ctx-refresh').addEventListener('click', () => location.reload());
@@ -683,9 +692,28 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings,
+      stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
+  }
+
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="height: 100%; display: flex; flex-direction: column; background: #fef08a;">
+        <textarea id="stickynote-text" style="flex: 1; resize: none; border: none; background: transparent; padding: 10px; font-family: 'Comic Sans MS', 'Tahoma', sans-serif; font-size: 14px; outline: none;"></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('#stickynote-text');
+        textarea.value = localStorage.getItem('retro_stickynotes') || '';
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
   }
 
   // ======= TERMINAL =======

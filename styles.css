@@ -653,7 +653,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 2px 4px 12px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.3);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -918,11 +918,12 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #2a72eb 0%, #4c8bf5 4%, #2a72eb 6%, #205ccb 50%, #1c52b5 90%, #1c52b5 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.6);
+  border-top: 1px solid #5a94ff;
 }
 
 #start-button {
@@ -3533,4 +3534,38 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+
+/* Sticky Notes Icon */
+.icon-stickynotes {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  border: 1px solid #eab308;
+  border-radius: 2px;
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  top: 8px; left: 6px; right: 6px;
+  height: 2px;
+  background: #ca8a04;
+  box-shadow: 0 6px 0 #ca8a04, 0 12px 0 #ca8a04;
+}
+.smi-icon.icon-stickynotes {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  border: 1px solid #eab308;
+}
+.smi-icon.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  top: 6px; left: 4px; right: 4px;
+  height: 2px;
+  background: #ca8a04;
+  box-shadow: 0 4px 0 #ca8a04, 0 8px 0 #ca8a04;
 }
