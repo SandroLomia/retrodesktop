@@ -652,8 +652,8 @@ body {
   position: absolute;
   background: #ece9d8;
   border: 2px solid #0055e5;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -918,7 +918,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(180deg, #3a79f8 0%, #2b65d6 5%, #1a4db5 95%, #113a94 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -3533,4 +3533,37 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+.sticky-textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: none;
+  background-color: #fdf59a; /* classic sticky yellow */
+  color: #333;
+  padding: 12px;
+  font-family: 'Segoe Print', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  box-sizing: border-box;
+}
+
+/* Base icon for sticky notes */
+.icon-stickynotes {
+  background: #fdf59a;
+  border: 1px solid #c9b922;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  height: 2px;
+  background: #e1d34c;
+  box-shadow: 0 4px 0 #e1d34c, 0 8px 0 #e1d34c;
 }
