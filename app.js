@@ -681,11 +681,29 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    const id = createWindow({
+      title: 'Sticky Notes', width: 280, height: 320, tbIcon: '📝',
+      body: '<textarea class="sticky-textarea" spellcheck="false" placeholder="Write your notes here..."></textarea>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.sticky-textarea');
+        textarea.value = localStorage.getItem('retro_stickynotes') || '';
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
   }
 
   // ======= TERMINAL =======
@@ -4490,7 +4508,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE, stickynotes: openStickyNotes,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
