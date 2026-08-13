@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, stickynotes: openStickyNotes, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -1713,6 +1713,24 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) result += buildTree(val, prefix + (isLast ? '    ' : '│   '));
     });
     return result;
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    const savedNotes = localStorage.getItem('retro_stickynotes') || '';
+    const id = createWindow({
+      title: 'Sticky Notes', width: 300, height: 250, tbIcon: '📝', status: 'Ready',
+      body: '<textarea class="stickynotes-textarea" style="width:100%; height:100%; resize:none; border:none; background:#fef08a; padding:10px; font-family:\'Comic Sans MS\', cursive, sans-serif; font-size:14px; outline:none; box-sizing:border-box;">' + savedNotes.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>',
+      statusbar: true,
+      onReady: (winId) => {
+        const win = document.getElementById(winId);
+        const textarea = document.getElementById(winId + '-body').querySelector('.stickynotes-textarea');
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
   }
 
   // ======= NOTEPAD =======
@@ -4487,7 +4505,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, stickynotes: openStickyNotes, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
