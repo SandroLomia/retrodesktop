@@ -382,6 +382,26 @@
       document.getElementById('start-menu').style.display = 'none';
     }
     document.getElementById('context-menu').style.display = 'none';
+    document.getElementById('taskbar-context-menu').style.display = 'none';
+  });
+
+
+  // Taskbar context menu
+  document.getElementById('taskbar').addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    const cm = document.getElementById('taskbar-context-menu');
+    cm.style.display = 'block';
+
+    // Position menu above the taskbar
+    cm.style.left = e.clientX + 'px';
+    // Start menu is at bottom, so ensure we place it above the taskbar
+    const rect = cm.getBoundingClientRect();
+    cm.style.top = (e.clientY - 30) + 'px';
+  });
+
+  document.getElementById('ctx-taskmgr').addEventListener('click', () => {
+    document.getElementById('taskbar-context-menu').style.display = 'none';
+    openTaskManager();
   });
 
   // Context menu
@@ -676,9 +696,94 @@
   document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
 
   // ======= App Launchers =======
+
+  // ======= TASK MANAGER =======
+  function openTaskManager() {
+    createWindow({
+      title: 'Task Manager',
+      width: 400,
+      height: 300,
+      tbIcon: '📋',
+      body: `
+        <div style="padding: 10px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
+          <div style="margin-bottom: 8px;"><strong>Applications</strong></div>
+          <div style="flex-grow: 1; border: 1px solid #7f9db9; background: #fff; overflow-y: auto;" id="tm-list"></div>
+          <div style="text-align: right; margin-top: 10px;">
+            <button id="tm-end-task" style="padding: 4px 12px; cursor: pointer;" disabled>End Task</button>
+          </div>
+        </div>
+      `,
+      onReady: (winId, w) => {
+        const listEl = w.querySelector('#tm-list');
+        const endTaskBtn = w.querySelector('#tm-end-task');
+        let selectedWinId = null;
+
+        function renderList() {
+          // Compare current window IDs to what is currently rendered
+          const openIds = Object.keys(openWindows).filter(id => id !== winId);
+          const currentNodes = Array.from(listEl.children);
+
+          // Remove closed windows
+          currentNodes.forEach(node => {
+            if (!openIds.includes(node.dataset.winId)) {
+              node.remove();
+            }
+          });
+
+          // Add or update windows
+          openIds.forEach(id => {
+            let div = listEl.querySelector(`[data-win-id="${id}"]`);
+            if (!div) {
+              div = document.createElement('div');
+              div.dataset.winId = id;
+              div.style.padding = '4px 8px';
+              div.style.cursor = 'pointer';
+              div.style.userSelect = 'none';
+              div.addEventListener('click', () => {
+                selectedWinId = id;
+                endTaskBtn.disabled = false;
+                renderList();
+              });
+              listEl.appendChild(div);
+            }
+
+            // Update title and selection state
+            const winInfo = openWindows[id];
+            div.textContent = winInfo.title || 'Unknown Window';
+            if (id === selectedWinId) {
+              div.style.background = '#316ac5';
+              div.style.color = '#fff';
+            } else {
+              div.style.background = 'transparent';
+              div.style.color = 'inherit';
+            }
+          });
+
+          if (!openWindows[selectedWinId]) {
+            selectedWinId = null;
+            endTaskBtn.disabled = true;
+          }
+        }
+
+        endTaskBtn.addEventListener('click', () => {
+          if (selectedWinId) {
+            removeWindow(selectedWinId);
+            selectedWinId = null;
+            endTaskBtn.disabled = true;
+            renderList();
+          }
+        });
+
+        renderList();
+        const interval = setInterval(renderList, 1000);
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, taskmanager: openTaskManager, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -4487,7 +4592,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, taskmgr: openTaskManager, taskmanager: openTaskManager, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
