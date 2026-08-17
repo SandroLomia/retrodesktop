@@ -699,7 +699,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288cff 6%, #1270e3 50%, #0c5cdb 90%, #004ee3 100%);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,7 +709,7 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288cff 6%, #1270e3 50%, #0c5cdb 90%, #004ee3 100%);
 }
 
 .window:not(.active) .window-titlebar {
@@ -3533,4 +3533,21 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+.icon-stickynotes {
+  background: conic-gradient(from 180deg, #fef08a 0%, #fde047 25%, #fef08a 50%, #facc15 75%, #fef08a 100%);
+  border-radius: 2px;
+  border: 1px solid #ca8a04;
+  position: relative;
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  width: 16px;
+  height: 2px;
+  background: #ca8a04;
+  box-shadow: 0 4px 0 #ca8a04, 0 8px 0 #ca8a04, 0 12px 0 #ca8a04;
 }
