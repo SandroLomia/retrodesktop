@@ -682,7 +682,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4584,7 +4584,26 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let savedNotes = localStorage.getItem('retro_stickynotes') || '';
+    createWindow({
+      title: 'Sticky Notes', width: 280, height: 280, tbIcon: '📝', statusbar: false,
+      body: `<textarea class="stickynotes-textarea" style="width: 100%; height: 100%; border: none; background: #fef08a; padding: 10px; font-family: 'Tahoma', sans-serif; font-size: 14px; resize: none; outline: none; box-sizing: border-box; line-height: 1.5;"></textarea>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.value = savedNotes;
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
+  }
+
   // ======= SETTINGS =======
+
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
     createWindow({
