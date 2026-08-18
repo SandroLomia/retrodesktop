@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, clockapp: openClockApp
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4047,7 +4047,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body" ></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
@@ -4153,21 +4153,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
-        <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <div class="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
-        const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
+        const msgEl = body.querySelector('.snake-msg');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
@@ -4252,23 +4252,23 @@ ${getAgentDesktopState()}`
       title: 'Tetris', width: 400, height: 560, tbIcon: '🧩',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;gap:12px;align-items:flex-start;height:100%;background:#0a0a0a;padding:10px;justify-content:center;">
-        <canvas id="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
+        <canvas class="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
         <div style="display:flex;flex-direction:column;gap:10px;min-width:110px;">
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">SCORE</div>
-            <div id="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LEVEL</div>
-            <div id="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
+            <div class="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LINES</div>
-            <div id="tet-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tet-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:6px;">NEXT</div>
-            <canvas id="tetris-next" width="80" height="80"></canvas>
+            <canvas class="tetris-next" width="80" height="80"></canvas>
           </div>
           <button id="tet-start" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
           <div style="color:#475569;font-family:monospace;font-size:9px;line-height:1.5;">← → Move<br>↑ Rotate<br>↓ Soft drop<br>Space: Drop</div>
@@ -4276,13 +4276,13 @@ ${getAgentDesktopState()}`
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#tetris-canvas');
+        const canvas = body.querySelector('.tetris-canvas');
         const ctx = canvas.getContext('2d');
-        const nextCanvas = body.querySelector('#tetris-next');
+        const nextCanvas = body.querySelector('.tetris-next');
         const nctx = nextCanvas.getContext('2d');
-        const scoreEl = body.querySelector('#tet-score');
-        const levelEl = body.querySelector('#tet-level');
-        const linesEl = body.querySelector('#tet-lines');
+        const scoreEl = body.querySelector('.tet-score');
+        const levelEl = body.querySelector('.tet-level');
+        const linesEl = body.querySelector('.tet-lines');
         const startBtn = body.querySelector('#tet-start');
         const COLS = 10, ROWS = 20, SZ = 20;
         const PIECES = [
@@ -4368,25 +4368,25 @@ ${getAgentDesktopState()}`
           <div style="display:flex;gap:8px;">
             <div style="background:#bbada0;border-radius:6px;padding:6px 12px;text-align:center;">
               <div style="font-size:9px;color:#eee4da;font-weight:700;">SCORE</div>
-              <div id="g2048-score" style="font-size:16px;font-weight:700;color:#fff;">0</div>
+              <div class="g2048-score" style="font-size:16px;font-weight:700;color:#fff;">0</div>
             </div>
             <div style="background:#bbada0;border-radius:6px;padding:6px 12px;text-align:center;">
               <div style="font-size:9px;color:#eee4da;font-weight:700;">BEST</div>
-              <div id="g2048-best" style="font-size:16px;font-weight:700;color:#fff;">0</div>
+              <div class="g2048-best" style="font-size:16px;font-weight:700;color:#fff;">0</div>
             </div>
           </div>
         </div>
-        <div id="g2048-msg" style="font-size:12px;color:#776e65;font-family:'Tahoma',sans-serif;">Join the numbers to get 2048! Use arrow keys.</div>
-        <div id="g2048-board" style="background:#bbada0;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,75px);grid-template-rows:repeat(4,75px);gap:8px;width:340px;height:340px;" tabindex="0"></div>
-        <button id="g2048-new" style="background:#8f7a66;color:#fff;border:none;border-radius:6px;padding:8px 24px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tahoma',sans-serif;">New Game</button>
+        <div class="g2048-msg" style="font-size:12px;color:#776e65;font-family:'Tahoma',sans-serif;">Join the numbers to get 2048! Use arrow keys.</div>
+        <div class="g2048-board" style="background:#bbada0;border-radius:8px;padding:8px;display:grid;grid-template-columns:repeat(4,75px);grid-template-rows:repeat(4,75px);gap:8px;width:340px;height:340px;" tabindex="0"></div>
+        <button class="g2048-new" style="background:#8f7a66;color:#fff;border:none;border-radius:6px;padding:8px 24px;cursor:pointer;font-size:13px;font-weight:700;font-family:'Tahoma',sans-serif;">New Game</button>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const boardEl = body.querySelector('#g2048-board');
-        const scoreEl = body.querySelector('#g2048-score');
-        const bestEl = body.querySelector('#g2048-best');
-        const msgEl = body.querySelector('#g2048-msg');
-        const newBtn = body.querySelector('#g2048-new');
+        const boardEl = body.querySelector('.g2048-board');
+        const scoreEl = body.querySelector('.g2048-score');
+        const bestEl = body.querySelector('.g2048-best');
+        const msgEl = body.querySelector('.g2048-msg');
+        const newBtn = body.querySelector('.g2048-new');
         const COLORS = { 0: '#cdc1b4', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e' };
         const FGCOLORS = { 0: 'transparent', 2: '#776e65', 4: '#776e65', 8: '#f9f6f2', 16: '#f9f6f2', 32: '#f9f6f2', 64: '#f9f6f2', 128: '#f9f6f2', 256: '#f9f6f2', 512: '#f9f6f2', 1024: '#f9f6f2', 2048: '#f9f6f2' };
         let grid, score, best = 0, won = false;
@@ -4554,6 +4554,32 @@ ${getAgentDesktopState()}`
   }
 
   // ======= CLOCK SETTINGS =======
+  function openClockApp() {
+    createWindow({
+      title: 'Clock', width: 250, height: 150, tbIcon: '🕒',
+      menubar: '',
+      body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#ece9d8;font-family:'Tahoma',sans-serif;">
+        <div class="clock-display" style="font-size:36px;font-weight:bold;color:#333;">00:00:00</div>
+        <div class="clock-date" style="font-size:14px;color:#666;margin-top:5px;">--</div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const display = body.querySelector('.clock-display');
+        const dateDisplay = body.querySelector('.clock-date');
+
+        function update() {
+          const now = new Date();
+          display.textContent = now.toLocaleTimeString();
+          dateDisplay.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        update();
+        const interval = setInterval(update, 1000);
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
   function openClockSettings() {
     createWindow({
       title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
@@ -4631,8 +4657,8 @@ ${getAgentDesktopState()}`
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
+        <div class="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
+        <div class="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
           <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
@@ -4643,14 +4669,14 @@ ${getAgentDesktopState()}`
           <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+        <button class="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const cells = body.querySelectorAll('.ttt-cell');
-        const msg = body.querySelector('#ttt-msg');
-        const resetBtn = body.querySelector('#ttt-reset');
+        const msg = body.querySelector('.ttt-msg');
+        const resetBtn = body.querySelector('.ttt-reset');
 
         let board = Array(9).fill(null);
         let xIsNext = true;
