@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4519,7 +4519,34 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 280, tbIcon: '📝',
+      statusbar: false,
+      body: `<div class="stickynotes-body" style="background: #ffeb3b; height: 100%; display: flex; flex-direction: column;">
+        <textarea id="STK-NOTE" style="flex: 1; border: none; background: transparent; padding: 12px; font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 14px; outline: none; resize: none;"></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('textarea');
+        const savedNote = localStorage.getItem('retro_stickynotes') || '';
+        textarea.value = savedNote;
+
+        let timeout;
+        textarea.addEventListener('input', () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            localStorage.setItem('retro_stickynotes', textarea.value);
+          }, 300);
+        });
+      }
+    });
+  }
+
   // ======= HELP AND SUPPORT =======
+
   function openHelp() {
     createWindow({
       title: 'Help and Support Center', width: 640, height: 480, tbIcon: '❓',
