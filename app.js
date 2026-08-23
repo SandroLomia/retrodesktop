@@ -358,7 +358,8 @@
     playSound('boot');
     updateDesktopIcons();
     updateClock();
-    setInterval(updateClock, 1000);
+    if (window.clockInterval) clearInterval(window.clockInterval);
+    window.clockInterval = setInterval(updateClock, 1000);
     document.getElementById('clock').addEventListener('click', () => openApp('clock'));
   });
 
@@ -683,7 +684,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -692,7 +693,7 @@
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -1713,6 +1714,24 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) result += buildTree(val, prefix + (isLast ? '    ' : '│   '));
     });
     return result;
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: '<textarea class="stickynotes-textarea" style="width: 100%; height: 100%; border: none; background: #fffacd; padding: 10px; font-family: Comic Sans MS, cursive, sans-serif; resize: none; outline: none; font-size: 14px; box-sizing: border-box;" spellcheck="false" placeholder="Type a note..."></textarea>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.value = localStorage.getItem('retro_stickynotes') || '';
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
   }
 
   // ======= NOTEPAD =======
@@ -4047,7 +4066,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
@@ -4491,7 +4510,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, notes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4631,8 +4650,8 @@ ${getAgentDesktopState()}`
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
+        <div class="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
+        <div class="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
           <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
@@ -4643,14 +4662,14 @@ ${getAgentDesktopState()}`
           <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+        <button class="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const cells = body.querySelectorAll('.ttt-cell');
-        const msg = body.querySelector('#ttt-msg');
-        const resetBtn = body.querySelector('#ttt-reset');
+        const msg = body.querySelector('.ttt-msg');
+        const resetBtn = body.querySelector('.ttt-reset');
 
         let board = Array(9).fill(null);
         let xIsNext = true;
