@@ -699,7 +699,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: linear-gradient(to bottom, #0058e6 0%, #3a93ff 6%, #288cff 10%, #127dff 14%, #036bfe 20%, #0050d2 100%);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +709,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: linear-gradient(to bottom, #0058e6 0%, #3a93ff 6%, #288cff 10%, #127dff 14%, #036bfe 20%, #0050d2 100%);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: linear-gradient(to bottom, #0058e6 0%, #3a93ff 6%, #288cff 10%, #127dff 14%, #036bfe 20%, #0050d2 100%);
 }
 
 .window-title-icon {
@@ -918,7 +918,7 @@ body {
   left: 0;
   right: 0;
   height: 36px;
-  background: linear-gradient(180deg, #245edb 0%, #3b7cf5 4%, #245edb 6%, #1c52c0 50%, #1848a8 90%, #1848a8 100%);
+  background: linear-gradient(to bottom, #245edb 0%, #3f8cf3 9%, #245edb 18%, #245edb 92%, #1941a5 100%);
   display: flex;
   align-items: center;
   z-index: 9999;
@@ -1028,6 +1028,9 @@ body {
 }
 
 #clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   font-size: 11px;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
@@ -3534,3 +3537,10 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+/* Sticky Notes */
+.icon-stickynotes { position: relative; }
+.icon-stickynotes::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #fde047, #fef08a); border-radius: 4px; border: 1px solid #eab308; }
+.icon-stickynotes::after { content: '📝'; position: absolute; font-size: 20px; }
+.smi-icon.icon-stickynotes::before { width: 24px; height: 24px; }
+.smi-icon.icon-stickynotes::after { font-size: 14px; }
