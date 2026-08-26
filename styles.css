@@ -782,7 +782,7 @@ body {
 
 .window-menubar {
   height: 24px;
-  background: #ece9d8;
+  background: linear-gradient(180deg, #f4f2e8, #e8e6d6);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -874,7 +874,7 @@ body {
 
 .window-statusbar {
   height: 22px;
-  background: #ece9d8;
+  background: linear-gradient(180deg, #f4f2e8, #e8e6d6);
   border-top: 1px solid #c0c0c0;
   display: flex;
   align-items: center;
