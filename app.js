@@ -4153,21 +4153,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
-        <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <div class="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
-        const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
+        const msgEl = body.querySelector('.snake-msg');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
