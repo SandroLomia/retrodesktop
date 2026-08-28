@@ -682,7 +682,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, pong: openPong,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
@@ -4169,14 +4169,21 @@ ${getAgentDesktopState()}`
         const msgEl = body.querySelector('#snake-msg');
         const restartBtn = body.querySelector('#snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
-        let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
+        let snake, dir, nextDir, food, score, best = 0, interval = null, running = false, isPaused = false;
 
         function rnd(n) { return Math.floor(Math.random() * n); }
         function placeFood() {
-          const flat = [];
-          for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
-            if (!snake.some(s => s.r === r && s.c === c)) flat.push({ r, c });
-          return flat.length ? flat[rnd(flat.length)] : { r: 0, c: 0 };
+          const grid = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+          for (const s of snake) {
+            if (s.r >= 0 && s.r < ROWS && s.c >= 0 && s.c < COLS) grid[s.r][s.c] = true;
+          }
+          const empty = [];
+          for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+              if (!grid[r][c]) empty.push({ r, c });
+            }
+          }
+          return empty.length ? empty[rnd(empty.length)] : { r: 0, c: 0 };
         }
         function draw() {
           ctx.fillStyle = '#0d1117'; ctx.fillRect(0, 0, 400, 400);
@@ -4194,11 +4201,30 @@ ${getAgentDesktopState()}`
             ctx.fillStyle = grd;
             ctx.beginPath(); ctx.roundRect(seg.c * CELL + 1, seg.r * CELL + 1, CELL - 2, CELL - 2, 3); ctx.fill();
           });
+
+          if (isPaused) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, 400, 400);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 32px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('PAUSED', 200, 200);
+          }
         }
         function step() {
+          if (isPaused) return;
           dir = nextDir;
           const head = { r: snake[0].r + dir.r, c: snake[0].c + dir.c };
-          if (head.r < 0 || head.r >= ROWS || head.c < 0 || head.c >= COLS || snake.some(s => s.r === head.r && s.c === head.c)) {
+
+          let collision = false;
+          if (head.r < 0 || head.r >= ROWS || head.c < 0 || head.c >= COLS) collision = true;
+          else {
+              for (let i = 0; i < snake.length; i++) {
+                  if (snake[i].r === head.r && snake[i].c === head.c) { collision = true; break; }
+              }
+          }
+
+          if (collision) {
             clearInterval(interval); running = false;
             if (score > best) { best = score; bestEl.textContent = best; }
             msgEl.textContent = `Game Over! Score: ${score}. Press New Game to restart.`;
@@ -4219,7 +4245,8 @@ ${getAgentDesktopState()}`
           dir = { r: 0, c: 1 }; nextDir = { r: 0, c: 1 };
           food = placeFood(); score = 0;
           scoreEl.textContent = 0;
-          msgEl.textContent = 'Use arrow keys to move.'; msgEl.style.color = '#facc15';
+          isPaused = false;
+          msgEl.textContent = 'Use arrow keys to move. Press P to pause.'; msgEl.style.color = '#facc15';
           running = true;
           const speed = 130;
           interval = setInterval(step, speed);
@@ -4233,6 +4260,13 @@ ${getAgentDesktopState()}`
             const d = map[e.key];
             if (d.r !== -dir.r || d.c !== -dir.c) nextDir = d;
             if (!running) startGame();
+          } else if (e.key === 'p' || e.key === 'P' || e.key === ' ') {
+            if (running) {
+                isPaused = !isPaused;
+                if (isPaused) { msgEl.textContent = 'Paused. Press P to resume.'; }
+                else { msgEl.textContent = 'Use arrow keys to move. Press P to pause.'; }
+                draw();
+            }
           }
         });
         restartBtn.addEventListener('click', startGame);
@@ -4626,24 +4660,115 @@ ${getAgentDesktopState()}`
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
 
   // ======= TIC TAC TOE =======
+
+  // ======= PONG =======
+  function openPong() {
+    createWindow({
+      title: 'Pong', width: 440, height: 340, tbIcon: '🏓',
+      menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
+      body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#000;padding:10px;gap:8px;">
+        <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
+          <span style="color:#fff;font-family:monospace;font-size:16px;">Player 1: <b id="pong-p1">0</b></span>
+          <button id="pong-start" style="background:#fff;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">Start Game</button>
+          <span style="color:#fff;font-family:monospace;font-size:16px;">Player 2: <b id="pong-p2">0</b></span>
+        </div>
+        <canvas id="pong-canvas" width="400" height="250" style="border:2px solid #fff;border-radius:4px;display:block;"></canvas>
+        <div id="pong-msg" style="color:#aaa;font-family:monospace;font-size:12px;text-align:center;">P1: W/S | P2: UP/DOWN</div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const canvas = body.querySelector('#pong-canvas');
+        const ctx = canvas.getContext('2d');
+        const p1ScoreEl = body.querySelector('#pong-p1');
+        const p2ScoreEl = body.querySelector('#pong-p2');
+        const startBtn = body.querySelector('#pong-start');
+
+        let p1Score = 0, p2Score = 0;
+        let paddleW = 10, paddleH = 60;
+        let p1Y = 95, p2Y = 95;
+        let ballX = 200, ballY = 125, ballVX = 3, ballVY = 3, ballR = 6;
+        let keys = {};
+        let interval = null;
+        let running = false;
+
+        function draw() {
+          ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 400, 250);
+          ctx.fillStyle = '#fff';
+          // Middle line
+          for (let i = 0; i < 250; i += 20) { ctx.fillRect(199, i, 2, 10); }
+          // Paddles
+          ctx.fillRect(10, p1Y, paddleW, paddleH);
+          ctx.fillRect(380, p2Y, paddleW, paddleH);
+          // Ball
+          ctx.beginPath(); ctx.arc(ballX, ballY, ballR, 0, Math.PI * 2); ctx.fill();
+        }
+
+        function step() {
+          if (keys['w'] && p1Y > 0) p1Y -= 5;
+          if (keys['s'] && p1Y < 250 - paddleH) p1Y += 5;
+          if (keys['ArrowUp'] && p2Y > 0) p2Y -= 5;
+          if (keys['ArrowDown'] && p2Y < 250 - paddleH) p2Y += 5;
+
+          ballX += ballVX;
+          ballY += ballVY;
+
+          if (ballY - ballR < 0 || ballY + ballR > 250) ballVY = -ballVY;
+
+          // Paddle collision
+          if (ballX - ballR < 20 && ballY > p1Y && ballY < p1Y + paddleH) { ballVX = -ballVX; ballX = 20 + ballR; ballVY += (ballY - (p1Y + paddleH/2)) * 0.1; }
+          if (ballX + ballR > 380 && ballY > p2Y && ballY < p2Y + paddleH) { ballVX = -ballVX; ballX = 380 - ballR; ballVY += (ballY - (p2Y + paddleH/2)) * 0.1; }
+
+          if (ballX < 0) { p2Score++; p2ScoreEl.textContent = p2Score; resetBall(); }
+          if (ballX > 400) { p1Score++; p1ScoreEl.textContent = p1Score; resetBall(); }
+
+          draw();
+        }
+
+        function resetBall() { ballX = 200; ballY = 125; ballVX = -Math.sign(ballVX) * 3; ballVY = (Math.random() > 0.5 ? 1 : -1) * 3; }
+
+        function startGame() {
+          if (running) return;
+          running = true;
+          resetBall();
+          p1Y = 95; p2Y = 95;
+          interval = setInterval(step, 1000/60);
+          canvas.focus();
+        }
+
+        canvas.setAttribute('tabindex', '0');
+        canvas.addEventListener('keydown', (e) => { keys[e.key] = true; });
+        canvas.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+        startBtn.addEventListener('click', () => { p1Score = 0; p2Score = 0; p1ScoreEl.textContent = 0; p2ScoreEl.textContent = 0; startGame(); });
+
+        draw();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('🏓 PONG', 200, 110);
+        ctx.font = '12px monospace'; ctx.fillStyle = '#aaa'; ctx.fillText('Click Start Game to play', 200, 140);
+
+        registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
   function openTicTacToe() {
     createWindow({
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
-          <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="3" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="4" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="5" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="6" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+      body: `<div class="ttt-container">
+        <div id="ttt-msg" class="ttt-message">Player X's Turn</div>
+        <div id="ttt-board" class="ttt-board">
+          <button class="ttt-cell" data-idx="0"></button>
+          <button class="ttt-cell" data-idx="1"></button>
+          <button class="ttt-cell" data-idx="2"></button>
+          <button class="ttt-cell" data-idx="3"></button>
+          <button class="ttt-cell" data-idx="4"></button>
+          <button class="ttt-cell" data-idx="5"></button>
+          <button class="ttt-cell" data-idx="6"></button>
+          <button class="ttt-cell" data-idx="7"></button>
+          <button class="ttt-cell" data-idx="8"></button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+        <button id="ttt-reset" class="ttt-reset">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
@@ -4674,7 +4799,7 @@ ${getAgentDesktopState()}`
 
           board[idx] = xIsNext ? 'X' : 'O';
           e.target.textContent = board[idx];
-          e.target.style.color = xIsNext ? '#d9534f' : '#337ab7';
+          if (xIsNext) { e.target.classList.add('x-move'); } else { e.target.classList.add('o-move'); }
 
           playSound('click');
 
@@ -4697,7 +4822,7 @@ ${getAgentDesktopState()}`
           msg.textContent = "Player X's Turn";
           cells.forEach(cell => {
             cell.textContent = '';
-            cell.style.color = '#333';
+            cell.classList.remove('x-move', 'o-move');
           });
         });
       }
