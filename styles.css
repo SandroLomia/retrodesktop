@@ -3419,6 +3419,11 @@ body {
 .icon-tictactoe::after { content: '❌'; position: absolute; font-size: 18px; left: 8px; top: 6px;}
 .smi-icon.icon-tictactoe::before { width: 24px; height: 24px; left: 2px; top: 2px;}
 .smi-icon.icon-tictactoe::after { font-size: 14px; left: 5px; top: 5px; }
+.icon-pong { position: relative; }
+.icon-pong::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #000, #333); border-radius: 6px; border: 2px solid #fff; }
+.icon-pong::after { content: '🏓'; position: absolute; font-size: 18px; left: 8px; top: 6px;}
+.smi-icon.icon-pong::before { width: 24px; height: 24px; left: 2px; top: 2px; border: 1px solid #fff; }
+.smi-icon.icon-pong::after { font-size: 14px; left: 5px; top: 5px; }
 
 .icon-snake { position: relative; }
 .icon-snake::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #14532d, #166534); border-radius: 6px; border: 2px solid #15803d; }
@@ -3533,4 +3538,56 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+/* ======= TIC TAC TOE ======= */
+.ttt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  background: #ece9d8;
+  padding: 12px;
+  font-family: 'Tahoma', sans-serif;
+}
+
+.ttt-message {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 70px);
+  grid-template-rows: repeat(3, 70px);
+  gap: 4px;
+  background: #333;
+  padding: 4px;
+  border: 2px inset #fff;
+}
+
+.ttt-cell {
+  background: #fff;
+  border: none;
+  font-size: 36px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+.ttt-cell.x-move {
+  color: #d9534f;
+}
+
+.ttt-cell.o-move {
+  color: #337ab7;
+}
+
+.ttt-reset {
+  margin-top: 10px;
+  padding: 4px 16px;
+  cursor: pointer;
 }
