@@ -3534,3 +3534,21 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+.icon-stickynotes {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="12" y="12" width="40" height="40" fill="%23fef08a" stroke="%23eab308" stroke-width="2"/><line x1="20" y1="24" x2="44" y2="24" stroke="%23ca8a04" stroke-width="2"/><line x1="20" y1="32" x2="44" y2="32" stroke="%23ca8a04" stroke-width="2"/><line x1="20" y1="40" x2="36" y2="40" stroke="%23ca8a04" stroke-width="2"/></svg>');
+}
+
+.stickynotes-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  background-color: #fef08a;
+  color: #333;
+  font-family: 'Tahoma', sans-serif;
+  font-size: 14px;
+  padding: 10px;
+  box-sizing: border-box;
+  outline: none;
+}
