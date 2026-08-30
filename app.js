@@ -4052,17 +4052,23 @@ ${getAgentDesktopState()}`
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
         body.id = winId + '-mine';
-        initMinesweeper(body, rows, cols, mines);
+        initMinesweeper(body, rows, cols, mines, winId);
       }
     });
   }
 
-  function initMinesweeper(container, rows, cols, mineCount) {
+  function initMinesweeper(container, rows, cols, mineCount, winId) {
     let grid = [], gameOver = false, flagCount = 0, revealed = 0;
     const total = rows * cols;
+    let timeElapsed = 0;
+    let timerInterval = null;
+    let isFirstClick = true;
 
     function init() {
       grid = []; gameOver = false; flagCount = 0; revealed = 0;
+      timeElapsed = 0;
+      isFirstClick = true;
+      if (timerInterval) clearInterval(timerInterval);
       for (let r = 0; r < rows; r++) {
         grid[r] = [];
         for (let c = 0; c < cols; c++) grid[r][c] = { mine: false, revealed: false, flagged: false, count: 0 };
@@ -4088,7 +4094,7 @@ ${getAgentDesktopState()}`
       let html = `<div class="mine-header">
         <div class="mine-counter">${String(mineCount - flagCount).padStart(3, '0')}</div>
         <div class="mine-face" id="mine-reset">😊</div>
-        <div class="mine-counter">000</div>
+        <div class="mine-counter">${String(timeElapsed).padStart(3, '0')}</div>
       </div>`;
       html += `<div class="mine-grid" style="grid-template-columns:repeat(${cols},24px)">`;
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
@@ -4107,6 +4113,19 @@ ${getAgentDesktopState()}`
       container.querySelectorAll('.mine-cell').forEach(el => {
         el.addEventListener('click', () => {
           if (gameOver) return;
+          if (isFirstClick) {
+            isFirstClick = false;
+            timerInterval = setInterval(() => {
+              if (!gameOver) {
+                timeElapsed++;
+                if (timeElapsed > 999) timeElapsed = 999;
+                const counters = container.querySelectorAll('.mine-counter');
+                if (counters.length > 1) {
+                  counters[1].textContent = String(timeElapsed).padStart(3, '0');
+                }
+              }
+            }, 1000);
+          }
           const r = +el.dataset.r, c = +el.dataset.c;
           if (grid[r][c].flagged) return;
           revealCell(r, c);
@@ -4131,12 +4150,14 @@ ${getAgentDesktopState()}`
       cell.revealed = true; revealed++;
       if (cell.mine) {
         gameOver = true;
+        if (timerInterval) clearInterval(timerInterval);
         for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) if (grid[rr][cc].mine) grid[rr][cc].revealed = true;
         setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😵'; }, 50);
         return;
       }
       if (revealed === total - mineCount) {
         gameOver = true;
+        if (timerInterval) clearInterval(timerInterval);
         setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😎'; }, 50);
       }
       if (cell.count === 0) {
@@ -4144,6 +4165,11 @@ ${getAgentDesktopState()}`
       }
     }
     init();
+    if (winId) {
+      registerWindowCleanup(winId, () => {
+        if (timerInterval) clearInterval(timerInterval);
+      });
+    }
   }
 
   // ======= SNAKE =======
