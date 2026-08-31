@@ -140,6 +140,16 @@
     return normalized.split('/').filter(Boolean).pop();
   }
 
+
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function isValidNodeName(name) {
     return typeof name === 'string'
       && name.trim() !== ''
@@ -683,7 +693,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todo: openTodo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1016,9 +1026,10 @@
       return;
     }
     // Track command history
-    if (!container._cmdHistory) container._cmdHistory = [];
-    container._cmdHistory.push(trimmed);
-    if (container._cmdHistory.length > 100) container._cmdHistory.shift();
+
+    state.history.push(trimmed);
+    state.histIdx = state.history.length;
+    if (state.history.length > 100) state.history.shift();
     // Handle simple output redirection: cmd > file and cmd >> file
     const redirectMatch = trimmed.match(/^(.+?)\s*(>>?)\s*([^\s]+)$/);
 
@@ -1406,7 +1417,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         break;
       }
       case 'history': {
-        const hist = container._cmdHistory || [];
+        const hist = state.history || [];
         output = hist.length ? hist.map((h, i) => `${(i + 1).toString().padStart(4)}  ${h}`).join('\n') : '(no history)';
         break;
       }
@@ -1573,7 +1584,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         break;
       }
       case 'clear-history':
-        container._cmdHistory = [];
+        state.history = []; state.histIdx = -1;
         output = 'Command history cleared.';
         break;
       case 'exit':
@@ -2186,6 +2197,95 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           if (setNode(fullPath, ta.value)) playSound('click');
           else alert(`Could not save "${name}".`);
         });
+      }
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📌',
+      statusbar: false,
+      body: `<textarea class="stickynotes-textarea" style="width: 100%; height: 100%; background: #fef08a; border: none; resize: none; padding: 10px; font-family: 'Comic Sans MS', 'Tahoma', sans-serif; font-size: 14px; outline: none;"></textarea>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.stickynotes-textarea');
+        ta.value = localStorage.getItem('retro_stickynotes') || 'Buy milk...';
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', ta.value);
+        });
+      }
+    });
+  }
+
+  // ======= TODO LIST =======
+  function openTodo() {
+    createWindow({
+      title: 'To-Do List', width: 300, height: 400, tbIcon: '☑️',
+      statusbar: false,
+      body: `<div style="display:flex; flex-direction:column; height: 100%; background: #fff; padding: 10px; box-sizing: border-box;">
+        <h3 style="margin: 0 0 10px 0; font-family: 'Tahoma', sans-serif;">Tasks</h3>
+        <div class="todo-list" style="flex: 1; overflow-y: auto; border: 1px solid #ccc; padding: 5px; margin-bottom: 10px; background: #fafafa;"></div>
+        <div style="display: flex; gap: 5px;">
+          <input type="text" class="todo-input" style="flex: 1; padding: 4px;" placeholder="Add new task...">
+          <button class="todo-add-btn" style="padding: 4px 10px;">Add</button>
+        </div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const listEl = body.querySelector('.todo-list');
+        const inputEl = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        let todos = JSON.parse(localStorage.getItem('retrotodo') || '[]');
+
+        function renderTodos() {
+          listEl.innerHTML = '';
+          todos.forEach((todo, idx) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 4px; border-bottom: 1px solid #eee;';
+            item.innerHTML = `<input type="checkbox" class="todo-check" ${todo.done ? 'checked' : ''}>
+                              <span style="flex: 1; font-family: 'Tahoma', sans-serif; font-size: 13px; text-decoration: ${todo.done ? 'line-through' : 'none'}; color: ${todo.done ? '#888' : '#000'}">${escapeHtml(todo.text)}</span>
+                              <button class="todo-del-btn" style="cursor: pointer; background: transparent; border: none; color: #ef4444; font-weight: bold;">✕</button>`;
+
+            const check = item.querySelector('.todo-check');
+            check.addEventListener('change', () => {
+              todos[idx].done = check.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const del = item.querySelector('.todo-del-btn');
+            del.addEventListener('click', () => {
+              todos.splice(idx, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            listEl.appendChild(item);
+          });
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function addTodo() {
+          const text = inputEl.value.trim();
+          if (text) {
+            todos.push({ text, done: false });
+            saveTodos();
+            renderTodos();
+            inputEl.value = '';
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        inputEl.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
       }
     });
   }
@@ -4491,7 +4591,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4926,14 +5026,7 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+
 
         function stashTokens(text, rules) {
           const tokens = [];
