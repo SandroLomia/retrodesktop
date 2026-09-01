@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, todo: openTodo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -5697,6 +5697,104 @@ ${getAgentDesktopState()}`
           showPicker('/home/user');
         }
 
+      }
+    });
+  }
+
+
+  // ======= TO-DO LIST =======
+  function openTodo() {
+    const id = createWindow({
+      title: 'To-Do List', width: 350, height: 450, tbIcon: 'todo', status: '',
+      body: `
+        <div class="todo-app">
+          <div class="todo-header">
+            <h2>Tasks</h2>
+          </div>
+          <div class="todo-input-row">
+            <input type="text" class="todo-input" placeholder="Add a new task...">
+            <button class="todo-add-btn">Add</button>
+          </div>
+          <div class="todo-list"></div>
+        </div>
+      `,
+      statusbar: true,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+        const statusText = body.closest('.window').querySelector('.status-text');
+
+        let tasks = [];
+        try {
+          const stored = localStorage.getItem('retrotodo');
+          if (stored) tasks = JSON.parse(stored);
+        } catch(e) {}
+
+        function saveTasks() {
+          localStorage.setItem('retrotodo', JSON.stringify(tasks));
+        }
+
+        function updateStatus() {
+          if (!statusText) return;
+          const pending = tasks.filter(t => !t.completed).length;
+          statusText.textContent = pending + (pending === 1 ? ' task remaining' : ' tasks remaining');
+        }
+
+        function renderTasks() {
+          list.innerHTML = '';
+          tasks.forEach((task, index) => {
+            const item = document.createElement('div');
+            item.className = 'todo-item' + (task.completed ? ' completed' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.checked = task.completed;
+            checkbox.onchange = () => {
+              task.completed = checkbox.checked;
+              saveTasks();
+              renderTasks();
+            };
+
+            const text = document.createElement('span');
+            text.className = 'todo-text';
+            text.textContent = task.text;
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'todo-del-btn';
+            delBtn.textContent = '✖';
+            delBtn.onclick = () => {
+              tasks.splice(index, 1);
+              saveTasks();
+              renderTasks();
+            };
+
+            item.appendChild(checkbox);
+            item.appendChild(text);
+            item.appendChild(delBtn);
+            list.appendChild(item);
+          });
+          updateStatus();
+        }
+
+        function addTask() {
+          const val = input.value.trim();
+          if (val) {
+            tasks.push({ text: val, completed: false });
+            saveTasks();
+            input.value = '';
+            renderTasks();
+          }
+        }
+
+        addBtn.addEventListener('click', addTask);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTask();
+        });
+
+        renderTasks();
       }
     });
   }
