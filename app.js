@@ -92,7 +92,7 @@
         el.addEventListener('dblclick', () => {
           const path = '/home/user/Desktop/' + name;
           if (isDir) { openFileExplorer(path); }
-          else { const content = getNode(path); if (typeof content === 'string') openNotepadWith(name, path, content); }
+          else { const content = getNode(path); if (typeof content === 'string') openFileContent(name, path, content); }
         });
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault(); e.stopPropagation();
@@ -476,6 +476,31 @@
   });
 
   const recycleBin = document.getElementById('icon-recyclebin');
+  recycleBin.addEventListener('contextmenu', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+    recycleBin.classList.add('selected');
+    removeExplorerCtx();
+    const menu = document.createElement('div');
+    menu.className = 'exp-context-menu';
+    menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px';
+    menu.innerHTML = '<div class="ctx-item exp-ctx-open">📂 Open</div><div class="ctx-separator"></div><div class="ctx-item exp-ctx-empty">🗑️ Empty Recycle Bin</div>';
+    document.body.appendChild(menu);
+
+    menu.querySelector('.exp-ctx-open').addEventListener('click', () => {
+      removeExplorerCtx();
+      openRecycleBin();
+    });
+
+    menu.querySelector('.exp-ctx-empty').addEventListener('click', () => {
+      removeExplorerCtx();
+      if (trashBin.length > 0 && confirm('Are you sure you want to permanently delete all items in the Recycle Bin?')) {
+        trashBin = []; saveTrash(); playSound('click');
+      }
+    });
+
+    setTimeout(() => document.addEventListener('click', removeExplorerCtx, { once: true }), 10);
+  });
   recycleBin.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; recycleBin.classList.add('drag-over'); });
   recycleBin.addEventListener('dragleave', () => { recycleBin.classList.remove('drag-over'); });
   recycleBin.addEventListener('drop', (e) => {
@@ -1028,7 +1053,7 @@
       const destFile = redirectMatch[3];
       // Only handle echo redirection for now
       if (beforeRedir.startsWith('echo ') || beforeRedir.startsWith('echo\t')) {
-        const content = beforeRedir.slice(5).replace(/^["']|["']$/g, '');
+        const content = beforeRedir.slice(4).trim().replace(/^["']|["']$/g, '');
         const destPath = resolvePath(state.cwd, destFile);
         const existing = getNode(destPath);
         const newContent = op === '>>' && typeof existing === 'string' ? existing + '\n' + content : content;
@@ -1561,7 +1586,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const openNode = getNode(openPath);
         if (openNode === undefined) { output = `open: ${openArg}: No such file or directory`; break; }
         if (isDirectory(openNode)) { openFileExplorer(openPath); output = ''; break; }
-        if (typeof openNode === 'string') { openNotepadWith(getBaseName(openPath), openPath, openNode); output = ''; break; }
+        if (typeof openNode === 'string') { openFileContent(getBaseName(openPath), openPath, openNode); output = ''; break; }
         output = `open: cannot open ${openArg}`;
         break;
       }
@@ -1713,6 +1738,30 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) result += buildTree(val, prefix + (isLast ? '    ' : '│   '));
     });
     return result;
+  }
+
+
+  // ======= IMAGE VIEWER =======
+  function openImageViewer(name, fullPath, url) {
+    createWindow({
+      title: name + ' - Image Viewer', width: 600, height: 480, tbIcon: '🖼️',
+      menubar: '<div class="window-menubar"><span>File</span><span>View</span><span>Help</span></div>',
+      body: '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#ece9d8;overflow:auto;padding:8px;"><img src="' + url + '" style="max-width:100%;max-height:100%;box-shadow:2px 2px 8px rgba(0,0,0,0.3);border:1px solid #888;"></div>',
+      status: fullPath
+    });
+  }
+
+  function openFileContent(name, fullPath, content) {
+    const ext = name.split('.').pop().toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+      if (content.startsWith('data:image')) {
+        openImageViewer(name, fullPath, content);
+      } else {
+        openImageViewer(name, fullPath, 'data:image/' + ext + ';base64,' + content);
+      }
+    } else {
+      openNotepadWith(name, fullPath, content);
+    }
   }
 
   // ======= NOTEPAD =======
@@ -1952,7 +2001,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               if (isDir) navigate(fullPath);
               else {
                 const val = getNode(fullPath);
-                if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+                if (typeof val === 'string') openFileContent(name, fullPath, val);
               }
             });
             // Drag start
@@ -2108,7 +2157,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) openFileExplorer(fullPath);
       else {
         const val = getNode(fullPath);
-        if (typeof val === 'string') openNotepadWith(name, fullPath, val);
+        if (typeof val === 'string') openFileContent(name, fullPath, val);
       }
     });
     menu.querySelector('.exp-ctx-rename').addEventListener('click', () => {
@@ -3351,7 +3400,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
               return `Opened folder: ${path}`;
             }
             if (typeof node === 'string') {
-              openNotepadWith(getBaseName(path), path, node);
+              openFileContent(getBaseName(path), path, node);
               return `Opened file: ${path}`;
             }
             return `open_path failed: unsupported node at ${path}`;
@@ -4502,7 +4551,7 @@ ${getAgentDesktopState()}`
               if (isDirectory(openNode)) {
                 openFileExplorer(openPath);
               } else if (typeof openNode === 'string') {
-                openNotepadWith(getBaseName(openPath), openPath, openNode);
+                openFileContent(getBaseName(openPath), openPath, openNode);
               } else {
                 alert(`Cannot find '${val}'. Make sure you typed the name correctly, and then try again.`);
               }
