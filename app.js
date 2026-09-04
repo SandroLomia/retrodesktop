@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todo: openTodo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -5701,4 +5701,105 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 280, tbIcon: '📝',
+      body: '<textarea class="stickynote-textarea" spellcheck="false" placeholder="Type here..."></textarea>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.stickynote-textarea');
+        ta.value = localStorage.getItem('retro_stickynotes') || '';
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', ta.value);
+        });
+      }
+    });
+  }
+
+  // ======= TODO LIST =======
+  function openTodo() {
+    createWindow({
+      title: 'Todo List', width: 360, height: 400, tbIcon: '✅',
+      body: `
+        <div class="todo-container">
+          <div class="todo-input-row">
+            <input type="text" class="todo-input" placeholder="Add a new task...">
+            <button class="todo-add-btn">Add</button>
+          </div>
+          <div class="todo-list"></div>
+        </div>
+      `,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const btn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+
+        let tasks = [];
+        try {
+          tasks = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) { tasks = []; }
+
+        function saveTasks() {
+          localStorage.setItem('retrotodo', JSON.stringify(tasks));
+        }
+
+        function renderTasks() {
+          list.innerHTML = '';
+          tasks.forEach((task, index) => {
+            const item = document.createElement('div');
+            item.className = 'todo-item' + (task.done ? ' done' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = !!task.done;
+            checkbox.addEventListener('change', () => {
+              tasks[index].done = checkbox.checked;
+              saveTasks();
+              renderTasks();
+            });
+
+            const text = document.createElement('span');
+            text.className = 'todo-text';
+            text.textContent = task.text;
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'todo-del-btn';
+            delBtn.textContent = '❌';
+            delBtn.addEventListener('click', () => {
+              tasks.splice(index, 1);
+              saveTasks();
+              renderTasks();
+            });
+
+            item.appendChild(checkbox);
+            item.appendChild(text);
+            item.appendChild(delBtn);
+            list.appendChild(item);
+          });
+        }
+
+        function addTask() {
+          const val = input.value.trim();
+          if (val) {
+            tasks.push({ text: val, done: false });
+            saveTasks();
+            input.value = '';
+            renderTasks();
+          }
+        }
+
+        btn.addEventListener('click', addTask);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTask();
+        });
+
+        renderTasks();
+      }
+    });
+  }
 })();
