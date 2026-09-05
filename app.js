@@ -4032,16 +4032,49 @@ ${getAgentDesktopState()}`
         <div class="mp-title">♪ RetroOS Theme — Unknown Artist</div>
         <div class="mp-progress"><div class="mp-progress-bar"></div></div>
         <div class="mp-controls">
-          <span class="mp-btn">⏮</span><span class="mp-btn">⏪</span>
-          <span class="mp-btn" style="font-size:26px;">⏸</span>
-          <span class="mp-btn">⏩</span><span class="mp-btn">⏭</span>
+          <span class="mp-btn mp-prev">⏮</span>
+          <span class="mp-btn mp-rewind">⏪</span>
+          <span class="mp-btn mp-play-pause" style="font-size:26px;">⏸</span>
+          <span class="mp-btn mp-fastforward">⏩</span>
+          <span class="mp-btn mp-next">⏭</span>
         </div>
       </div>`,
-      statusbar: false
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const playPauseBtn = body.querySelector('.mp-play-pause');
+        const visualizer = body.querySelector('.mp-visualizer');
+        const progressBar = body.querySelector('.mp-progress-bar');
+
+        let isPlaying = true;
+        let progress = 0;
+        let playInterval;
+
+        function updateProgress() {
+          if (isPlaying) {
+            progress += 0.5;
+            if (progress > 100) progress = 0;
+            progressBar.style.width = progress + '%';
+          }
+        }
+
+        playInterval = setInterval(updateProgress, 100);
+
+        playPauseBtn.addEventListener('click', () => {
+          isPlaying = !isPlaying;
+          playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
+          if (isPlaying) {
+            visualizer.classList.remove('paused');
+          } else {
+            visualizer.classList.add('paused');
+          }
+        });
+
+        registerWindowCleanup(winId, () => clearInterval(playInterval));
+      }
     });
   }
 
-  // ======= MINESWEEPER =======
   function openMinesweeper() {
     const rows = 9, cols = 9, mines = 10;
     const id = createWindow({
