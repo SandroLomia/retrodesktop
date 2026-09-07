@@ -352,14 +352,20 @@
     document.getElementById('login-screen').style.display = 'flex';
   }, 3000);
 
+  let clockInterval;
+  let clockListenerAdded = false;
   document.getElementById('login-user-btn').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('desktop').style.display = 'block';
     playSound('boot');
     updateDesktopIcons();
     updateClock();
-    setInterval(updateClock, 1000);
-    document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+    if (clockInterval) clearInterval(clockInterval);
+    clockInterval = setInterval(updateClock, 1000);
+    if (!clockListenerAdded) {
+      document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+      clockListenerAdded = true;
+    }
   });
 
   function updateClock() {
@@ -678,7 +684,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator, stickynotes: openStickyNotes,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -692,7 +698,7 @@
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -4041,13 +4047,38 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let savedNotes = localStorage.getItem('retro_stickynotes') || '';
+    const id = createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      menubar: '',
+      body: '<div class="stickynotes-body"><textarea class="stickynotes-textarea" spellcheck="false" placeholder="Type your notes here..."></textarea></div>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.value = savedNotes;
+
+        let timeout;
+        textarea.addEventListener('input', (e) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            localStorage.setItem('retro_stickynotes', e.target.value);
+          }, 500);
+        });
+      }
+    });
+  }
+
   // ======= MINESWEEPER =======
   function openMinesweeper() {
     const rows = 9, cols = 9, mines = 10;
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
@@ -4487,7 +4518,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator, stickynotes: openStickyNotes,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
