@@ -683,7 +683,8 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings,
+      todo: openTodo, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4492,8 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe,
+              todo: openTodo, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -5697,6 +5699,112 @@ ${getAgentDesktopState()}`
           showPicker('/home/user');
         }
 
+      }
+    });
+  }
+
+
+  // ======= TODO APP =======
+  function openTodo() {
+    createWindow({
+      title: 'Todo List', width: 320, height: 400, tbIcon: '📋',
+      menubar: '<div class="window-menubar"><span>File</span><span>Help</span></div>',
+      body: `<div style="display:flex;flex-direction:column;height:100%;background:#fff;font-family:'Tahoma',sans-serif;font-size:13px;">
+        <div style="display:flex;padding:10px;background:#ece9d8;border-bottom:1px solid #c0c0c0;">
+          <input type="text" id="todo-input" style="flex:1;padding:4px;border:1px solid #7f9db9;" placeholder="What needs to be done?">
+          <button id="todo-add" style="margin-left:5px;padding:4px 8px;cursor:pointer;">Add</button>
+        </div>
+        <div id="todo-list" style="flex:1;overflow-y:auto;padding:10px;background:#fff;"></div>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('#todo-input');
+        const addBtn = body.querySelector('#todo-add');
+        const listEl = body.querySelector('#todo-list');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch(e) { todos = []; }
+
+        function renderTodos() {
+          listEl.innerHTML = '';
+          todos.forEach((t, i) => {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.marginBottom = '8px';
+            row.innerHTML = `
+              <input type="checkbox" ${t.done ? 'checked' : ''} style="margin-right:8px;cursor:pointer;">
+              <span style="flex:1;${t.done ? 'text-decoration:line-through;color:#888;' : ''}">${escapeHtml(t.text)}</span>
+              <button style="border:none;background:transparent;color:#f00;cursor:pointer;font-size:12px;">✖</button>
+            `;
+
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            checkbox.addEventListener('change', () => {
+              todos[i].done = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const delBtn = row.querySelector('button');
+            delBtn.addEventListener('click', () => {
+              todos.splice(i, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            listEl.appendChild(row);
+          });
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text: text, done: false });
+            saveTodos();
+            input.value = '';
+            renderTodos();
+            input.focus();
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
+        input.focus();
+      }
+    });
+  }
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display:flex;flex-direction:column;height:100%;background:#fef08a;">
+        <textarea id="sticky-text" style="flex:1;border:none;background:transparent;resize:none;padding:12px;font-family:'Comic Sans MS', 'Tahoma', sans-serif;font-size:14px;color:#333;outline:none;box-shadow:inset 0 0 10px rgba(0,0,0,0.05);"></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('#sticky-text');
+
+        const savedNote = localStorage.getItem('retro_stickynotes') || '';
+        textarea.value = savedNote;
+
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+
+        textarea.focus();
       }
     });
   }
