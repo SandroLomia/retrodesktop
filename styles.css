@@ -653,7 +653,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 2px 4px 20px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(0,0,0,0.4), inset 1px 1px 2px rgba(255,255,255,0.8);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -3534,3 +3534,7 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+/* New Apps */
+.icon-todo { background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" fill="%23fcd34d"/><path d="M7 10h10M7 14h10" stroke="%23b45309" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="5" r="1" fill="%23ef4444"/></svg>') no-repeat center center / contain; }
+.icon-stickynotes { background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16v12l-4 4H4V4z" fill="%23fef08a"/><path d="M16 16h4l-4 4v-4z" fill="%23fde047"/></svg>') no-repeat center center / contain; }
