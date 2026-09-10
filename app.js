@@ -684,6 +684,7 @@
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
+    , stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4492,6 +4493,7 @@ ${getAgentDesktopState()}`
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+            , stickynotes: openStickyNotes, sticky: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4585,6 +4587,28 @@ ${getAgentDesktopState()}`
   }
 
   // ======= SETTINGS =======
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📌',
+      menubar: '',
+      body: `<div style="display:flex;flex-direction:column;height:100%;background:#fef3c7;padding:0;">
+        <textarea class="stickynotes-textarea" style="flex:1;background:transparent;border:none;resize:none;padding:10px;font-family:'Tahoma',sans-serif;font-size:14px;color:#333;outline:none;" spellcheck="false" placeholder="Write a note..."></textarea>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        const savedNote = localStorage.getItem('retro_stickynotes') || '';
+        textarea.value = savedNote;
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
+  }
+
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
     createWindow({
