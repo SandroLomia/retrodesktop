@@ -1,3 +1,55 @@
+
+/* ======= THEMES ======= */
+:root {
+  --window-bg: #ece9d8;
+  --window-border: #0055e5;
+  --window-title-bg-active: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --window-menubar-bg: #ece9d8;
+  --window-toolbar-bg: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  --window-statusbar-bg: #ece9d8;
+}
+
+[data-theme="blue"] {
+  --window-bg: #ece9d8;
+  --window-border: #0055e5;
+  --window-title-bg-active: linear-gradient(180deg, #0058e6 0%, #3a93ff 4%, #288cff 6%, #1272e6 50%, #0366d6 90%, #015cce 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  --window-menubar-bg: #ece9d8;
+  --window-toolbar-bg: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  --window-statusbar-bg: #ece9d8;
+}
+
+[data-theme="olive"] {
+  --window-bg: #e3e0cd;
+  --window-border: #6a7c49;
+  --window-title-bg-active: linear-gradient(180deg, #90a562 0%, #afc576 4%, #a5bb6d 6%, #829a4a 50%, #688235 90%, #587126 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #bcc7a6 0%, #a2b186 20%, #90a071 80%, #9cb17c 100%);
+  --window-menubar-bg: #e3e0cd;
+  --window-toolbar-bg: linear-gradient(180deg, #eeeed6 0%, #dfdec2 100%);
+  --window-statusbar-bg: #e3e0cd;
+}
+
+[data-theme="silver"] {
+  --window-bg: #e0dfdb;
+  --window-border: #7b7d8d;
+  --window-title-bg-active: linear-gradient(180deg, #abb1ce 0%, #c1c5db 4%, #b4b9d1 6%, #919bb8 50%, #7681a5 90%, #667299 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #c7cad9 0%, #b2b6c9 20%, #a3a8be 80%, #b1b5c8 100%);
+  --window-menubar-bg: #e0dfdb;
+  --window-toolbar-bg: linear-gradient(180deg, #ebece9 0%, #dcdcd6 100%);
+  --window-statusbar-bg: #e0dfdb;
+}
+
+[data-theme="dark"] {
+  --window-bg: #2d2d2d;
+  --window-border: #444;
+  --window-title-bg-active: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  --window-title-bg-inactive: linear-gradient(180deg, #333 0%, #222 50%, #111 100%);
+  --window-menubar-bg: #2d2d2d;
+  --window-toolbar-bg: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+  --window-statusbar-bg: #2d2d2d;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -650,10 +702,10 @@ body {
 /* ======= WINDOWS ======= */
 .window {
   position: absolute;
-  background: #ece9d8;
-  border: 2px solid #0055e5;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  background: var(--window-bg);
+  border: 2px solid var(--window-border);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 6px 6px 20px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -699,7 +751,7 @@ body {
 
 .window-titlebar {
   height: 30px;
-  background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  background: var(--window-title-bg-active);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -709,11 +761,11 @@ body {
 }
 
 .window.active .window-titlebar {
-  background: linear-gradient(180deg, #444 0%, #333 50%, #222 100%);
+  background: var(--window-title-bg-active);
 }
 
 .window:not(.active) .window-titlebar {
-  background: linear-gradient(180deg, #9db8d7 0%, #7b9cc0 20%, #6b8bb0 80%, #7b9cc0 100%);
+  background: var(--window-title-bg-inactive);
 }
 
 .window-title-icon {
@@ -782,7 +834,7 @@ body {
 
 .window-menubar {
   height: 24px;
-  background: #ece9d8;
+  background: var(--window-menubar-bg);
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -804,7 +856,7 @@ body {
 
 .window-toolbar {
   height: 28px;
-  background: linear-gradient(180deg, #f4f2e8, #e8e6d6);
+  background: var(--window-toolbar-bg);
   display: flex;
   align-items: center;
   padding: 0 6px;
@@ -831,7 +883,7 @@ body {
 
 .window-address {
   height: 26px;
-  background: #ece9d8;
+  background: var(--window-menubar-bg);
   display: flex;
   align-items: center;
   padding: 0 6px;
@@ -874,7 +926,7 @@ body {
 
 .window-statusbar {
   height: 22px;
-  background: #ece9d8;
+  background: var(--window-statusbar-bg);
   border-top: 1px solid #c0c0c0;
   display: flex;
   align-items: center;
