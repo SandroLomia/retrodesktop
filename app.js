@@ -744,7 +744,9 @@
       if (e.key === 'Enter') {
         const cmd = inp.value;
         inp.disabled = true;
-        state.history.push(cmd);
+        if (cmd.trim()) {
+          state.history.push(cmd);
+        }
         state.histIdx = state.history.length;
         processCommand(container, state, cmd);
       } else if (e.key === 'ArrowUp') {
@@ -1183,6 +1185,31 @@
       case 'date':
         output = new Date().toString();
         break;
+      case 'cal': {
+        const d = new Date();
+        const month = d.toLocaleString('default', { month: 'long' });
+        const year = d.getFullYear();
+        const firstDay = new Date(year, d.getMonth(), 1).getDay();
+        const daysInMonth = new Date(year, d.getMonth() + 1, 0).getDate();
+        let calStr = `    ${month} ${year}\nSu Mo Tu We Th Fr Sa\n`;
+        let day = 1;
+        for (let i = 0; i < 6; i++) {
+          for (let j = 0; j < 7; j++) {
+            if (i === 0 && j < firstDay) {
+              calStr += '   ';
+            } else if (day <= daysInMonth) {
+              calStr += day.toString().padStart(2, ' ') + ' ';
+              day++;
+            } else {
+              break;
+            }
+          }
+          calStr += '\n';
+          if (day > daysInMonth) break;
+        }
+        output = calStr.trimEnd();
+        break;
+      }
       case 'uptime':
         output = ' 12:34:56 up 2 days, 4:20,  1 user,  load average: 0.12, 0.05, 0.02';
         break;
@@ -1605,6 +1632,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
   SYSTEM
   date              Current date        uptime           System uptime
+  cal               Calendar
   uname             System info         hostname         Hostname
   whoami            Current user        id               User info
   ps                Process list        top              Live processes
@@ -4587,6 +4615,7 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'classic';
     createWindow({
       title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
       statusbar: false,
@@ -4596,6 +4625,16 @@ ${getAgentDesktopState()}`
           <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
+
+
+        <h3 style="margin-top:20px; font-size: 16px;">Window Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="classic" ${currentTheme === 'classic' ? 'selected' : ''}>Classic (Default)</option>
+          <option value="blue" ${currentTheme === 'blue' ? 'selected' : ''}>Luna Blue</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+          <option value="dark" ${currentTheme === 'dark' ? 'selected' : ''}>Dark Mode</option>
+        </select>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
         <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
@@ -4612,6 +4651,13 @@ ${getAgentDesktopState()}`
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
+
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.dataset.theme = theme;
+        });
         const bgSel = body.querySelector('#bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
@@ -4624,6 +4670,7 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  document.body.dataset.theme = localStorage.getItem('retro_theme') || 'classic';
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
