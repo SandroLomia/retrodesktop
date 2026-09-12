@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todo: openTodoList
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodoList
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4515,6 +4515,119 @@ ${getAgentDesktopState()}`
           if (e.key === 'Enter') executeRun();
         });
         cancelBtn.addEventListener('click', () => closeWindow(winId));
+      }
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 280, height: 280, tbIcon: '📝',
+      statusbar: false,
+      body: '<div class="stickynote-container"><textarea class="stickynote-textarea" spellcheck="false" placeholder="Type a note..."></textarea></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynote-textarea');
+        let note = '';
+        try { note = localStorage.getItem('retro_stickynotes') || ''; } catch (e) { }
+        textarea.value = note;
+        textarea.addEventListener('input', () => {
+          try { localStorage.setItem('retro_stickynotes', textarea.value); } catch (e) { }
+        });
+      }
+    });
+  }
+
+
+  // ======= TODO LIST =======
+  function openTodoList() {
+    createWindow({
+      title: 'To-Do List', width: 320, height: 400, tbIcon: '✓',
+      statusbar: false,
+      body: `
+        <div class="todo-container">
+          <div class="todo-input-container">
+            <input type="text" class="todo-input" placeholder="What needs to be done?" />
+            <button class="todo-add-btn">Add</button>
+          </div>
+          <ul class="todo-list"></ul>
+        </div>
+      `,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+
+        let todos = [];
+        try {
+          const saved = localStorage.getItem('retrotodo');
+          if (saved) todos = JSON.parse(saved);
+        } catch (e) { }
+
+        function saveTodos() {
+          try { localStorage.setItem('retrotodo', JSON.stringify(todos)); } catch (e) { }
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'todo-checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.addEventListener('change', () => {
+              todo.completed = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const text = document.createElement('span');
+            text.className = 'todo-text';
+            text.textContent = todo.text;
+            text.addEventListener('click', () => {
+              todo.completed = !todo.completed;
+              saveTodos();
+              renderTodos();
+            });
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'todo-delete';
+            delBtn.textContent = '✕';
+            delBtn.title = 'Delete';
+            delBtn.addEventListener('click', () => {
+              todos.splice(index, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(text);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+          });
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, completed: false });
+            input.value = '';
+            saveTodos();
+            renderTodos();
+          }
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
       }
     });
   }
