@@ -675,11 +675,76 @@
 
   document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
 
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes(initialContent = '', x = null, y = null, id = null) {
+    const noteId = id || ('sn_' + Date.now().toString() + '_' + Math.floor(Math.random() * 1000));
+
+    createWindow({
+      title: 'Sticky Note', width: 220, height: 220, tbIcon: '📝',
+      menubar: '',
+      body: `<textarea class="stickynote-textarea" style="width:100%;height:100%;border:none;background:#fef3c7;padding:10px;resize:none;font-family:'Comic Sans MS', cursive, sans-serif;font-size:14px;box-sizing:border-box;outline:none;"></textarea>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const win = body.closest('.window');
+        const textarea = body.querySelector('.stickynote-textarea');
+        textarea.value = initialContent;
+
+        // Remove window title background and borders to make it look like a sticky note
+        win.style.background = '#fde68a';
+        win.style.border = '1px solid #fbbf24';
+        win.style.boxShadow = '2px 2px 5px rgba(0,0,0,0.2)';
+        const titlebar = win.querySelector('.window-titlebar');
+        titlebar.style.background = '#fcd34d';
+        titlebar.style.borderBottom = 'none';
+        titlebar.style.color = '#78350f';
+        const tbText = titlebar.querySelector('.window-titlebar-text');
+        tbText.style.fontWeight = 'bold';
+
+        if (x !== null && y !== null) {
+          win.style.left = x;
+          win.style.top = y;
+        }
+
+        const saveState = () => {
+          const notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+          notes[noteId] = {
+            content: textarea.value,
+            x: win.style.left,
+            y: win.style.top
+          };
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+        };
+
+        textarea.addEventListener('input', saveState);
+        win.addEventListener('mouseup', saveState); // Save position on drag/resize
+
+        // initial save if not loaded from state
+        if (initialContent === '') {
+          saveState();
+        }
+
+        // Custom close logic to remove from localStorage
+        const closeBtn = titlebar.querySelector('.window-controls button:last-child');
+        const defaultClose = closeBtn.onclick;
+        closeBtn.onclick = (e) => {
+          const notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+          delete notes[noteId];
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          if (defaultClose) defaultClose(e);
+        };
+      }
+    });
+  }
+
+
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
-      paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
+      stickynotes: openStickyNotes, paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
@@ -4488,7 +4553,7 @@ ${getAgentDesktopState()}`
           } else {
             const launchers = {
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
-              mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
+              stickynote: openStickyNotes, stickynotes: openStickyNotes, mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
@@ -4631,8 +4696,8 @@ ${getAgentDesktopState()}`
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
+        <div class="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
+        <div class="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
           <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
@@ -4643,14 +4708,14 @@ ${getAgentDesktopState()}`
           <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
           <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
+        <button class="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const cells = body.querySelectorAll('.ttt-cell');
-        const msg = body.querySelector('#ttt-msg');
-        const resetBtn = body.querySelector('#ttt-reset');
+        const msg = body.querySelector('.ttt-msg');
+        const resetBtn = body.querySelector('.ttt-reset');
 
         let board = Array(9).fill(null);
         let xIsNext = true;
@@ -5699,6 +5764,17 @@ ${getAgentDesktopState()}`
 
       }
     });
+  }
+
+
+  // Load saved Sticky Notes on startup
+  try {
+    const savedNotes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+    Object.entries(savedNotes).forEach(([id, note]) => {
+      openStickyNotes(note.content, note.x, note.y, id);
+    });
+  } catch (e) {
+    console.error('Failed to load sticky notes', e);
   }
 
 })();
