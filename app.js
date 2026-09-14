@@ -682,7 +682,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      stickynotes: openStickyNotes, snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              stickynotes: openStickyNotes, snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -5697,6 +5697,24 @@ ${getAgentDesktopState()}`
           showPicker('/home/user');
         }
 
+      }
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: '<div style="width:100%; height:100%; background:#fef08a; padding:5px; box-sizing:border-box;"><textarea class="stickynotes-textarea" spellcheck="false" style="width:100%; height:100%; background:transparent; border:none; outline:none; resize:none; font-family:\'Comic Sans MS\', \'Chalkboard SE\', sans-serif; font-size:14px; color:#333; line-height:1.5;"></textarea></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.value = localStorage.getItem('retro_stickynotes') || '';
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
       }
     });
   }
