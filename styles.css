@@ -401,6 +401,34 @@ body {
   font-family: 'Courier New', monospace;
 }
 
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: #fef08a;
+  border: 1px solid #ca8a04;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.2);
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-bottom: 8px solid #d97706;
+  border-left: 8px solid transparent;
+}
+.smi-icon.icon-stickynotes::before {
+  width: 24px;
+  height: 24px;
+}
+
 .icon-notepad {
   position: relative;
 }
