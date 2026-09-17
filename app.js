@@ -290,7 +290,7 @@
   const cmdHistory = [];
   let cmdHistoryIdx = -1;
 
-  let soundEnabled = true;
+  let soundEnabled = localStorage.getItem('retro_sound') === '0' ? false : true;
   let audioCtx = null;
   function playSound(type) {
     if (!soundEnabled) return;
@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todo: openTodoList
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodoList
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4584,6 +4584,186 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = [];
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || [];
+    } catch (e) {
+      notes = [];
+    }
+
+    if (notes.length === 0) {
+      notes.push({ id: Date.now(), text: 'Welcome to Sticky Notes!', x: 100, y: 100 });
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+    }
+
+    notes.forEach(note => {
+      if (document.getElementById(`sticky-note-${note.id}`)) return;
+      createStickyNote(note);
+    });
+  }
+
+  function saveStickyNotes() {
+    const notes = [];
+    document.querySelectorAll('.sticky-note-window').forEach(win => {
+      const id = win.id.replace('sticky-note-', '');
+      const textarea = win.querySelector('textarea');
+      if (textarea) {
+        notes.push({
+          id: id,
+          text: textarea.value,
+          x: parseInt(win.style.left) || 100,
+          y: parseInt(win.style.top) || 100
+        });
+      }
+    });
+    localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+  }
+
+  function createStickyNote(note) {
+    const id = `sticky-note-${note.id}`;
+    const winId = createWindow({
+      title: 'Sticky Note',
+      width: 200,
+      height: 200,
+      tbIcon: '📝',
+      statusbar: false,
+      body: `<textarea style="width:100%; height:100%; resize:none; border:none; background:#ffffcc; font-family:'Tahoma'; font-size:14px; padding:8px; outline:none;" id="${id}-textarea">${escapeHtml(note.text)}</textarea>`,
+      x: note.x,
+      y: note.y
+    });
+
+    const winEl = document.getElementById(winId);
+    if (winEl) {
+      winEl.classList.add('sticky-note-window');
+      winEl.id = id;
+      const textarea = winEl.querySelector('textarea');
+
+      textarea.addEventListener('input', () => {
+        saveStickyNotes();
+      });
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'style') {
+            saveStickyNotes();
+          }
+        });
+      });
+      observer.observe(winEl, { attributes: true });
+
+      const closeBtn = winEl.querySelector('.title-bar-controls button[aria-label="Close"]');
+      if (closeBtn) {
+        const oldClick = closeBtn.onclick;
+        closeBtn.onclick = (e) => {
+          if (oldClick) oldClick(e);
+          setTimeout(saveStickyNotes, 100);
+        };
+      }
+    }
+  }
+
+  // ======= TODO LIST =======
+  function openTodoList() {
+    const winId = createWindow({
+      title: 'Todo List',
+      width: 300,
+      height: 400,
+      tbIcon: '✅',
+      statusbar: false,
+      body: `
+        <div style="display:flex; flex-direction:column; height:100%; font-family:'Tahoma'; background:#fff;">
+          <div style="padding:10px; border-bottom:1px solid #ccc; display:flex;">
+            <input type="text" id="todo-input" placeholder="Add a new task..." style="flex:1; padding:4px; font-family:'Tahoma';">
+            <button id="todo-add-btn" style="margin-left:5px; padding:4px 8px; font-family:'Tahoma';">Add</button>
+          </div>
+          <div id="todo-list" style="flex:1; overflow-y:auto; padding:10px;"></div>
+        </div>
+      `,
+      onReady: (id) => {
+        const body = document.getElementById(id + '-body');
+        const input = body.querySelector('#todo-input');
+        const addBtn = body.querySelector('#todo-add-btn');
+        const list = body.querySelector('#todo-list');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) {
+          todos = [];
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.marginBottom = '5px';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.style.marginRight = '8px';
+            checkbox.addEventListener('change', () => {
+              todos[index].completed = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const text = document.createElement('span');
+            text.textContent = todo.text;
+            text.style.flex = '1';
+            if (todo.completed) {
+              text.style.textDecoration = 'line-through';
+              text.style.color = '#888';
+            }
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'X';
+            delBtn.style.padding = '2px 5px';
+            delBtn.style.marginLeft = '5px';
+            delBtn.style.color = 'red';
+            delBtn.addEventListener('click', () => {
+              todos.splice(index, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            item.appendChild(checkbox);
+            item.appendChild(text);
+            item.appendChild(delBtn);
+            list.appendChild(item);
+          });
+        }
+
+        addBtn.addEventListener('click', () => {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text: text, completed: false });
+            input.value = '';
+            saveTodos();
+            renderTodos();
+          }
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            addBtn.click();
+          }
+        });
+
+        renderTodos();
+      }
+    });
+  }
+
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
@@ -4610,6 +4790,7 @@ ${getAgentDesktopState()}`
         const cb = body.querySelector('#toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
+          localStorage.setItem('retro_sound', soundEnabled ? '1' : '0');
           if (soundEnabled) playSound('click');
         });
         const bgSel = body.querySelector('#bg-selector');
