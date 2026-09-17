@@ -1,3 +1,7 @@
+:root {
+  --desktop-bg: #000;
+}
+
 /* ======= RESET & BASE ======= */
 *, *::before, *::after {
   margin: 0;
@@ -3533,4 +3537,37 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+.icon-stickynotes {
+  background: #ffffcc;
+  border: 1px solid #cccc99;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+.icon-stickynotes::after {
+  content: "📝";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+}
+
+.icon-todo {
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 32px;
+  height: 32px;
+  position: relative;
+}
+.icon-todo::after {
+  content: "✅";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
 }
