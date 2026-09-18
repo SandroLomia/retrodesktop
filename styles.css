@@ -259,7 +259,7 @@ body {
 }
 
 .desktop-icon:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .desktop-icon.selected {
@@ -286,6 +286,25 @@ body {
 }
 
 /* SVG Icon Styles - Pixel Art Style */
+.icon-stickynotes {
+  background: #ffd700;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #cda434;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  margin: 4px;
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  background: repeating-linear-gradient(to bottom, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 5px);
+}
+
 .icon-mycomputer {
   background: conic-gradient(from 180deg, #c0c0c0 0%, #e0e0e0 25%, #c0c0c0 50%, #a0a0a0 75%, #c0c0c0 100%);
   border-radius: 4px;
@@ -653,7 +672,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 4px 4px 20px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -1044,7 +1063,7 @@ body {
   background: #fff;
   border: 2px solid #0055c0;
   border-radius: 8px 8px 0 0;
-  box-shadow: 3px 3px 12px rgba(0,0,0,0.4);
+  box-shadow: 4px 4px 16px rgba(0,0,0,0.5);
   z-index: 99999;
   overflow: hidden;
   animation: startMenuOpen 0.15s ease-out;
