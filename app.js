@@ -352,14 +352,18 @@
     document.getElementById('login-screen').style.display = 'flex';
   }, 3000);
 
+  let loginInitialized = false;
   document.getElementById('login-user-btn').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('desktop').style.display = 'block';
     playSound('boot');
     updateDesktopIcons();
     updateClock();
-    setInterval(updateClock, 1000);
-    document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+    if (!loginInitialized) {
+      setInterval(updateClock, 1000);
+      document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+      loginInitialized = true;
+    }
   });
 
   function updateClock() {
@@ -682,7 +686,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
@@ -4491,7 +4495,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4624,6 +4628,30 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 300, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display:flex;flex-direction:column;height:100%;background:#fff9b1;font-family:'Comic Sans MS', 'Tahoma', sans-serif;">
+        <textarea id="stickynotes-ta" style="flex:1;background:transparent;border:none;padding:12px;font-family:inherit;font-size:14px;resize:none;outline:none;" spellcheck="false" placeholder="Write a note..."></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('#stickynotes-ta');
+        const saved = localStorage.getItem('retro_stickynotes');
+        if (saved) ta.value = saved;
+        let timeout;
+        ta.addEventListener('input', () => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            localStorage.setItem('retro_stickynotes', ta.value);
+          }, 500);
+        });
+      }
+    });
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
