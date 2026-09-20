@@ -2,6 +2,17 @@
 (function () {
   'use strict';
 
+
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+
   let windowId = 0;
   let activeWindowId = null;
   let dragState = null;
@@ -678,7 +689,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator, stickynotes: openStickyNotes,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -4490,7 +4501,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE, stickynotes: openStickyNotes,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
@@ -4624,8 +4635,92 @@ ${getAgentDesktopState()}`
 
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  loadStickyNotes();
 
-  // ======= TIC TAC TOE =======
+
+  // ======= Sticky Notes =======
+  function loadStickyNotes() {
+    let notes = [];
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || [];
+    } catch (e) {
+      notes = [];
+    }
+    notes.forEach(note => {
+      openStickyNotes(note.id, note.text, note.x, note.y);
+    });
+  }
+
+  function saveStickyNotes() {
+    const notes = [];
+    document.querySelectorAll('.stickynote-window').forEach(w => {
+      const id = w.dataset.noteid;
+      const text = w.querySelector('.stickynote-textarea').value;
+      const x = parseInt(w.style.left) || 100;
+      const y = parseInt(w.style.top) || 100;
+      notes.push({ id, text, x, y });
+    });
+    localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+  }
+
+  function openStickyNotes(existingId = null, existingText = '', x = null, y = null) {
+    const noteId = existingId || 'note-' + Date.now();
+    const winId = createWindow({
+      title: 'Sticky Note',
+      width: 250,
+      height: 250,
+      tbIcon: '📝',
+      statusbar: false,
+      body: `<textarea class="stickynote-textarea">${escapeHtml(existingText)}</textarea>`,
+      onReady: (winId, w) => {
+        w.classList.add('stickynote-window');
+        w.dataset.noteid = noteId;
+
+        // Custom header class for sticky note styles
+        const titlebar = w.querySelector('.window-titlebar');
+        titlebar.classList.add('stickynote-titlebar');
+
+        // Remove standard maximize/minimize controls if needed, but keeping close is fine
+        w.querySelector('.window-btn.maximize').remove();
+        w.querySelector('.window-btn.minimize').remove();
+
+        if (x !== null && y !== null) {
+          w.style.left = x + 'px';
+          w.style.top = y + 'px';
+        } else {
+          // cascade logic for new notes
+          const offset = document.querySelectorAll('.stickynote-window').length * 20;
+          w.style.left = (100 + offset) + 'px';
+          w.style.top = (100 + offset) + 'px';
+        }
+
+        const textarea = w.querySelector('.stickynote-textarea');
+        textarea.addEventListener('input', () => {
+          saveStickyNotes();
+        });
+
+        // Save position on drag/resize
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+              saveStickyNotes();
+            }
+          });
+        });
+        observer.observe(w, { attributes: true });
+
+        registerWindowCleanup(winId, () => {
+          setTimeout(saveStickyNotes, 0); // Save after removal
+        });
+
+        if (!existingId) {
+          saveStickyNotes(); // Save new note immediately
+        }
+      }
+    });
+  }
+
+// ======= TIC TAC TOE =======
   function openTicTacToe() {
     createWindow({
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
@@ -4926,14 +5021,6 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
