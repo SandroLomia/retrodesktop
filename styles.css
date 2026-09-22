@@ -3534,3 +3534,68 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: #fef08a;
+  border: 1px solid #eab308;
+  border-radius: 2px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  transform: rotate(3deg);
+  left: 2px;
+}
+.icon-stickynotes::after {
+  content: '📝';
+  position: absolute;
+  font-size: 18px;
+  left: 8px;
+  top: 6px;
+}
+.smi-icon.icon-stickynotes::before {
+  width: 24px;
+  height: 24px;
+  left: 1px;
+}
+.smi-icon.icon-stickynotes::after {
+  font-size: 14px;
+  left: 4px;
+  top: 2px;
+}
+
+.icon-todo {
+  position: relative;
+}
+.icon-todo::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  border-radius: 4px;
+  border: 1px solid #818cf8;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  left: 2px;
+}
+.icon-todo::after {
+  content: '✅';
+  position: absolute;
+  font-size: 18px;
+  left: 8px;
+  top: 6px;
+}
+.smi-icon.icon-todo::before {
+  width: 24px;
+  height: 24px;
+  left: 1px;
+}
+.smi-icon.icon-todo::after {
+  font-size: 14px;
+  left: 4px;
+  top: 2px;
+}
