@@ -682,7 +682,7 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodo,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -5700,5 +5700,224 @@ ${getAgentDesktopState()}`
       }
     });
   }
+
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 400, height: 350, tbIcon: '📝',
+      toolbar: `<div class="window-toolbar">
+        <button class="win-toolbar-btn" id="btn-add-note">➕ New Note</button>
+        <button class="win-toolbar-btn" id="btn-clear-notes">❌ Clear All</button>
+      </div>`,
+      body: `<div class="stickynotes-body" style="padding: 10px; height: 100%; overflow-y: auto; background: #e5e5e5; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start;"></div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body').querySelector('.stickynotes-body');
+        const btnAdd = document.getElementById(winId + '-body').querySelector('#btn-add-note');
+        const btnClear = document.getElementById(winId + '-body').querySelector('#btn-clear-notes');
+
+        let notes = [];
+        try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || [];
+        } catch (e) {
+          notes = [];
+        }
+
+        const colors = ['#fef08a', '#fbcfe8', '#bfdbfe', '#bbf7d0'];
+
+        function saveNotes() {
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+        }
+
+        function renderNotes() {
+          body.innerHTML = '';
+          notes.forEach((note) => {
+            const el = document.createElement('div');
+            el.style.width = '160px';
+            el.style.minHeight = '160px';
+            el.style.background = note.color || '#fef08a';
+            el.style.boxShadow = '2px 2px 5px rgba(0,0,0,0.2)';
+            el.style.display = 'flex';
+            el.style.flexDirection = 'column';
+            el.style.position = 'relative';
+
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.padding = '4px';
+            header.style.background = 'rgba(0,0,0,0.05)';
+            header.style.cursor = 'pointer';
+
+            const colorBtn = document.createElement('span');
+            colorBtn.textContent = '🎨';
+            colorBtn.title = 'Change Color';
+            colorBtn.style.fontSize = '12px';
+            colorBtn.onclick = () => {
+              const currentIdx = colors.indexOf(note.color || '#fef08a');
+              note.color = colors[(currentIdx + 1) % colors.length];
+              saveNotes();
+              renderNotes();
+            };
+
+            const delBtn = document.createElement('span');
+            delBtn.textContent = '✖';
+            delBtn.title = 'Delete';
+            delBtn.style.fontSize = '12px';
+            delBtn.style.fontWeight = 'bold';
+            delBtn.onclick = () => {
+              notes = notes.filter(n => n.id !== note.id);
+              saveNotes();
+              renderNotes();
+            };
+
+            header.appendChild(colorBtn);
+            header.appendChild(delBtn);
+
+            const content = document.createElement('textarea');
+            content.value = note.text || '';
+            content.style.flex = '1';
+            content.style.background = 'transparent';
+            content.style.border = 'none';
+            content.style.resize = 'none';
+            content.style.padding = '8px';
+            content.style.fontFamily = 'Tahoma, sans-serif';
+            content.style.fontSize = '14px';
+            content.style.outline = 'none';
+            content.oninput = (e) => {
+              note.text = e.target.value;
+              saveNotes();
+            };
+
+            el.appendChild(header);
+            el.appendChild(content);
+            body.appendChild(el);
+          });
+        }
+
+        btnAdd.onclick = () => {
+          notes.push({ id: Date.now(), text: '', color: colors[0] });
+          saveNotes();
+          renderNotes();
+        };
+
+        btnClear.onclick = () => {
+          if (confirm('Delete all sticky notes?')) {
+            notes = [];
+            saveNotes();
+            renderNotes();
+          }
+        };
+
+        renderNotes();
+      }
+    });
+  }
+
+  // ======= TO-DO LIST =======
+  function openTodo() {
+    createWindow({
+      title: 'To-Do List', width: 450, height: 400, tbIcon: '✅',
+      toolbar: `<div class="window-toolbar">
+        <input type="text" id="todo-input" style="flex:1; padding:4px;" placeholder="Add a new task...">
+        <button class="win-toolbar-btn" id="btn-add-todo">Add Task</button>
+        <button class="win-toolbar-btn" id="btn-clear-todo">Clear Completed</button>
+      </div>`,
+      body: `<div class="todo-body" style="padding: 10px; height: 100%; overflow-y: auto; background: #fff;"></div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body').querySelector('.todo-body');
+        const input = document.getElementById(winId + '-body').querySelector('#todo-input');
+        const btnAdd = document.getElementById(winId + '-body').querySelector('#btn-add-todo');
+        const btnClear = document.getElementById(winId + '-body').querySelector('#btn-clear-todo');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo')) || [];
+        } catch (e) {
+          todos = [];
+        }
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+          body.innerHTML = '';
+          if (todos.length === 0) {
+            body.innerHTML = '<div style="color:#888; text-align:center; padding: 20px;">No tasks. You\'re all caught up!</div>';
+            return;
+          }
+
+          todos.forEach((todo) => {
+            const el = document.createElement('div');
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.padding = '8px';
+            el.style.borderBottom = '1px solid #eee';
+            el.style.gap = '10px';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.done;
+            checkbox.onchange = () => {
+              todo.done = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            };
+
+            const text = document.createElement('span');
+            text.textContent = todo.text;
+            text.style.flex = '1';
+            text.style.fontFamily = 'Tahoma, sans-serif';
+            text.style.fontSize = '14px';
+            if (todo.done) {
+              text.style.textDecoration = 'line-through';
+              text.style.color = '#888';
+            }
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '❌';
+            delBtn.style.background = 'none';
+            delBtn.style.border = 'none';
+            delBtn.style.cursor = 'pointer';
+            delBtn.onclick = () => {
+              todos = todos.filter(t => t.id !== todo.id);
+              saveTodos();
+              renderTodos();
+            };
+
+            el.appendChild(checkbox);
+            el.appendChild(text);
+            el.appendChild(delBtn);
+            body.appendChild(el);
+          });
+        }
+
+        function addTask() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ id: Date.now(), text, done: false });
+            input.value = '';
+            saveTodos();
+            renderTodos();
+          }
+        }
+
+        btnAdd.onclick = addTask;
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter') addTask();
+        };
+
+        btnClear.onclick = () => {
+          todos = todos.filter(t => !t.done);
+          saveTodos();
+          renderTodos();
+        };
+
+        renderTodos();
+      }
+    });
+  }
+
 
 })();
