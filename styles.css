@@ -3534,3 +3534,24 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #fef08a;
+  border: 1px solid #ca8a04;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  transform: rotate(-3deg);
+}
+.icon-stickynotes::after {
+  content: '📝';
+  position: absolute;
+  font-size: 16px;
+  top: 4px;
+  left: 6px;
+}
