@@ -681,7 +681,7 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, stickynotes: openStickyNotes, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
@@ -4397,13 +4397,17 @@ ${getAgentDesktopState()}`
           if (!empty.length) return; const { r, c } = empty[Math.floor(Math.random() * empty.length)]; g[r][c] = Math.random() < 0.9 ? 2 : 4;
         }
         function render() {
-          boardEl.innerHTML = '';
-          for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
-            const v = grid[r][c]; const cell = document.createElement('div');
-            const fs = v >= 1024 ? 20 : v >= 256 ? 22 : v >= 16 ? 24 : 26;
-            cell.style.cssText = `background:${COLORS[v] || '#3c3a32'};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:900;color:${FGCOLORS[v] || '#f9f6f2'};font-family:'Tahoma',sans-serif;transition:all 0.1s;`;
-            cell.textContent = v || ''; boardEl.appendChild(cell);
+          let html = '';
+          for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
+              const v = grid[r][c];
+              const fs = v >= 1024 ? 20 : v >= 256 ? 22 : v >= 16 ? 24 : 26;
+              const bg = COLORS[v] || '#3c3a32';
+              const fg = FGCOLORS[v] || '#f9f6f2';
+              html += `<div style="background:${bg};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:900;color:${fg};font-family:'Tahoma',sans-serif;transition:all 0.1s;">${v || ''}</div>`;
+            }
           }
+          boardEl.innerHTML = html;
           scoreEl.textContent = score; bestEl.textContent = best;
         }
         function slide(row) {
@@ -4490,7 +4494,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, stickynotes: openStickyNotes, code: openIDE,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
@@ -4585,6 +4589,66 @@ ${getAgentDesktopState()}`
   }
 
   // ======= SETTINGS =======
+
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 300, tbIcon: '📝',
+      toolbar: '<div class="window-toolbar" style="padding: 4px; background: #fffde7; border-bottom: 1px solid #e6c229;"><button class="sticky-new-btn" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: bold; color: #555;">+</button></div>',
+      statusbar: false,
+      body: '<div class="sticky-container" style="background: #fff9c4; height: 100%; overflow-y: auto; padding: 10px; font-family: \'Comic Sans MS\', cursive, sans-serif; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px;"></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const container = body.querySelector('.sticky-container');
+        const newBtn = document.getElementById(winId).querySelector('.sticky-new-btn');
+        let notes = [];
+        try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || [{ id: Date.now(), text: 'New Note' }];
+        } catch(e) {
+          notes = [{ id: Date.now(), text: 'New Note' }];
+        }
+
+        function renderNotes() {
+          let html = '';
+          notes.forEach(note => {
+            html += `<div class="sticky-note-item" data-id="${note.id}" style="background: #fff59d; padding: 8px; border: 1px solid #e6c229; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); position: relative;">
+              <button class="sticky-del-btn" data-id="${note.id}" style="position: absolute; top: 2px; right: 2px; background: none; border: none; cursor: pointer; font-size: 12px; color: #888;">✕</button>
+              <textarea class="sticky-textarea" data-id="${note.id}" style="width: 100%; height: 60px; background: transparent; border: none; outline: none; resize: vertical; font-family: inherit; font-size: 14px;">${escapeHtml(note.text)}</textarea>
+            </div>`;
+          });
+          container.innerHTML = html;
+
+          container.querySelectorAll('.sticky-del-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const id = parseInt(e.target.dataset.id);
+              notes = notes.filter(n => n.id !== id);
+              renderNotes();
+            });
+          });
+
+          container.querySelectorAll('.sticky-textarea').forEach(ta => {
+            ta.addEventListener('input', (e) => {
+              const id = parseInt(e.target.dataset.id);
+              const note = notes.find(n => n.id === id);
+              if (note) note.text = e.target.value;
+            });
+          });
+        }
+
+        renderNotes();
+
+        newBtn.addEventListener('click', () => {
+          notes.push({ id: Date.now(), text: '' });
+          renderNotes();
+        });
+
+        const saveInterval = setInterval(() => {
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+        }, 1000);
+        registerWindowCleanup(winId, () => clearInterval(saveInterval));
+      }
+    });
+  }
+
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
     createWindow({
