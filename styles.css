@@ -3534,3 +3534,33 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #fef08a, #facc15);
+  border: 2px solid #ca8a04;
+  border-radius: 2px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+.icon-stickynotes::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 10px 10px;
+  border-color: transparent transparent #fff transparent;
+}
+
+.smi-icon.icon-stickynotes::before {
+  width: 22px;
+  height: 22px;
+}

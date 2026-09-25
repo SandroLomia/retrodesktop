@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator, stickynotes: openStickyNotes,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -4153,21 +4153,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
-        <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <div class="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
-        const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
+        const msgEl = body.querySelector('.snake-msg');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
@@ -4252,38 +4252,38 @@ ${getAgentDesktopState()}`
       title: 'Tetris', width: 400, height: 560, tbIcon: '🧩',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;gap:12px;align-items:flex-start;height:100%;background:#0a0a0a;padding:10px;justify-content:center;">
-        <canvas id="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
+        <canvas class="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
         <div style="display:flex;flex-direction:column;gap:10px;min-width:110px;">
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">SCORE</div>
-            <div id="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tetris-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LEVEL</div>
-            <div id="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
+            <div class="tetris-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LINES</div>
-            <div id="tet-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+            <div class="tetris-lines" style="color:#fde68a;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:6px;">NEXT</div>
-            <canvas id="tetris-next" width="80" height="80"></canvas>
+            <canvas class="tetris-next" width="80" height="80"></canvas>
           </div>
-          <button id="tet-start" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <button class="tetris-start" style="background:#6366f1;color:#fff;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
           <div style="color:#475569;font-family:monospace;font-size:9px;line-height:1.5;">← → Move<br>↑ Rotate<br>↓ Soft drop<br>Space: Drop</div>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#tetris-canvas');
+        const canvas = body.querySelector('.tetris-canvas');
         const ctx = canvas.getContext('2d');
-        const nextCanvas = body.querySelector('#tetris-next');
+        const nextCanvas = body.querySelector('.tetris-next');
         const nctx = nextCanvas.getContext('2d');
-        const scoreEl = body.querySelector('#tet-score');
-        const levelEl = body.querySelector('#tet-level');
-        const linesEl = body.querySelector('#tet-lines');
-        const startBtn = body.querySelector('#tet-start');
+        const scoreEl = body.querySelector('.tetris-score');
+        const levelEl = body.querySelector('.tetris-level');
+        const linesEl = body.querySelector('.tetris-lines');
+        const startBtn = body.querySelector('.tetris-start');
         const COLS = 10, ROWS = 20, SZ = 20;
         const PIECES = [
           { shape: [[1, 1, 1, 1]], color: '#22d3ee' },  // I
@@ -4490,7 +4490,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE, stickynotes: openStickyNotes,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
@@ -5701,4 +5701,27 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let savedNotes = localStorage.getItem('retro_stickynotes');
+    if (!savedNotes) {
+      savedNotes = "Welcome to Sticky Notes!\n\nLeave a note for yourself here.";
+    }
+
+    createWindow({
+      title: 'Sticky Notes', width: 280, height: 300, tbIcon: '📝',
+      body: `<div style="display:flex; flex-direction:column; height:100%; background:#fff9c4; padding:0;">
+        <textarea class="stickynote-text" style="flex:1; width:100%; border:none; background:transparent; resize:none; padding:15px; font-family:'Comic Sans MS', 'Tahoma', sans-serif; font-size:16px; color:#333; outline:none;">${escapeHtml(savedNotes)}</textarea>
+      </div>`,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynote-text');
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
+  }
 })();
