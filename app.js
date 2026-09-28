@@ -1244,8 +1244,12 @@
         open2048();
         output = 'Opening 2048...';
         break;
+      case 'tictactoe':
+        openTicTacToe();
+        output = 'Opening Tic Tac Toe...';
+        break;
       case 'games':
-        output = `Available games:\n  snake     - Classic snake game\n  tetris    - Tetris\n  2048      - Merge tiles to reach 2048\n  minesweeper - Classic minesweeper (or: mine)`;
+        output = `Available games:\n  snake       - Classic snake game\n  tetris      - Tetris\n  2048        - Merge tiles to reach 2048\n  minesweeper - Classic minesweeper (or: mine)\n  tictactoe   - Tic Tac Toe`;
         break;
       case 'mine':
       case 'minesweeper':
@@ -1632,7 +1636,8 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   calc              Calculator          nano/vi          Text editor
   games             List games          snake            Play Snake
   tetris            Play Tetris         2048             Play 2048
-  minesweeper       Minesweeper         agent            Interactive AI CLI
+  minesweeper       Minesweeper         tictactoe        Tic Tac Toe
+  agent             Interactive AI CLI
   agent [prompt]    AI execution        exit / logout    Close terminal
   open / xdg-open   Open file/URL
 
@@ -3541,9 +3546,9 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           if (type === 'open_game') {
             const game = String(action.app || action.game || '').toLowerCase().trim();
-            const gameMap = { snake: 'snake', tetris: 'tetris', '2048': 'game2048', minesweeper: 'minesweeper', mine: 'minesweeper' };
+            const gameMap = { snake: 'snake', tetris: 'tetris', '2048': 'game2048', minesweeper: 'minesweeper', mine: 'minesweeper', tictactoe: 'tictactoe' };
             const appKey = gameMap[game];
-            if (!appKey) return `open_game failed: unknown game "${game}". Available: snake, tetris, 2048, minesweeper`;
+            if (!appKey) return `open_game failed: unknown game "${game}". Available: snake, tetris, 2048, minesweeper, tictactoe`;
             await animateAgentToElement(getActionTarget(appKey));
             openApp(appKey);
             return `Opened game: ${game}`;
@@ -4558,10 +4563,12 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'Date and Time Properties', width: 340, height: 280, tbIcon: '🕒',
       statusbar: false,
-      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center;">
-        <h3 style="margin-top:0; font-size: 16px;">Current Date and Time</h3>
-        <div style="font-size: 48px; font-weight: bold; margin: 20px 0; color: #333;" id="clock-display-large"></div>
-        <div style="font-size: 18px; color: #666;" id="date-display-large"></div>
+      body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; box-sizing: border-box; background: #ece9d8;">
+        <div style="background: #fff; border: 1px solid #aca899; padding: 25px; box-shadow: inset 1px 1px #eee, 1px 1px #fff; display: flex; flex-direction: column; align-items: center; border-radius: 3px; width: 100%; box-sizing: border-box;">
+          <h3 style="margin-top: 0; font-size: 16px; color: #003399; margin-bottom: 25px; border-bottom: 1px solid #aca899; padding-bottom: 10px; width: 100%; text-align: center;">Current Date and Time</h3>
+          <div style="font-size: 56px; font-weight: bold; margin: 10px 0 25px 0; color: #333; text-shadow: 1px 1px #ccc;" id="clock-display-large"></div>
+          <div style="font-size: 18px; color: #555; background: #f5f5f5; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px;" id="date-display-large"></div>
+        </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -4630,20 +4637,22 @@ ${getAgentDesktopState()}`
     createWindow({
       title: 'Tic Tac Toe', width: 300, height: 360, tbIcon: '❌',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;">
-        <div id="ttt-msg" style="font-size:16px;font-weight:bold;color:#333;margin-bottom:10px;">Player X's Turn</div>
-        <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,70px);grid-template-rows:repeat(3,70px);gap:4px;background:#333;padding:4px;border:2px inset #fff;">
-          <button class="ttt-cell" data-idx="0" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="1" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="2" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="3" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="4" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="5" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="6" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="7" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
-          <button class="ttt-cell" data-idx="8" style="background:#fff;border:none;font-size:36px;font-weight:bold;cursor:pointer;color:#333;"></button>
+      body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:#ece9d8;padding:12px;font-family:'Tahoma',sans-serif;box-sizing:border-box;">
+        <div style="background:#fff;border:1px solid #aca899;padding:15px;box-shadow:inset 1px 1px #eee, 1px 1px #fff;display:flex;flex-direction:column;align-items:center;border-radius:3px;">
+          <div id="ttt-msg" style="font-size:18px;font-weight:bold;color:#003399;margin-bottom:15px;text-align:center;min-height:22px;">Player X's Turn</div>
+          <div id="ttt-board" style="display:grid;grid-template-columns:repeat(3,75px);grid-template-rows:repeat(3,75px);gap:5px;background:#aca899;padding:5px;border:2px inset #dfdfdf;margin-bottom:20px;">
+            <button class="ttt-cell" data-idx="0" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="1" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="2" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="3" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="4" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="5" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="6" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="7" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+            <button class="ttt-cell" data-idx="8" style="background:#fff;border:1px solid #716f64;font-size:42px;font-weight:bold;cursor:pointer;color:#333;box-shadow:inset 1px 1px #fff, inset -1px -1px #ece9d8;transition:background 0.2s;"></button>
+          </div>
+          <button id="ttt-reset" style="padding:6px 20px;cursor:pointer;background:#ece9d8;border:1px solid #716f64;border-radius:3px;box-shadow:inset 1px 1px #fff, 1px 1px #aca899;font-family:'Tahoma',sans-serif;font-size:13px;">Restart Game</button>
         </div>
-        <button id="ttt-reset" style="margin-top:10px;padding:4px 16px;cursor:pointer;">Restart Game</button>
       </div>`,
       statusbar: false,
       onReady: (winId) => {
@@ -4661,6 +4670,10 @@ ${getAgentDesktopState()}`
           for (let line of lines) {
             const [a,b,c] = line;
             if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+              // Highlight winning cells
+              cells[a].style.backgroundColor = '#dff0d8';
+              cells[b].style.backgroundColor = '#dff0d8';
+              cells[c].style.backgroundColor = '#dff0d8';
               return board[a];
             }
           }
@@ -4698,6 +4711,7 @@ ${getAgentDesktopState()}`
           cells.forEach(cell => {
             cell.textContent = '';
             cell.style.color = '#333';
+            cell.style.backgroundColor = '#fff';
           });
         });
       }
