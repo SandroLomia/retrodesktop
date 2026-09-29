@@ -681,11 +681,44 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let savedNotes = '';
+    try {
+      savedNotes = localStorage.getItem('retro_stickynotes') || '';
+    } catch(e){}
+
+    const id = createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📝', status: '', statusbar: false,
+      body: '<div class="stickynotes-body"><textarea class="stickynotes-textarea" placeholder="Type a note here..." spellcheck="false">' + escapeHtml(savedNotes) + '</textarea></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-textarea');
+        textarea.addEventListener('input', () => {
+          try {
+            localStorage.setItem('retro_stickynotes', textarea.value);
+          } catch(e){}
+        });
+      }
+    });
   }
 
   // ======= TERMINAL =======
@@ -4490,7 +4523,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE, stickynotes: openStickyNotes, 'sticky notes': openStickyNotes,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
@@ -4926,14 +4959,7 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+
 
         function stashTokens(text, rules) {
           const tokens = [];
