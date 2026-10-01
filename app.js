@@ -47,6 +47,15 @@
     } catch (e) { }
   }
 
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function getFileIcon(name, val) {
     if (typeof val === 'object') return '📁';
     const ext = name.split('.').pop().toLowerCase();
@@ -362,7 +371,14 @@
     document.getElementById('clock').addEventListener('click', () => openApp('clock'));
   });
 
-  function updateClock() {
+
+  // Restore sticky notes on boot if any exist
+  try {
+    const stickies = JSON.parse(localStorage.getItem('retro_stickynotes')) || [];
+    if (stickies.length > 0) openStickyNotes();
+  } catch(e) {}
+
+function updateClock() {
     const now = new Date();
     let h = now.getHours(), m = now.getMinutes();
     const ampm = h >= 12 ? 'PM' : 'AM';
@@ -682,22 +698,142 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let stickies = [];
+    try { stickies = JSON.parse(localStorage.getItem('retro_stickynotes')) || []; } catch (e) { stickies = []; }
+
+    if (stickies.length === 0) {
+      stickies.push({ id: 'sn-' + Date.now(), text: 'Hello World!', x: window.innerWidth - 220, y: 60, w: 200, h: 200 });
+      saveStickies(stickies);
+    }
+
+    renderStickyNotes(stickies);
+  }
+
+  function saveStickies(stickies) {
+    try { localStorage.setItem('retro_stickynotes', JSON.stringify(stickies)); } catch (e) {}
+  }
+
+  function renderStickyNotes(stickies) {
+    let container = document.getElementById('stickynotes-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'stickynotes-container';
+      document.getElementById('desktop').appendChild(container);
+    }
+    container.innerHTML = '';
+
+    stickies.forEach(note => {
+      const el = document.createElement('div');
+      el.className = 'sticky-note';
+      el.id = note.id;
+      el.style.left = note.x + 'px';
+      el.style.top = note.y + 'px';
+      el.style.width = note.w + 'px';
+      el.style.height = note.h + 'px';
+
+      el.innerHTML = `
+        <div class="sticky-note-header">
+          <div class="sticky-note-add" title="New Note">+</div>
+          <div class="sticky-note-delete" title="Delete Note">✕</div>
+        </div>
+        <textarea class="sticky-note-content" spellcheck="false">${escapeHtml(note.text)}</textarea>
+        <div class="sticky-note-resize"></div>
+      `;
+      container.appendChild(el);
+
+      const header = el.querySelector('.sticky-note-header');
+      const addBtn = el.querySelector('.sticky-note-add');
+      const delBtn = el.querySelector('.sticky-note-delete');
+      const textEl = el.querySelector('.sticky-note-content');
+      const resizeEl = el.querySelector('.sticky-note-resize');
+
+      // Update text
+      textEl.addEventListener('input', () => {
+        note.text = textEl.value;
+        saveStickies(stickies);
+      });
+
+      // Add note
+      addBtn.addEventListener('click', () => {
+        stickies.push({ id: 'sn-' + Date.now(), text: '', x: note.x + 20, y: note.y + 20, w: 200, h: 200 });
+        saveStickies(stickies);
+        renderStickyNotes(stickies);
+      });
+
+      // Delete note
+      delBtn.addEventListener('click', () => {
+        stickies = stickies.filter(n => n.id !== note.id);
+        saveStickies(stickies);
+        renderStickyNotes(stickies);
+      });
+
+      // Dragging
+      header.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.sticky-note-add, .sticky-note-delete')) return;
+        const startX = e.clientX, startY = e.clientY;
+        const origX = note.x, origY = note.y;
+
+        // bring to front logic
+        container.appendChild(el);
+
+        function onMouseMove(moveEv) {
+          note.x = origX + (moveEv.clientX - startX);
+          note.y = origY + (moveEv.clientY - startY);
+          el.style.left = note.x + 'px';
+          el.style.top = note.y + 'px';
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          saveStickies(stickies);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      // Resizing
+      resizeEl.addEventListener('mousedown', (e) => {
+        const startX = e.clientX, startY = e.clientY;
+        const origW = note.w, origH = note.h;
+
+        container.appendChild(el);
+
+        function onMouseMove(moveEv) {
+          note.w = Math.max(100, origW + (moveEv.clientX - startX));
+          note.h = Math.max(100, origH + (moveEv.clientY - startY));
+          el.style.width = note.w + 'px';
+          el.style.height = note.h + 'px';
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+          saveStickies(stickies);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+    });
   }
 
   // ======= TERMINAL =======
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body" class="terminal-body-inner"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const tb = body.querySelector('.terminal-body');
-        tb.id = winId + '-term';
+        tb.classList.add(winId + '-term');
         initTerminal(winId, tb, initialCommand);
       }
     });
@@ -3313,8 +3449,14 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
           if (type === 'open_app') {
             const app = String(action.app || '').toLowerCase();
             if (!app) return 'open_app failed: missing app.';
-            await animateAgentToElement(getActionTarget(app));
-            openApp(app);
+
+            // Map common app names to standard identifiers
+            let appName = app;
+            if (appName === 'sticky notes') appName = 'stickynotes';
+            else if (appName === 'terminal' || appName === 'cmd') appName = 'terminal';
+
+            await animateAgentToElement(getActionTarget(appName));
+            openApp(appName);
             return `Opened app: ${app}`;
           }
 
@@ -4047,11 +4189,11 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body" class="minesweeper-body-inner"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
-        body.id = winId + '-mine';
+        body.classList.add(winId + '-mine');
         initMinesweeper(body, rows, cols, mines);
       }
     });
@@ -4153,21 +4295,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
-        <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <div class="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
-        const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
+        const msgEl = body.querySelector('.snake-msg');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
@@ -4925,15 +5067,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];

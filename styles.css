@@ -3534,3 +3534,87 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+/* ======= STICKY NOTES ======= */
+#stickynotes-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.sticky-note {
+  position: absolute;
+  background-color: #feff9c;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid #dcdca3;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  min-width: 100px;
+  min-height: 100px;
+}
+
+.sticky-note-header {
+  height: 20px;
+  background-color: #f7f96e;
+  cursor: move;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 4px;
+  border-bottom: 1px solid #dcdca3;
+}
+
+.sticky-note-add, .sticky-note-delete {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+  margin-left: 4px;
+  user-select: none;
+  padding: 0 2px;
+}
+
+.sticky-note-add:hover, .sticky-note-delete:hover {
+  color: #000;
+}
+
+.sticky-note-content {
+  flex: 1;
+  background: transparent;
+  border: none;
+  resize: none;
+  padding: 8px;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  line-height: 1.4;
+}
+
+.sticky-note-resize {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: se-resize;
+  background: linear-gradient(135deg, transparent 50%, #dcdca3 50%);
+}
+
+.icon-stickynotes {
+  background: linear-gradient(135deg, #feff9c, #dcdca3);
+  border: 1px solid #999;
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '📝';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+}
