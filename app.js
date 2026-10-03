@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      todo: openTodo, terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -3541,7 +3541,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           if (type === 'open_game') {
             const game = String(action.app || action.game || '').toLowerCase().trim();
-            const gameMap = { snake: 'snake', tetris: 'tetris', '2048': 'game2048', minesweeper: 'minesweeper', mine: 'minesweeper' };
+            const gameMap = { snake: 'snake', tetris: 'tetris', '2048': 'game2048', minesweeper: 'minesweeper', mine: 'minesweeper', todo: 'todo', todolist: 'todo' };
             const appKey = gameMap[game];
             if (!appKey) return `open_game failed: unknown game "${game}". Available: snake, tetris, 2048, minesweeper`;
             await animateAgentToElement(getActionTarget(appKey));
@@ -4487,7 +4487,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              todo: openTodo, cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
@@ -4700,6 +4700,99 @@ ${getAgentDesktopState()}`
             cell.style.color = '#333';
           });
         });
+      }
+    });
+  }
+
+
+  // ======= TODO LIST =======
+  function openTodo() {
+    const id = createWindow({
+      title: 'Todo List', width: 320, height: 400, tbIcon: '✓',
+      body: `
+        <div class="todo-app" id="TODOAPP">
+          <div class="todo-header">
+            <input type="text" class="todo-input" placeholder="What needs to be done?" />
+            <button class="todo-add-btn">Add</button>
+          </div>
+          <ul class="todo-list"></ul>
+        </div>
+      `,
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const app = body.querySelector('.todo-app');
+        app.id = winId + '-todo';
+        const input = app.querySelector('.todo-input');
+        const addBtn = app.querySelector('.todo-add-btn');
+        const list = app.querySelector('.todo-list');
+
+        let todos = [];
+        try {
+          const saved = localStorage.getItem('retrotodo');
+          if (saved) todos = JSON.parse(saved);
+        } catch(e) {}
+
+        function saveTodos() {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+            checkbox.onchange = () => {
+              todos[index].completed = checkbox.checked;
+              saveTodos();
+              renderTodos();
+            };
+
+            const text = document.createElement('div');
+            text.className = 'todo-text';
+            text.textContent = todo.text;
+            text.onclick = () => {
+              todos[index].completed = !todos[index].completed;
+              saveTodos();
+              renderTodos();
+            };
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'todo-delete';
+            delBtn.innerHTML = '&times;';
+            delBtn.onclick = () => {
+              todos.splice(index, 1);
+              saveTodos();
+              renderTodos();
+            };
+
+            li.appendChild(checkbox);
+            li.appendChild(text);
+            li.appendChild(delBtn);
+            list.appendChild(li);
+          });
+        }
+
+        function addTodo() {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, completed: false });
+            saveTodos();
+            input.value = '';
+            renderTodos();
+          }
+        }
+
+        addBtn.onclick = addTodo;
+        input.onkeypress = (e) => {
+          if (e.key === 'Enter') addTodo();
+        };
+
+        renderTodos();
       }
     });
   }
