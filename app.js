@@ -357,6 +357,7 @@
     document.getElementById('desktop').style.display = 'block';
     playSound('boot');
     updateDesktopIcons();
+    loadStickyNotes();
     updateClock();
     setInterval(updateClock, 1000);
     document.getElementById('clock').addEventListener('click', () => openApp('clock'));
@@ -678,7 +679,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, stickynotes: openStickyNotes, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -686,6 +687,60 @@
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes(existingId = null, initialContent = '') {
+    const opts = {
+      title: 'Sticky Note', width: 250, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: '<div class="stickynote-body"><textarea class="stickynote-textarea" spellcheck="false" placeholder="Type your note here..."></textarea></div>',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynote-textarea');
+        const win = document.getElementById(winId);
+
+        // Make window background yellow to match note
+        win.style.background = '#fff9c4';
+        const titlebar = win.querySelector('.window-titlebar');
+        titlebar.style.background = '#fbc02d';
+        titlebar.style.color = '#333';
+
+        textarea.value = initialContent;
+
+        const saveNote = () => {
+          let notes = {};
+          try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+          notes[winId] = { content: textarea.value }; // could save position too if wanted
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+        };
+        textarea.addEventListener('input', saveNote);
+
+        const removeNote = () => {
+          let notes = {};
+          try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+          delete notes[winId];
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+        };
+
+        // Listen for close to remove note
+        const closeBtn = win.querySelector('.window-btn.close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', removeNote);
+        }
+      }
+    };
+    if (existingId) opts.id = existingId;
+    createWindow(opts);
+  }
+
+  function loadStickyNotes() {
+    let notes = {};
+    try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+    Object.entries(notes).forEach(([winId, data]) => {
+      openStickyNotes(winId, data.content || '');
+    });
   }
 
   // ======= TERMINAL =======
@@ -4487,7 +4542,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, stickynotes: openStickyNotes, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
