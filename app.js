@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes, todo: openTodo
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1722,6 +1722,129 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
       status: 'Ln 1, Col 1'
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes',
+      width: 280,
+      height: 280,
+      tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="padding: 0; height: 100%; display: flex; flex-direction: column; background-color: #fff7d1;">
+        <textarea id="stickynotes-text" style="flex: 1; border: none; background: transparent; padding: 15px; font-family: 'Comic Sans MS', 'Tahoma', sans-serif; font-size: 16px; resize: none; outline: none; color: #333;"></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('#stickynotes-text');
+        const saved = localStorage.getItem('retro_stickynotes');
+        if (saved) textarea.value = saved;
+
+        textarea.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', textarea.value);
+        });
+      }
+    });
+  }
+
+  // ======= TODO LIST =======
+  function openTodo() {
+    createWindow({
+      title: 'To-Do List',
+      width: 320,
+      height: 400,
+      tbIcon: '✓',
+      statusbar: true,
+      body: `<div style="padding: 10px; height: calc(100% - 20px); display: flex; flex-direction: column; font-family: 'Tahoma', sans-serif; background: #fff;">
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+          <input type="text" id="todo-input" placeholder="Add a new task..." style="flex: 1; padding: 4px; font-family: inherit;">
+          <button id="todo-add" style="padding: 4px 10px;">Add</button>
+        </div>
+        <div id="todo-list" style="flex: 1; overflow-y: auto; border: 1px solid #7f9db9; padding: 5px; background: #fff;"></div>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('#todo-input');
+        const addBtn = body.querySelector('#todo-add');
+        const list = body.querySelector('#todo-list');
+
+        let todos = [];
+        try {
+          const saved = localStorage.getItem('retro_todo');
+          if (saved) todos = JSON.parse(saved);
+        } catch (e) {}
+
+        function saveTodos() {
+          localStorage.setItem('retro_todo', JSON.stringify(todos));
+          updateStatusWindow(winId, `${todos.filter(t => !t.done).length} item(s) left`);
+        }
+
+        function renderTodos() {
+          list.innerHTML = '';
+          todos.forEach((todo, idx) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.padding = '4px';
+            item.style.borderBottom = '1px solid #eee';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = todo.done;
+            cb.style.marginRight = '8px';
+            cb.addEventListener('change', () => {
+              todo.done = cb.checked;
+              saveTodos();
+              renderTodos();
+            });
+
+            const text = document.createElement('span');
+            text.textContent = todo.text;
+            text.style.flex = '1';
+            text.style.textDecoration = todo.done ? 'line-through' : 'none';
+            text.style.color = todo.done ? '#888' : '#000';
+
+            const del = document.createElement('button');
+            del.textContent = '✕';
+            del.style.border = 'none';
+            del.style.background = 'transparent';
+            del.style.color = '#c00';
+            del.style.cursor = 'pointer';
+            del.style.padding = '0 5px';
+            del.addEventListener('click', () => {
+              todos.splice(idx, 1);
+              saveTodos();
+              renderTodos();
+            });
+
+            item.appendChild(cb);
+            item.appendChild(text);
+            item.appendChild(del);
+            list.appendChild(item);
+          });
+          saveTodos();
+        }
+
+        function addTodo() {
+          const val = input.value.trim();
+          if (!val) return;
+          todos.push({ text: val, done: false });
+          input.value = '';
+          saveTodos();
+          renderTodos();
+          input.focus();
+        }
+
+        addBtn.addEventListener('click', addTodo);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') addTodo();
+        });
+
+        renderTodos();
+      }
     });
   }
 
@@ -4491,7 +4614,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodo
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
