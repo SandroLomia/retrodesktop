@@ -1719,23 +1719,42 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   function openNotepad() {
     createWindow({
       title: 'Untitled - Notepad', width: 560, height: 400, tbIcon: '📝',
-      menubar: '<div class="window-menubar"><span>File</span><span>Edit</span><span>Format</span><span>View</span><span>Help</span></div>',
+      menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span class="np-clear-btn">🗑️ Clear</span><span>Format</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false" placeholder=""></textarea>',
-      status: 'Ln 1, Col 1'
+      status: 'Ln 1, Col 1',
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.notepad-textarea');
+        const win = body.closest('.window');
+        win.querySelector('.np-save-btn').addEventListener('click', () => {
+          const content = ta.value;
+          const fileName = prompt('Enter file name to save in Documents:', 'note.txt');
+          if (fileName) {
+            if (setNode('/home/user/Documents/' + fileName, content)) {
+              playSound('click');
+              win.querySelector('.window-title-text').textContent = fileName + ' - Notepad';
+            } else {
+              alert('Failed to save file.');
+            }
+          }
+        });
+        win.querySelector('.np-clear-btn').addEventListener('click', () => {
+          ta.value = '';
+        });
+      }
     });
   }
 
   // ======= CALCULATOR =======
   function openCalculator() {
     const btns = ['MC', 'MR', 'MS', 'M+', '←', 'CE', 'C', '±', '7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', '0', '.', '=', '+'];
-    let btnHtml = '';
-    btns.forEach(b => {
+    const btnHtml = btns.map(b => {
       let cls = 'calc-btn';
       if (['/', '*', '-', '+'].includes(b)) cls += ' operator';
       if (b === '=') cls += ' equals';
       if (['CE', 'C'].includes(b)) cls += ' clear';
-      btnHtml += `<button class="${cls}" data-val="${b}">${b}</button>`;
-    });
+      return `<button class="${cls}" data-val="${b}">${b}</button>`;
+    }).join('');
     const id = createWindow({
       title: 'Calculator', width: 260, height: 340, tbIcon: '🔢',
       menubar: '<div class="window-menubar"><span>View</span><span>Edit</span><span>Help</span></div>',
@@ -2175,16 +2194,20 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
   function openNotepadWith(name, fullPath, content) {
     createWindow({
       title: name + ' - Text Editor', width: 560, height: 400, tbIcon: '📝',
-      menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span>Edit</span><span>Format</span><span>Help</span></div>',
+      menubar: '<div class="window-menubar"><span class="np-save-btn">💾 Save</span><span class="np-clear-btn">🗑️ Clear</span><span>Format</span><span>Help</span></div>',
       body: '<textarea class="notepad-textarea" spellcheck="false"></textarea>',
       status: fullPath,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
         const ta = body.querySelector('.notepad-textarea');
         ta.value = content;
-        body.closest('.window').querySelector('.np-save-btn').addEventListener('click', () => {
+        const win = body.closest('.window');
+        win.querySelector('.np-save-btn').addEventListener('click', () => {
           if (setNode(fullPath, ta.value)) playSound('click');
           else alert(`Could not save "${name}".`);
+        });
+        win.querySelector('.np-clear-btn').addEventListener('click', () => {
+          ta.value = '';
         });
       }
     });
@@ -4603,6 +4626,13 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Theme Accent</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="default" ${localStorage.getItem('retro_theme') === 'default' || !localStorage.getItem('retro_theme') ? 'selected' : ''}>Silver</option>
+          <option value="blue" ${localStorage.getItem('retro_theme') === 'blue' ? 'selected' : ''}>Blue</option>
+          <option value="olive" ${localStorage.getItem('retro_theme') === 'olive' ? 'selected' : ''}>Olive Green</option>
+        </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4648,22 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.className = theme === 'default' ? '' : `theme-${theme}`;
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  const savedTheme = localStorage.getItem('retro_theme');
+  if (savedTheme && savedTheme !== 'default') {
+    document.body.className = `theme-${savedTheme}`;
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

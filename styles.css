@@ -3534,3 +3534,45 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+/* ======= THEMES ======= */
+.theme-blue .window-titlebar {
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 5%, #288eff 10%, #127dff 40%, #036bfe 50%, #005ae6 90%, #0044cd 100%);
+}
+.theme-blue .window.active .window-titlebar {
+  background: linear-gradient(180deg, #0058e6 0%, #3a93ff 5%, #288eff 10%, #127dff 40%, #036bfe 50%, #005ae6 90%, #0044cd 100%);
+}
+.theme-blue .window:not(.active) .window-titlebar {
+  background: linear-gradient(180deg, #7ba2e7 0%, #8eb1ed 5%, #84a9e9 10%, #769be3 40%, #688fde 50%, #5b81d6 90%, #466cbe 100%);
+}
+.theme-blue #taskbar {
+  background: linear-gradient(180deg, #245edb 0%, #3f8cf3 5%, #245edb 10%, #245edb 100%);
+}
+.theme-blue .taskbar-app.active {
+  background: linear-gradient(180deg, #1b47a9 0%, #1b47a9 100%);
+}
+.theme-blue #start-button {
+  background: linear-gradient(180deg, #3d9d3d 0%, #298529 100%);
+}
+.theme-blue #start-button:hover {
+  background: linear-gradient(180deg, #4cb04c 0%, #349634 100%);
+}
+.theme-blue #start-button:active, .theme-blue #start-button.active {
+  background: linear-gradient(180deg, #1e691e 0%, #155215 100%);
+}
+
+.theme-olive .window-titlebar {
+  background: linear-gradient(180deg, #c7d3a7 0%, #d5e0b6 5%, #c7d3a7 10%, #b8c598 40%, #a8b888 50%, #90a56e 90%, #80965e 100%);
+}
+.theme-olive .window.active .window-titlebar {
+  background: linear-gradient(180deg, #c7d3a7 0%, #d5e0b6 5%, #c7d3a7 10%, #b8c598 40%, #a8b888 50%, #90a56e 90%, #80965e 100%);
+}
+.theme-olive .window:not(.active) .window-titlebar {
+  background: linear-gradient(180deg, #dce4ca 0%, #e8f0d8 5%, #dce4ca 10%, #d2dbbd 40%, #c9d2b2 50%, #bbc6a2 90%, #afbb94 100%);
+}
+.theme-olive #taskbar {
+  background: linear-gradient(180deg, #a7b789 0%, #c1d2a1 5%, #a7b789 10%, #a7b789 100%);
+}
+.theme-olive .taskbar-app.active {
+  background: linear-gradient(180deg, #8c9c6f 0%, #8c9c6f 100%);
+}
