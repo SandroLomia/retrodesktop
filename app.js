@@ -360,6 +360,7 @@
     updateClock();
     setInterval(updateClock, 1000);
     document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+    loadStickyNotes();
   });
 
   function updateClock() {
@@ -681,7 +682,7 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
@@ -4582,6 +4583,133 @@ ${getAgentDesktopState()}`
         registerWindowCleanup(winId, () => clearInterval(interval));
       }
     });
+  }
+
+
+  // ======= STICKY NOTES =======
+  let stickyNotes = [];
+
+  function saveStickyNotes() {
+    localStorage.setItem('retro_stickynotes', JSON.stringify(stickyNotes));
+  }
+
+  function loadStickyNotes() {
+    try {
+      const stored = localStorage.getItem('retro_stickynotes');
+      if (stored) {
+        stickyNotes = JSON.parse(stored);
+        stickyNotes.forEach(note => renderStickyNote(note));
+      }
+    } catch (e) {
+      stickyNotes = [];
+    }
+  }
+
+  function openStickyNotes() {
+    const newNote = {
+      id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      x: 100 + (Math.random() * 50),
+      y: 100 + (Math.random() * 50),
+      w: 200,
+      h: 200,
+      text: ''
+    };
+    stickyNotes.push(newNote);
+    saveStickyNotes();
+    renderStickyNote(newNote);
+  }
+
+  function renderStickyNote(note) {
+    const desktop = document.getElementById('desktop');
+    const el = document.createElement('div');
+    el.className = 'sticky-note';
+    el.id = note.id;
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+    el.style.width = note.w + 'px';
+    el.style.height = note.h + 'px';
+
+    const header = document.createElement('div');
+    header.className = 'sticky-note-header';
+
+    const addBtn = document.createElement('div');
+    addBtn.className = 'sticky-note-btn';
+    addBtn.textContent = '+';
+    addBtn.title = 'New Note';
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openStickyNotes();
+    });
+
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'sticky-note-btn';
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Delete Note';
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      el.remove();
+      stickyNotes = stickyNotes.filter(n => n.id !== note.id);
+      saveStickyNotes();
+    });
+
+    header.appendChild(addBtn);
+    header.appendChild(closeBtn);
+
+    const content = document.createElement('textarea');
+    content.className = 'sticky-note-content';
+    content.value = note.text;
+    content.addEventListener('input', () => {
+      note.text = content.value;
+      saveStickyNotes();
+    });
+
+    // Use ResizeObserver for resize tracking
+    const ro = new ResizeObserver(() => {
+      note.w = el.offsetWidth;
+      note.h = el.offsetHeight;
+      saveStickyNotes();
+    });
+    ro.observe(el);
+
+    // Dragging logic
+    let isDragging = false, startX, startY, initialX, initialY;
+    header.addEventListener('mousedown', (e) => {
+      if (e.target === addBtn || e.target === closeBtn) return;
+      isDragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      initialX = parseInt(el.style.left) || 0;
+      initialY = parseInt(el.style.top) || 0;
+      el.style.zIndex = 1000;
+
+      const onMouseMove = (ev) => {
+        if (!isDragging) return;
+        let nx = initialX + (ev.clientX - startX);
+        let ny = initialY + (ev.clientY - startY);
+        // boundary check
+        nx = Math.max(0, nx);
+        ny = Math.max(0, ny);
+        el.style.left = nx + 'px';
+        el.style.top = ny + 'px';
+      };
+
+      const onMouseUp = () => {
+        isDragging = false;
+        el.style.zIndex = 50;
+        note.x = parseInt(el.style.left);
+        note.y = parseInt(el.style.top);
+        saveStickyNotes();
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+
+    el.appendChild(header);
+    el.appendChild(content);
+    desktop.appendChild(el);
   }
 
   // ======= SETTINGS =======

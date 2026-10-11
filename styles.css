@@ -3534,3 +3534,63 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+.icon-stickynotes {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="12" width="40" height="40" fill="%23ffd54f"/><path d="M12 12 h40 v10 h-40 z" fill="%23ffc107"/><path d="M42 52 l10 -10 v10 z" fill="%23ffb300"/></svg>');
+}
+
+/* Sticky Note */
+.sticky-note {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background-color: #fff9b1;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  font-family: 'Comic Sans MS', 'Tahoma', sans-serif;
+  resize: both;
+  overflow: hidden;
+}
+.sticky-note-header {
+  height: 24px;
+  background-color: #fceea7;
+  cursor: move;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+.sticky-note-btn {
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  user-select: none;
+}
+.sticky-note-btn:hover {
+  color: #000;
+  background-color: rgba(0,0,0,0.1);
+}
+.sticky-note-content {
+  flex: 1;
+  border: none;
+  background: transparent;
+  resize: none;
+  padding: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  line-height: 1.4;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+}
