@@ -3534,3 +3534,58 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+/* ======= STICKY NOTES ICON ======= */
+.icon-stickynotes {
+  background: linear-gradient(135deg, #fdfdcb, #e0d984);
+  border: 1px solid #c9c16b;
+  position: relative;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-stickynotes::after {
+  content: '📝';
+  font-size: 24px;
+}
+.smi-icon.icon-stickynotes::after {
+  font-size: 14px;
+}
+
+/* ======= THEMES ======= */
+.theme-olive .window-titlebar {
+  background: linear-gradient(180deg, #d3d195 0%, #b8b783 50%, #9c9a6f 100%);
+}
+.theme-olive.window:not(.active) .window-titlebar,
+.theme-olive .window:not(.active) .window-titlebar {
+  background: linear-gradient(180deg, #e4e2b0 0%, #d4d1a1 20%, #c4c192 80%, #d4d1a1 100%);
+}
+.theme-olive .window.active .window-titlebar {
+  background: linear-gradient(180deg, #e8e6ab 0%, #cccc87 50%, #afae65 100%);
+}
+.theme-olive #taskbar {
+  background: linear-gradient(180deg, #c7c590 0%, #bcb97e 4%, #c7c590 6%, #aca96b 50%, #9c9854 90%, #9c9854 100%);
+}
+.theme-olive .start-menu-header {
+  background: linear-gradient(180deg, #c4c28c, #9d9b62);
+  border-bottom: 2px solid #fff;
+}
+
+.theme-silver .window-titlebar {
+  background: linear-gradient(180deg, #e3e4e9 0%, #c0c3ce 50%, #9ea2b4 100%);
+}
+.theme-silver.window:not(.active) .window-titlebar,
+.theme-silver .window:not(.active) .window-titlebar {
+  background: linear-gradient(180deg, #f3f4f7 0%, #e0e2eb 20%, #cccedc 80%, #e0e2eb 100%);
+}
+.theme-silver .window.active .window-titlebar {
+  background: linear-gradient(180deg, #f0f0f5 0%, #d5d5df 50%, #babbc7 100%);
+}
+.theme-silver #taskbar {
+  background: linear-gradient(180deg, #cecece 0%, #c7c7c7 4%, #cecece 6%, #b5b5b5 50%, #a2a2a2 90%, #a2a2a2 100%);
+}
+.theme-silver .start-menu-header {
+  background: linear-gradient(180deg, #babbc7, #8d90a5);
+  border-bottom: 2px solid #fff;
+}

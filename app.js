@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4587,8 +4587,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'default';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 400, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4603,6 +4604,14 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Window Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="default" ${currentTheme === 'default' ? 'selected' : ''}>Blue (Luna)</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,6 +4627,82 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const t = e.target.value;
+          localStorage.setItem('retro_theme', t);
+          applyTheme(t);
+        });
+      }
+    });
+  }
+
+  function applyTheme(themeType) {
+    document.body.classList.remove('theme-olive', 'theme-silver');
+    if (themeType === 'olive') {
+      document.body.classList.add('theme-olive');
+    } else if (themeType === 'silver') {
+      document.body.classList.add('theme-silver');
+    }
+  }
+
+  // Init Theme
+  applyTheme(localStorage.getItem('retro_theme') || 'default');
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 350, tbIcon: '📝',
+      toolbar: '<div class="window-toolbar"><button id="btn-add-note">➕ New Note</button></div>',
+      body: '<div id="notes-container" style="padding: 10px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; height: 100%; background: #fdfdcb;"></div>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const container = body.querySelector('#notes-container');
+        const addBtn = document.getElementById(winId).querySelector('#btn-add-note');
+
+        function loadNotes() {
+          let notes = {};
+          try {
+            notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+          } catch (e) {}
+          container.innerHTML = '';
+          Object.entries(notes).forEach(([id, text]) => {
+            const noteEl = document.createElement('div');
+            noteEl.style = 'background: #fff9b1; border: 1px solid #e0d984; padding: 10px; position: relative; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);';
+            const textarea = document.createElement('textarea');
+            textarea.style = 'width: 100%; height: 80px; border: none; background: transparent; resize: vertical; font-family: Tahoma, sans-serif;';
+            textarea.value = text;
+            textarea.addEventListener('input', () => {
+              notes[id] = textarea.value;
+              localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+            });
+            const delBtn = document.createElement('button');
+            delBtn.textContent = '✖';
+            delBtn.style = 'position: absolute; top: 2px; right: 2px; background: transparent; border: none; cursor: pointer; color: #a59d4e; font-size: 10px;';
+            delBtn.addEventListener('click', () => {
+              delete notes[id];
+              localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+              loadNotes();
+            });
+            noteEl.appendChild(textarea);
+            noteEl.appendChild(delBtn);
+            container.appendChild(noteEl);
+          });
+        }
+
+        addBtn.addEventListener('click', () => {
+          let notes = {};
+          try {
+            notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+          } catch (e) {}
+          const newId = 'note_' + Date.now();
+          notes[newId] = '';
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          loadNotes();
+        });
+
+        loadNotes();
       }
     });
   }
