@@ -4169,7 +4169,9 @@ ${getAgentDesktopState()}`
         const msgEl = body.querySelector('#snake-msg');
         const restartBtn = body.querySelector('#snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
-        let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
+        let snake, dir, nextDir, food, score, interval = null, running = false;
+        let best = parseInt(localStorage.getItem('retro_snake_best') || '0', 10);
+        bestEl.textContent = best;
 
         function rnd(n) { return Math.floor(Math.random() * n); }
         function placeFood() {
@@ -4200,7 +4202,7 @@ ${getAgentDesktopState()}`
           const head = { r: snake[0].r + dir.r, c: snake[0].c + dir.c };
           if (head.r < 0 || head.r >= ROWS || head.c < 0 || head.c >= COLS || snake.some(s => s.r === head.r && s.c === head.c)) {
             clearInterval(interval); running = false;
-            if (score > best) { best = score; bestEl.textContent = best; }
+            if (score > best) { best = score; bestEl.textContent = best; localStorage.setItem('retro_snake_best', best); }
             msgEl.textContent = `Game Over! Score: ${score}. Press New Game to restart.`;
             msgEl.style.color = '#f87171';
             return;
@@ -4209,7 +4211,7 @@ ${getAgentDesktopState()}`
           if (head.r === food.r && head.c === food.c) {
             score++; scoreEl.textContent = score;
             food = placeFood();
-            if (score > best) { best = score; bestEl.textContent = best; }
+            if (score > best) { best = score; bestEl.textContent = best; localStorage.setItem('retro_snake_best', best); }
           } else { snake.pop(); }
           draw();
         }
@@ -4259,6 +4261,10 @@ ${getAgentDesktopState()}`
             <div id="tet-score" style="color:#a5b4fc;font-family:monospace;font-size:18px;font-weight:700;">0</div>
           </div>
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
+            <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">BEST</div>
+            <div id="tet-best" style="color:#facc15;font-family:monospace;font-size:18px;font-weight:700;">0</div>
+          </div>
+          <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">LEVEL</div>
             <div id="tet-level" style="color:#86efac;font-family:monospace;font-size:18px;font-weight:700;">1</div>
           </div>
@@ -4281,6 +4287,7 @@ ${getAgentDesktopState()}`
         const nextCanvas = body.querySelector('#tetris-next');
         const nctx = nextCanvas.getContext('2d');
         const scoreEl = body.querySelector('#tet-score');
+        const bestEl = body.querySelector('#tet-best');
         const levelEl = body.querySelector('#tet-level');
         const linesEl = body.querySelector('#tet-lines');
         const startBtn = body.querySelector('#tet-start');
@@ -4295,6 +4302,8 @@ ${getAgentDesktopState()}`
           { shape: [[1, 1, 0], [0, 1, 1]], color: '#f87171' }  // Z
         ];
         let board, cur, curX, curY, next, score, level, lines, interval, running = false;
+        let best = parseInt(localStorage.getItem('retro_tetris_best') || '0', 10);
+        bestEl.textContent = best;
 
         function rotate(m) { return m[0].map((_, i) => m.map(r => r[i]).reverse()); }
         function rndPiece() { return JSON.parse(JSON.stringify(PIECES[Math.floor(Math.random() * PIECES.length)])); }
@@ -4311,6 +4320,7 @@ ${getAgentDesktopState()}`
             if (board[r].every(c => c)) { board.splice(r, 1); board.unshift(Array(COLS).fill(0)); cleared++; r++; }
           }
           if (cleared) { lines += cleared; score += [0, 100, 300, 500, 800][cleared] * level; level = Math.floor(lines / 10) + 1; }
+          if (score > best) { best = score; bestEl.textContent = best; localStorage.setItem('retro_tetris_best', best); }
           scoreEl.textContent = score; levelEl.textContent = level; linesEl.textContent = lines;
           cur = next; curX = Math.floor((COLS - cur.shape[0].length) / 2); curY = 0; next = rndPiece();
           drawNext();
@@ -4389,7 +4399,9 @@ ${getAgentDesktopState()}`
         const newBtn = body.querySelector('#g2048-new');
         const COLORS = { 0: '#cdc1b4', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e' };
         const FGCOLORS = { 0: 'transparent', 2: '#776e65', 4: '#776e65', 8: '#f9f6f2', 16: '#f9f6f2', 32: '#f9f6f2', 64: '#f9f6f2', 128: '#f9f6f2', 256: '#f9f6f2', 512: '#f9f6f2', 1024: '#f9f6f2', 2048: '#f9f6f2' };
-        let grid, score, best = 0, won = false;
+        let grid, score, won = false;
+        let best = parseInt(localStorage.getItem('retro_2048_best') || '0', 10);
+        bestEl.textContent = best;
 
         function newGrid() { return Array.from({ length: 4 }, () => Array(4).fill(0)); }
         function addTile(g) {
@@ -4417,7 +4429,7 @@ ${getAgentDesktopState()}`
           if (dir === 'right') for (let r = 0; r < 4; r++) { const { row, pts } = slide([...grid[r]].reverse()); const nr = [...row].reverse(); if (pts || JSON.stringify(nr) !== JSON.stringify(grid[r])) { grid[r] = nr; score += pts; changed = true; } }
           if (dir === 'up') for (let c = 0; c < 4; c++) { const col = grid.map(r => r[c]); const { row, pts } = slide(col); if (pts || JSON.stringify(row) !== JSON.stringify(col)) { row.forEach((v, r) => grid[r][c] = v); score += pts; changed = true; } }
           if (dir === 'down') for (let c = 0; c < 4; c++) { const col = grid.map(r => r[c]).reverse(); const { row, pts } = slide(col); const nr = [...row].reverse(); if (pts || JSON.stringify(nr) !== JSON.stringify(grid.map(r => r[c]))) { nr.forEach((v, r) => grid[r][c] = v); score += pts; changed = true; } }
-          if (changed) { if (score > best) { best = score; } addTile(grid); if (!won && grid.flat().includes(2048)) { msgEl.textContent = '🎉 You reached 2048! Keep going!'; msgEl.style.color = '#f67c5f'; won = true; } render(); checkLose(); }
+          if (changed) { if (score > best) { best = score; localStorage.setItem('retro_2048_best', best); } addTile(grid); if (!won && grid.flat().includes(2048)) { msgEl.textContent = '🎉 You reached 2048! Keep going!'; msgEl.style.color = '#f67c5f'; won = true; } render(); checkLose(); }
         }
         function checkLose() {
           if (grid.flat().includes(0)) return;
