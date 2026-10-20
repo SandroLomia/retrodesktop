@@ -4,6 +4,15 @@
 
   let windowId = 0;
   let activeWindowId = null;
+
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
   let dragState = null;
   let resizeState = null;
   const openWindows = {};
@@ -682,10 +691,88 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNote(noteId, initialText = '') {
+    createWindow({
+      title: 'Sticky Note', width: 200, height: 200, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display:flex; flex-direction:column; height:100%; background:#fff9c4; font-family:'Comic Sans MS', 'Tahoma', sans-serif;">
+        <div style="padding: 4px; background: #fff59d; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #e6ce22;">
+            <button class="stickynote-add" style="background:none; border:none; cursor:pointer; font-size:14px; color:#555; padding:0 4px;" title="New Note">➕</button>
+            <button class="stickynote-delete" style="background:none; border:none; cursor:pointer; font-size:14px; color:#555; padding:0 4px;" title="Delete Note">🗑️</button>
+        </div>
+        <textarea class="stickynote-text" style="flex:1; border:none; background:transparent; padding:8px; resize:none; outline:none; font-family:inherit; font-size:14px; color:#333; line-height:1.4;">${escapeHtml(initialText)}</textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynote-text');
+        const btnAdd = body.querySelector('.stickynote-add');
+        const btnDelete = body.querySelector('.stickynote-delete');
+
+        textarea.addEventListener('input', () => {
+            saveStickyNote(noteId, textarea.value);
+        });
+
+        btnAdd.addEventListener('click', () => {
+            const newId = 'note_' + Date.now();
+            saveStickyNote(newId, '');
+            openStickyNote(newId, '');
+        });
+
+        btnDelete.addEventListener('click', () => {
+            deleteStickyNote(noteId);
+            // Close the window
+            const win = document.getElementById(winId);
+            if (win) {
+                win.querySelector('.window-btn.close').click();
+            }
+        });
+      }
+    });
+  }
+
+  function saveStickyNote(id, text) {
+      let notes = {};
+      try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+      } catch(e) {}
+      notes[id] = text;
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+  }
+
+  function deleteStickyNote(id) {
+      let notes = {};
+      try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+      } catch(e) {}
+      delete notes[id];
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+  }
+
+  function openStickyNotes() {
+      let notes = {};
+      try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+      } catch(e) {}
+
+      const entries = Object.entries(notes);
+      if (entries.length === 0) {
+          const newId = 'note_' + Date.now();
+          saveStickyNote(newId, '');
+          openStickyNote(newId, '');
+      } else {
+          entries.forEach(([id, text]) => {
+              openStickyNote(id, text);
+          });
+      }
   }
 
   // ======= TERMINAL =======
@@ -4587,8 +4674,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'blue';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4602,6 +4690,13 @@ ${getAgentDesktopState()}`
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
+        </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">System Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="blue" ${currentTheme === 'blue' ? 'selected' : ''}>Luna Blue (Default)</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Silver</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Olive Green</option>
         </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
@@ -4618,12 +4713,28 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyDesktopTheme(theme);
+        });
       }
     });
   }
 
+
+  // ======= Desktop Theme =======
+  function applyDesktopTheme(themeType) {
+    document.body.classList.remove('theme-blue', 'theme-silver', 'theme-olive');
+    if (themeType && themeType !== 'blue') {
+      document.body.classList.add('theme-' + themeType);
+    }
+  }
+
   // Init Background
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  applyDesktopTheme(localStorage.getItem('retro_theme') || 'blue');
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {
@@ -4926,14 +5037,7 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+
 
         function stashTokens(text, rules) {
           const tokens = [];
