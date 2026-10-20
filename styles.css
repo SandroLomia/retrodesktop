@@ -653,7 +653,7 @@ body {
   background: #ece9d8;
   border: 2px solid #0055e5;
   border-radius: 8px 8px 0 0;
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.2);
+  box-shadow: 2px 2px 10px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -3533,4 +3533,43 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+/* ======= THEMES ======= */
+body.theme-silver #taskbar {
+  background: linear-gradient(180deg, #c4c4c4 0%, #d4d4d4 4%, #c4c4c4 6%, #a4a4a4 50%, #909090 90%, #909090 100%);
+}
+body.theme-silver .window-titlebar {
+  background: linear-gradient(180deg, #b0b4b9 0%, #999d9f 50%, #85898c 100%);
+}
+body.theme-silver .window.active .window-titlebar {
+  background: linear-gradient(180deg, #e4e5e7 0%, #c1c5c9 50%, #9fa5a9 100%);
+}
+body.theme-silver #start-button {
+  background: linear-gradient(180deg, #7a7a7a 0%, #606060 40%, #505050 60%, #404040 100%);
+}
+body.theme-silver .start-menu-header {
+  background: linear-gradient(90deg, #999d9f 0%, #85898c 100%);
+}
+
+body.theme-olive #taskbar {
+  background: linear-gradient(180deg, #c0c69d 0%, #d1d6ad 4%, #c0c69d 6%, #a3a976 50%, #909660 90%, #909660 100%);
+}
+body.theme-olive .window-titlebar {
+  background: linear-gradient(180deg, #bcc3a2 0%, #9ca47b 50%, #8c946b 100%);
+}
+body.theme-olive .window.active .window-titlebar {
+  background: linear-gradient(180deg, #d3d9b4 0%, #c4c99a 50%, #a2a870 100%);
+}
+body.theme-olive #start-button {
+  background: linear-gradient(180deg, #9c9965 0%, #8c8955 40%, #7c7945 60%, #6c6935 100%);
+}
+body.theme-olive .start-menu-header {
+  background: linear-gradient(90deg, #9ca47b 0%, #8c946b 100%);
+}
+
+.icon-stickynotes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
