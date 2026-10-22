@@ -352,14 +352,21 @@
     document.getElementById('login-screen').style.display = 'flex';
   }, 3000);
 
+  let clockInterval = null;
+  let clockListenerAdded = false;
+
   document.getElementById('login-user-btn').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('desktop').style.display = 'block';
     playSound('boot');
     updateDesktopIcons();
     updateClock();
-    setInterval(updateClock, 1000);
-    document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+    if (clockInterval) clearInterval(clockInterval);
+    clockInterval = setInterval(updateClock, 1000);
+    if (!clockListenerAdded) {
+      document.getElementById('clock').addEventListener('click', () => openApp('clock'));
+      clockListenerAdded = true;
+    }
   });
 
   function updateClock() {
@@ -675,6 +682,117 @@
 
   document.addEventListener('mouseup', () => { dragState = null; resizeState = null; });
 
+
+  // ======= STICKY NOTES =======
+  let stickyNotes = [];
+  try {
+    stickyNotes = JSON.parse(localStorage.getItem('retro_stickynotes')) || [];
+  } catch (e) {
+    stickyNotes = [];
+  }
+
+  function saveStickyNotes() {
+    localStorage.setItem('retro_stickynotes', JSON.stringify(stickyNotes));
+  }
+
+  function openStickyNotes() {
+    const newNote = {
+      id: 'note_' + Date.now(),
+      text: '',
+      x: 100 + (Math.random() * 50),
+      y: 100 + (Math.random() * 50)
+    };
+    stickyNotes.push(newNote);
+    saveStickyNotes();
+    renderStickyNote(newNote);
+  }
+
+  function renderStickyNote(note) {
+    const el = document.createElement('div');
+    el.className = 'stickynote-container';
+    el.id = note.id;
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+
+    el.innerHTML = `
+      <div class="stickynote-header">
+        <span class="stickynote-close">×</span>
+      </div>
+      <textarea class="stickynote-body">${escapeHtml(note.text)}</textarea>
+    `;
+
+    document.getElementById('desktop').appendChild(el);
+
+    const header = el.querySelector('.stickynote-header');
+    const closeBtn = el.querySelector('.stickynote-close');
+    const body = el.querySelector('.stickynote-body');
+
+    // Dragging logic
+    let offsetX = 0, offsetY = 0;
+
+    const onMouseMove = (e) => {
+      let newX = e.clientX - offsetX;
+      let newY = e.clientY - offsetY;
+      el.style.left = newX + 'px';
+      el.style.top = newY + 'px';
+      note.x = newX;
+      note.y = newY;
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      saveStickyNotes();
+    };
+
+    header.addEventListener('mousedown', (e) => {
+      const rect = el.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      el.style.zIndex = ++windowId + 100;
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      e.stopPropagation();
+    });
+
+    // Close logic
+    closeBtn.addEventListener('click', () => {
+      el.remove();
+      stickyNotes = stickyNotes.filter(n => n.id !== note.id);
+      saveStickyNotes();
+    });
+
+    // Text update logic
+    body.addEventListener('input', () => {
+      note.text = body.value;
+      saveStickyNotes();
+    });
+
+    // Bring to front on click
+    el.addEventListener('mousedown', () => {
+      el.style.zIndex = ++windowId + 100;
+    });
+  }
+
+  // Load sticky notes on boot
+  document.getElementById('login-user-btn').addEventListener('click', () => {
+    // Only load if they haven't been rendered yet
+    if (!document.querySelector('.stickynote-container')) {
+      stickyNotes.forEach(note => renderStickyNote(note));
+    }
+  });
+
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
@@ -683,7 +801,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4451,6 +4569,19 @@ ${getAgentDesktopState()}`
     }
   }
 
+
+  // ======= THEME LOGIC =======
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-blue', 'theme-silver', 'theme-olive');
+    if (theme && theme !== 'blue') {
+      document.body.classList.add(`theme-${theme}`);
+    }
+  }
+
+  // Apply theme on load
+  const currentTheme = localStorage.getItem('retro_theme') || 'blue';
+  applyTheme(currentTheme);
+
   // ======= RUN DIALOG =======
   function openRun() {
     createWindow({
@@ -4587,8 +4718,9 @@ ${getAgentDesktopState()}`
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
+    const currentTheme = localStorage.getItem('retro_theme') || 'blue';
     createWindow({
-      title: 'System Settings', width: 340, height: 320, tbIcon: '⚙️',
+      title: 'System Settings', width: 340, height: 380, tbIcon: '⚙️',
       statusbar: false,
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
@@ -4603,6 +4735,14 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">Window Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="blue" ${currentTheme === 'blue' ? 'selected' : ''}>Luna (Blue)</option>
+          <option value="silver" ${currentTheme === 'silver' ? 'selected' : ''}>Luna (Silver)</option>
+          <option value="olive" ${currentTheme === 'olive' ? 'selected' : ''}>Luna (Olive Green)</option>
+        </select>
+
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4617,6 +4757,12 @@ ${getAgentDesktopState()}`
           const bg = e.target.value;
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
+        });
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          applyTheme(theme);
         });
       }
     });
@@ -4926,14 +5072,7 @@ ${getAgentDesktopState()}`
         };
         let suppressInput = false;
 
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
+
 
         function stashTokens(text, rules) {
           const tokens = [];
