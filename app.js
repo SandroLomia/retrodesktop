@@ -677,13 +677,14 @@
 
   // ======= App Launchers =======
   function openApp(name) {
-    const launchers = {
+        const launchers = {
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings,
+      todo: openTodo, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1724,6 +1725,154 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       status: 'Ln 1, Col 1'
     });
   }
+
+
+  // ======= TODO LIST =======
+  function openTodo() {
+    createWindow({
+      title: 'Todo List', width: 300, height: 400, tbIcon: '✓',
+      statusbar: false,
+      body: `<div class="todo-body" style="padding: 10px; height: 100%; display: flex; flex-direction: column; background: #fff;">
+        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+          <input type="text" class="todo-input" style="flex: 1; padding: 4px;" placeholder="Add a new task...">
+          <button class="todo-add">Add</button>
+        </div>
+        <ul class="todo-list" style="list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1;"></ul>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add');
+        const list = body.querySelector('.todo-list');
+
+        let todos = [];
+        try {
+          todos = JSON.parse(localStorage.getItem('retrotodo') || '[]');
+        } catch (e) {
+          todos = [];
+        }
+
+        const render = () => {
+          list.innerHTML = '';
+          todos.forEach((t, i) => {
+            const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.padding = '5px 0';
+            li.style.borderBottom = '1px solid #eee';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = t.done;
+            cb.style.marginRight = '8px';
+            cb.addEventListener('change', () => {
+              todos[i].done = cb.checked;
+              save();
+              render();
+            });
+
+            const span = document.createElement('span');
+            span.textContent = t.text;
+            span.style.flex = '1';
+            if (t.done) span.style.textDecoration = 'line-through';
+
+            const del = document.createElement('button');
+            del.textContent = 'x';
+            del.style.padding = '2px 5px';
+            del.addEventListener('click', () => {
+              todos.splice(i, 1);
+              save();
+              render();
+            });
+
+            li.appendChild(cb);
+            li.appendChild(span);
+            li.appendChild(del);
+            list.appendChild(li);
+          });
+        };
+
+        const save = () => {
+          localStorage.setItem('retrotodo', JSON.stringify(todos));
+        };
+
+        const add = () => {
+          const text = input.value.trim();
+          if (text) {
+            todos.push({ text, done: false });
+            input.value = '';
+            save();
+            render();
+          }
+        };
+
+        addBtn.addEventListener('click', add);
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') add();
+        });
+
+        render();
+      }
+    });
+  }
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = {};
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes') || '{}');
+    } catch (e) {}
+
+    const createNote = (id, text, left, top) => {
+      id = id || 'note_' + Date.now();
+      left = left || (100 + Math.random() * 50);
+      top = top || (100 + Math.random() * 50);
+
+      const winId = createWindow({
+        title: 'Sticky Note', width: 200, height: 200, tbIcon: '📝',
+        statusbar: false,
+        body: `<textarea class="sticky-textarea" style="width: 100%; height: 100%; border: none; outline: none; background: #fef08a; padding: 10px; font-family: 'Comic Sans MS', cursive, sans-serif; resize: none;"></textarea>`,
+        onReady: (winId) => {
+          const win = document.getElementById(winId);
+          win.style.left = left + 'px';
+          win.style.top = top + 'px';
+          win.querySelector('.window-titlebar').style.background = '#fde047';
+
+          const ta = document.getElementById(winId + '-body').querySelector('textarea');
+          ta.value = text || '';
+
+          const save = () => {
+            notes[id] = { text: ta.value, left: parseInt(win.style.left) || left, top: parseInt(win.style.top) || top };
+            localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          };
+
+          ta.addEventListener('input', save);
+
+          // Observe drag to save position
+          const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+              if (mutation.attributeName === 'style') save();
+            });
+          });
+          observer.observe(win, { attributes: true });
+
+          registerWindowCleanup(winId, () => {
+            delete notes[id];
+            localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          });
+        }
+      });
+    };
+
+    if (Object.keys(notes).length === 0) {
+      createNote();
+    } else {
+      Object.entries(notes).forEach(([id, note]) => {
+        createNote(id, note.text, note.left, note.top);
+      });
+    }
+  }
+
 
   // ======= CALCULATOR =======
   function openCalculator() {
@@ -4491,7 +4640,8 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe,
+              todo: openTodo, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4603,6 +4753,13 @@ ${getAgentDesktopState()}`
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
         </select>
+
+        <h3 style="margin-top:20px; font-size: 16px;">System Theme</h3>
+        <select id="theme-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+          <option value="blue" ${localStorage.getItem('retro_theme') === 'blue' || !localStorage.getItem('retro_theme') ? 'selected' : ''}>Default Blue</option>
+          <option value="olive" ${localStorage.getItem('retro_theme') === 'olive' ? 'selected' : ''}>Olive Green</option>
+          <option value="silver" ${localStorage.getItem('retro_theme') === 'silver' ? 'selected' : ''}>Silver</option>
+        </select>
         <p style="color:#666; margin-top:20px; font-size: 12px; line-height: 1.4;">Changes are saved automatically.</p>
       </div>`,
       onReady: (winId) => {
@@ -4618,12 +4775,23 @@ ${getAgentDesktopState()}`
           localStorage.setItem('retro_bg', bg);
           applyDesktopBackground(bg);
         });
+
+        const themeSel = body.querySelector('#theme-selector');
+        themeSel.addEventListener('change', (e) => {
+          const theme = e.target.value;
+          localStorage.setItem('retro_theme', theme);
+          document.body.className = theme === 'blue' ? '' : 'theme-' + theme;
+        });
       }
     });
   }
 
-  // Init Background
+  // Init Background and Theme
   applyDesktopBackground(localStorage.getItem('retro_bg') || 'classic');
+  const initTheme = localStorage.getItem('retro_theme') || 'blue';
+  if (initTheme !== 'blue') {
+    document.body.className = 'theme-' + initTheme;
+  }
 
   // ======= TIC TAC TOE =======
   function openTicTacToe() {

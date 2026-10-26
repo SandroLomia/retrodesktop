@@ -422,6 +422,56 @@ body {
   box-shadow: 0 5px 0 #94a3b8, 0 10px 0 #94a3b8, 0 15px 0 #94a3b8;
 }
 
+
+.icon-todo {
+  position: relative;
+}
+.icon-todo::before {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 34px;
+  background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+  border: 2px solid #94a3b8;
+  border-radius: 4px;
+}
+.icon-todo::after {
+  content: '✓';
+  position: absolute;
+  color: #16a34a;
+  font-weight: bold;
+  font-size: 20px;
+  top: 4px;
+}
+
+.icon-stickynotes {
+  position: relative;
+}
+.icon-stickynotes::before {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  border: 1px solid #eab308;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  transform: rotate(3deg);
+}
+
+.smi-icon.icon-todo::before {
+  width: 22px;
+  height: 26px;
+}
+.smi-icon.icon-todo::after {
+  font-size: 16px;
+  top: 1px;
+}
+
+.smi-icon.icon-stickynotes::before {
+  width: 24px;
+  height: 24px;
+}
+
 .icon-calculator {
   position: relative;
 }
@@ -3533,4 +3583,31 @@ body {
   border-right-color: #808080;
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
+}
+
+/* Themes */
+body.theme-olive .window-titlebar {
+  background: linear-gradient(180deg, #e4ead3 0%, #aab28c 100%);
+}
+body.theme-olive .window.active .window-titlebar {
+  background: linear-gradient(180deg, #d3dca4 0%, #9ba670 100%);
+}
+body.theme-olive #taskbar {
+  background: linear-gradient(180deg, #c5d3a1 0%, #879559 100%);
+}
+body.theme-olive .window {
+  border-color: #879559;
+}
+
+body.theme-silver .window-titlebar {
+  background: linear-gradient(180deg, #f2f2f6 0%, #b8bbc3 100%);
+}
+body.theme-silver .window.active .window-titlebar {
+  background: linear-gradient(180deg, #e4e4e9 0%, #999fa9 100%);
+}
+body.theme-silver #taskbar {
+  background: linear-gradient(180deg, #d8dadd 0%, #a2a7b1 100%);
+}
+body.theme-silver .window {
+  border-color: #a2a7b1;
 }
