@@ -682,17 +682,107 @@
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
-      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
+      snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodoList,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    createWindow({
+      title: 'Sticky Notes', width: 250, height: 250, tbIcon: '📌',
+      body: '<textarea class="stickynote-textarea" style="width: 100%; height: 100%; border: none; background: #fef08a; padding: 10px; font-family: \'Comic Sans MS\', cursive, sans-serif; font-size: 14px; resize: none;"></textarea>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.stickynote-textarea');
+        try {
+          ta.value = localStorage.getItem('retro_stickynotes') || '';
+        } catch (e) {}
+        ta.addEventListener('input', () => {
+          localStorage.setItem('retro_stickynotes', ta.value);
+        });
+      }
+    });
+  }
+
+  // ======= TO-DO LIST =======
+  function openTodoList() {
+    createWindow({
+      title: 'To-Do List', width: 300, height: 400, tbIcon: '✓',
+      body: '<div class="todo-app" style="display:flex; flex-direction:column; height:100%; background:#fff; padding:10px;"><div style="display:flex; gap:5px; margin-bottom:10px;"><input type="text" class="todo-input" style="flex:1; padding:4px; border: 1px solid #808080;" placeholder="Add a new task..."><button class="todo-add window-btn">Add</button></div><div class="todo-list" style="flex:1; overflow-y:auto;"></div></div>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add');
+        const list = body.querySelector('.todo-list');
+
+        let todos = [];
+        try { todos = JSON.parse(localStorage.getItem('retrotodo')) || []; } catch(e) {}
+
+        function render() {
+          list.innerHTML = '';
+          todos.forEach((t, i) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.alignItems = 'center';
+            item.style.padding = '4px 0';
+            item.style.borderBottom = '1px solid #eee';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.checked = t.done;
+            cb.style.marginRight = '8px';
+            cb.addEventListener('change', () => { t.done = cb.checked; save(); render(); });
+
+            const text = document.createElement('span');
+            text.textContent = t.text;
+            text.style.flex = '1';
+            text.style.fontFamily = "'Tahoma', sans-serif";
+            text.style.fontSize = "12px";
+            if(t.done) { text.style.textDecoration = 'line-through'; text.style.color = '#888'; }
+
+            const del = document.createElement('button');
+            del.textContent = '✕';
+            del.style.color = 'red';
+            del.style.border = 'none';
+            del.style.background = 'transparent';
+            del.style.cursor = 'pointer';
+            del.style.fontWeight = 'bold';
+            del.addEventListener('click', () => { todos.splice(i, 1); save(); render(); });
+
+            item.appendChild(cb);
+            item.appendChild(text);
+            item.appendChild(del);
+            list.appendChild(item);
+          });
+        }
+        function save() { localStorage.setItem('retrotodo', JSON.stringify(todos)); }
+
+        addBtn.addEventListener('click', () => {
+          if(!input.value.trim()) return;
+          todos.push({ text: input.value.trim(), done: false });
+          input.value = '';
+          save();
+          render();
+        });
+        input.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter') addBtn.click();
+        });
+
+        render();
+      }
+    });
   }
 
   // ======= TERMINAL =======
   function openTerminal(initialCommand = '') {
     const id = createWindow({
       title: 'Command Prompt', width: 680, height: 420, tbIcon: '>_', status: '',
-      body: '<div class="terminal-body" id="TERBODY"></div>',
+      body: '<div class="terminal-body TERBODY"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
@@ -2658,8 +2748,8 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         setActiveWindow(id);
         if (initialPrompt) {
           const body = document.getElementById(id + '-body');
-          const input = body?.querySelector('#agent-input');
-          const sendBtn = body?.querySelector('#agent-send-btn');
+          const input = body?.querySelector('.agent-input');
+          const sendBtn = body?.querySelector('.agent-send-btn');
           if (input && sendBtn) {
             input.value = initialPrompt;
             sendBtn.click();
@@ -2679,25 +2769,25 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
             <button class="agent-provider-btn" data-provider="gemini">Gemini</button>
             <button class="agent-provider-btn" data-provider="claude">Claude</button>
           </div>
-          <div class="agent-provider-help" id="agent-provider-help"></div>
+          <div class="agent-provider-help"></div>
 
           <label class="agent-field">
             <span>Model</span>
-            <input type="text" id="agent-model-input" placeholder="gpt-4o-mini">
+            <input type="text" class="agent-model-input" placeholder="gpt-4o-mini">
           </label>
 
           <label class="agent-field">
             <span>API Key</span>
-            <input type="password" id="agent-key-input" placeholder="Paste API key">
+            <input type="password" class="agent-key-input" placeholder="Paste API key">
           </label>
 
           <div class="agent-sidebar-actions">
-            <button class="agent-btn primary" id="agent-save-config">Save</button>
-            <button class="agent-btn" id="agent-clear-chat">Clear Chat</button>
+            <button class="agent-btn primary agent-save-config">Save</button>
+            <button class="agent-btn agent-clear-chat">Clear Chat</button>
           </div>
 
           <label class="agent-toggle">
-            <input type="checkbox" id="agent-control-toggle">
+            <input type="checkbox" class="agent-control-toggle">
             <span>Desktop control mode</span>
           </label>
 
@@ -2707,22 +2797,22 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
 
           <div class="agent-state-box">
             <div class="agent-sidebar-title">Agent Status</div>
-            <div class="agent-status" id="agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
+            <div class="agent-status agent-status-label" style="font-size:11px; font-weight:bold; color:#000; background:#fff; border:1px solid #808080; padding:2px 4px; margin-bottom:8px; display:inline-block;">Ready</div>
             <div class="agent-sidebar-title">Debug Logs</div>
-            <div id="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
+            <div class="agent-debug-log" style="font-family:monospace; font-size:10px; height:80px; overflow-y:auto; background:#fff; border:1px solid #808080; padding:4px; line-height:1.2; word-break:break-all; margin-bottom:8px; color:#000;"></div>
             <div class="agent-sidebar-title">Desktop State</div>
-            <pre id="agent-state-preview"></pre>
+            <pre class="agent-state-preview"></pre>
           </div>
         </div>
 
         <div class="agent-main">
-          <div class="agent-chat" id="agent-chat"></div>
-          <div class="agent-action-log" id="agent-action-log"></div>
+          <div class="agent-chat"></div>
+          <div class="agent-action-log"></div>
           <div class="agent-compose">
-            <textarea id="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
+            <textarea class="agent-input" placeholder="Ask for help, or enable Desktop control mode and ask the agent to operate the simulator..."></textarea>
             <div class="agent-compose-actions">
-              <span class="agent-status" id="agent-status">Ready</span>
-              <button class="agent-btn primary" id="agent-send-btn">Send</button>
+              <span class="agent-status">Ready</span>
+              <button class="agent-btn primary agent-send-btn">Send</button>
             </div>
           </div>
         </div>
@@ -2795,20 +2885,20 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const body = document.getElementById(winId + '-body');
         const refs = {
           providerButtons: Array.from(body.querySelectorAll('.agent-provider-btn')),
-          providerHelp: body.querySelector('#agent-provider-help'),
-          modelInput: body.querySelector('#agent-model-input'),
-          keyInput: body.querySelector('#agent-key-input'),
-          saveConfig: body.querySelector('#agent-save-config'),
-          clearChat: body.querySelector('#agent-clear-chat'),
-          controlToggle: body.querySelector('#agent-control-toggle'),
-          statePreview: body.querySelector('#agent-state-preview'),
-          chat: body.querySelector('#agent-chat'),
-          actionLog: body.querySelector('#agent-action-log'),
-          input: body.querySelector('#agent-input'),
-          sendBtn: body.querySelector('#agent-send-btn'),
-          status: body.querySelector('#agent-status'),
-          statusLabel: body.querySelector('#agent-status-label'),
-          debugLog: body.querySelector('#agent-debug-log')
+          providerHelp: body.querySelector('.agent-provider-help'),
+          modelInput: body.querySelector('.agent-model-input'),
+          keyInput: body.querySelector('.agent-key-input'),
+          saveConfig: body.querySelector('.agent-save-config'),
+          clearChat: body.querySelector('.agent-clear-chat'),
+          controlToggle: body.querySelector('.agent-control-toggle'),
+          statePreview: body.querySelector('.agent-state-preview'),
+          chat: body.querySelector('.agent-chat'),
+          actionLog: body.querySelector('.agent-action-log'),
+          input: body.querySelector('.agent-input'),
+          sendBtn: body.querySelector('.agent-send-btn'),
+          status: body.querySelector('.agent-status'),
+          statusLabel: body.querySelector('.agent-status-label'),
+          debugLog: body.querySelector('.agent-debug-log')
         };
         const state = {
           provider: localStorage.getItem(STORAGE.provider) || 'openai',
@@ -3145,7 +3235,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                   : normalized === 'ide_editor' || normalized === 'active_ide_editor'
                     ? element.querySelector('#cs-code-input')
                     : normalized === 'agent_input' || normalized === 'active_agent_input'
-                      ? element.querySelector('#agent-input')
+                      ? element.querySelector('.agent-input')
                       : null;
             if (targetEl) return { record, element: targetEl };
           }
@@ -3176,7 +3266,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                             : normalized === 'ide_run'
                               ? element.querySelector('#cs-run-btn')
                               : normalized === 'agent_send'
-                                ? element.querySelector('#agent-send-btn')
+                                ? element.querySelector('.agent-send-btn')
                                 : normalized === 'settings_sound_toggle'
                                   ? element.querySelector('#toggle-sound')
                                   : null;
@@ -3897,12 +3987,11 @@ ${getAgentDesktopState()}`
           <div class="ie-browser-tip">Tip: type a full URL like <code>https://example.com</code> or a search phrase like <code>linux commands</code>.</div>
         </div>
         <div class="ie-browser-frame-wrap" style="display:none;">
-          <div class="ie-browser-note" id="ie-browser-note">
+          <div class="ie-browser-note">
             Some sites refuse to load inside another webpage. If this tab stays blank, use <strong>Open External</strong>.
           </div>
           <iframe
             class="ie-browser-frame"
-            id="ie-browser-frame"
             referrerpolicy="no-referrer"
             sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
           ></iframe>
@@ -3916,10 +4005,10 @@ ${getAgentDesktopState()}`
         const statusEl = win.querySelector('.status-section');
         const addrInput = win.querySelector('.ie-addr-input');
         const goBtn = win.querySelector('.ie-go-btn');
-        const frame = body.querySelector('#ie-browser-frame');
+        const frame = body.querySelector('.ie-browser-frame');
         const startView = body.querySelector('.ie-browser-start');
         const frameWrap = body.querySelector('.ie-browser-frame-wrap');
-        const note = body.querySelector('#ie-browser-note');
+        const note = body.querySelector('.ie-browser-note');
         const history = [];
         let historyIndex = -1;
         let currentUrl = '';
@@ -4047,7 +4136,7 @@ ${getAgentDesktopState()}`
     const id = createWindow({
       title: 'Minesweeper', width: 280, height: 360, tbIcon: '💣',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
-      body: '<div class="minesweeper-body" id="MINEBODY"></div>',
+      body: '<div class="minesweeper-body MINEBODY"></div>',
       statusbar: false,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body').querySelector('.minesweeper-body');
@@ -4087,7 +4176,7 @@ ${getAgentDesktopState()}`
     function render() {
       let html = `<div class="mine-header">
         <div class="mine-counter">${String(mineCount - flagCount).padStart(3, '0')}</div>
-        <div class="mine-face" id="mine-reset">😊</div>
+        <div class="mine-face mine-reset">😊</div>
         <div class="mine-counter">000</div>
       </div>`;
       html += `<div class="mine-grid" style="grid-template-columns:repeat(${cols},24px)">`;
@@ -4103,7 +4192,7 @@ ${getAgentDesktopState()}`
       }
       html += '</div>';
       container.innerHTML = html;
-      container.querySelector('#mine-reset').addEventListener('click', init);
+      container.querySelector('.mine-reset').addEventListener('click', init);
       container.querySelectorAll('.mine-cell').forEach(el => {
         el.addEventListener('click', () => {
           if (gameOver) return;
@@ -4132,12 +4221,12 @@ ${getAgentDesktopState()}`
       if (cell.mine) {
         gameOver = true;
         for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) if (grid[rr][cc].mine) grid[rr][cc].revealed = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😵'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-reset'); if (face) face.textContent = '😵'; }, 50);
         return;
       }
       if (revealed === total - mineCount) {
         gameOver = true;
-        setTimeout(() => { const face = container.querySelector('#mine-reset'); if (face) face.textContent = '😎'; }, 50);
+        setTimeout(() => { const face = container.querySelector('.mine-reset'); if (face) face.textContent = '😎'; }, 50);
       }
       if (cell.count === 0) {
         for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) revealCell(r + dr, c + dc);
@@ -4153,21 +4242,21 @@ ${getAgentDesktopState()}`
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;background:#0a0a0a;padding:10px;gap:8px;">
         <div style="display:flex;justify-content:space-between;width:400px;align-items:center;">
-          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b id="snake-score">0</b></span>
-          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b id="snake-best">0</b></span>
-          <button id="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
+          <span style="color:#4ade80;font-family:monospace;font-size:13px;">Score: <b class="snake-score">0</b></span>
+          <span style="color:#facc15;font-family:monospace;font-size:13px;">Best: <b class="snake-best">0</b></span>
+          <button class="snake-restart" style="background:#22c55e;color:#000;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:700;">New Game</button>
         </div>
-        <canvas id="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
+        <canvas class="snake-canvas" width="400" height="400" style="border:2px solid #22c55e;border-radius:4px;display:block;"></canvas>
         <div id="snake-msg" style="color:#facc15;font-family:monospace;font-size:12px;text-align:center;">Use arrow keys to move. Press any arrow or New Game to start.</div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#snake-canvas');
+        const canvas = body.querySelector('.snake-canvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = body.querySelector('#snake-score');
-        const bestEl = body.querySelector('#snake-best');
+        const scoreEl = body.querySelector('.snake-score');
+        const bestEl = body.querySelector('.snake-best');
         const msgEl = body.querySelector('#snake-msg');
-        const restartBtn = body.querySelector('#snake-restart');
+        const restartBtn = body.querySelector('.snake-restart');
         const CELL = 20, COLS = 20, ROWS = 20;
         let snake, dir, nextDir, food, score, best = 0, interval = null, running = false;
 
@@ -4252,7 +4341,7 @@ ${getAgentDesktopState()}`
       title: 'Tetris', width: 400, height: 560, tbIcon: '🧩',
       menubar: '<div class="window-menubar"><span>Game</span><span>Help</span></div>',
       body: `<div style="display:flex;gap:12px;align-items:flex-start;height:100%;background:#0a0a0a;padding:10px;justify-content:center;">
-        <canvas id="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
+        <canvas class="tetris-canvas" width="200" height="400" style="border:2px solid #6366f1;border-radius:4px;"></canvas>
         <div style="display:flex;flex-direction:column;gap:10px;min-width:110px;">
           <div style="background:#111;border:1px solid #333;border-radius:6px;padding:10px;">
             <div style="color:#94a3b8;font-family:monospace;font-size:10px;margin-bottom:4px;">SCORE</div>
@@ -4276,7 +4365,7 @@ ${getAgentDesktopState()}`
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const canvas = body.querySelector('#tetris-canvas');
+        const canvas = body.querySelector('.tetris-canvas');
         const ctx = canvas.getContext('2d');
         const nextCanvas = body.querySelector('#tetris-next');
         const nctx = nextCanvas.getContext('2d');
@@ -4491,7 +4580,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todo: openTodoList
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
