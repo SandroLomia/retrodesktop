@@ -1035,6 +1035,52 @@ body {
   text-align: center;
 }
 
+
+.icon-stickynotes {
+  background: #fef08a;
+  border: 1px solid #eab308;
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.3);
+  position: relative;
+  width: 28px;
+  height: 30px;
+  margin: 5px;
+}
+.icon-stickynotes::after {
+  content: '📌';
+  position: absolute;
+  top: -8px;
+  left: 4px;
+  font-size: 14px;
+}
+.icon-todo {
+  background: #fff;
+  border: 2px solid #808080;
+  border-radius: 2px;
+  position: relative;
+  width: 28px;
+  height: 34px;
+  margin: 3px;
+}
+.icon-todo::before {
+  content: '✓';
+  position: absolute;
+  top: 0px;
+  left: 2px;
+  color: #22c55e;
+  font-weight: bold;
+  font-size: 14px;
+}
+.icon-todo::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  width: 10px;
+  height: 2px;
+  background: #000;
+  box-shadow: 0 6px 0 #000, 0 12px 0 #000;
+}
+
 /* ======= START MENU ======= */
 #start-menu {
   position: fixed;
