@@ -678,7 +678,7 @@
   // ======= App Launchers =======
   function openApp(name) {
     const launchers = {
-      terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
+      terminal: openTerminal, notepad: openNotepad, todo: openTodo, stickynotes: openStickyNotes, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
@@ -1713,6 +1713,176 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
       if (isDir) result += buildTree(val, prefix + (isLast ? '    ' : '│   '));
     });
     return result;
+  }
+
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = {};
+    try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch (e) {}
+
+    // Generate a unique ID if no notes exist, or open existing notes
+    if (Object.keys(notes).length === 0) {
+      notes['note_' + Date.now()] = { text: '', x: 100, y: 100, width: 200, height: 200 };
+    }
+
+    function saveNotes() {
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+    }
+
+    Object.entries(notes).forEach(([noteId, noteData]) => {
+      createStickyNote(noteId, noteData);
+    });
+
+    function createStickyNote(noteId, noteData) {
+      const id = createWindow({
+        title: 'Sticky Note', width: noteData.width || 200, height: noteData.height || 200, tbIcon: '📝', status: false,
+        body: `<textarea class="sticky-textarea" style="width:100%; height:100%; box-sizing:border-box; border:none; background:#fff9b1; resize:none; padding:8px; font-family:'Comic Sans MS', 'Tahoma', sans-serif; outline:none;"></textarea>`
+      });
+
+      const win = document.getElementById(id);
+      const body = document.getElementById(id + '-body');
+      const textarea = body.querySelector('.sticky-textarea');
+      const titlebar = win.querySelector('.window-titlebar');
+
+      win.style.left = (noteData.x || 100) + 'px';
+      win.style.top = (noteData.y || 100) + 'px';
+
+      // Override standard window styles to make it look like a sticky note
+      win.style.border = '1px solid #e5db7a';
+      win.style.boxShadow = '2px 2px 5px rgba(0,0,0,0.2)';
+      titlebar.style.background = '#fcf078';
+      titlebar.style.color = '#000';
+      titlebar.style.borderBottom = 'none';
+
+      textarea.value = noteData.text || '';
+
+      function updateNoteData() {
+        notes[noteId] = {
+          text: textarea.value,
+          x: parseInt(win.style.left) || 100,
+          y: parseInt(win.style.top) || 100,
+          width: parseInt(win.style.width) || 200,
+          height: parseInt(win.style.height) || 200
+        };
+        saveNotes();
+      }
+
+      textarea.addEventListener('input', updateNoteData);
+      win.addEventListener('mouseup', updateNoteData); // For catching drags and resizes
+
+      // Handle closing: delete the note
+      const closeBtn = win.querySelector('.window-btn.close');
+      closeBtn.addEventListener('mousedown', () => {
+        delete notes[noteId];
+        saveNotes();
+      });
+
+      // Add a 'New Note' button next to close
+      const controls = win.querySelector('.window-controls');
+      const newBtn = document.createElement('button');
+      newBtn.className = 'window-btn';
+      newBtn.title = 'New Note';
+      newBtn.textContent = '+';
+      newBtn.style.color = '#000';
+      controls.insertBefore(newBtn, closeBtn);
+
+      newBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent window drag
+        const newId = 'note_' + Date.now();
+        notes[newId] = { text: '', x: parseInt(win.style.left) + 20, y: parseInt(win.style.top) + 20, width: 200, height: 200 };
+        saveNotes();
+        createStickyNote(newId, notes[newId]);
+      });
+    }
+  }
+
+  // ======= TODO =======
+  function openTodo() {
+    const id = createWindow({
+      title: 'To-Do List', width: 320, height: 400, tbIcon: '✅', status: 'Manage your tasks',
+      body: `<div class="todo-app" style="display:flex; flex-direction:column; height:100%; padding:8px; box-sizing:border-box; background:#fff;">
+        <div style="display:flex; gap:4px; margin-bottom:8px;">
+          <input type="text" class="todo-input" style="flex:1; padding:2px 4px; border:1px solid #7f9db9;" placeholder="What needs to be done?">
+          <button class="todo-add" style="padding:2px 8px;">Add</button>
+        </div>
+        <div class="todo-list" style="flex:1; overflow-y:auto; border:1px solid #7f9db9; padding:4px;"></div>
+      </div>`
+    });
+
+    const body = document.getElementById(id + '-body');
+    const input = body.querySelector('.todo-input');
+    const addBtn = body.querySelector('.todo-add');
+    const list = body.querySelector('.todo-list');
+
+    let todos = [];
+    try { todos = JSON.parse(localStorage.getItem('retrotodo')) || []; } catch (e) {}
+
+    function save() {
+      localStorage.setItem('retrotodo', JSON.stringify(todos));
+    }
+
+    function render() {
+      list.innerHTML = '';
+      todos.forEach((todo, idx) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.padding = '4px 0';
+        item.style.borderBottom = '1px solid #eee';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = todo.done;
+        cb.style.marginRight = '8px';
+        cb.addEventListener('change', () => {
+          todo.done = cb.checked;
+          save();
+          render();
+        });
+
+        const span = document.createElement('span');
+        span.textContent = todo.text;
+        span.style.flex = '1';
+        span.style.wordBreak = 'break-word';
+        if (todo.done) span.style.textDecoration = 'line-through';
+        if (todo.done) span.style.color = '#888';
+
+        const del = document.createElement('button');
+        del.textContent = '✕';
+        del.style.background = 'none';
+        del.style.border = 'none';
+        del.style.cursor = 'pointer';
+        del.style.color = '#c00';
+        del.addEventListener('click', () => {
+          todos.splice(idx, 1);
+          save();
+          render();
+        });
+
+        item.appendChild(cb);
+        item.appendChild(span);
+        item.appendChild(del);
+        list.appendChild(item);
+      });
+    }
+
+    function addTodo() {
+      const text = input.value.trim();
+      if (!text) return;
+      todos.push({ text, done: false });
+      input.value = '';
+      save();
+      render();
+    }
+
+    addBtn.addEventListener('click', addTodo);
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addTodo();
+    });
+
+    render();
   }
 
   // ======= NOTEPAD =======
@@ -4487,7 +4657,7 @@ ${getAgentDesktopState()}`
             openInternet(val);
           } else {
             const launchers = {
-              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
+              cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, todo: openTodo, stickynotes: openStickyNotes, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,

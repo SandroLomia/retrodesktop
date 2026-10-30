@@ -3534,3 +3534,17 @@ body {
   border-bottom-color: #808080;
   box-shadow: inset 1px 1px #fff, inset -1px -1px #808080;
 }
+
+
+/* Custom App Icons */
+.icon-todo { position: relative; }
+.icon-todo::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 4px; border: 2px solid #15803d; }
+.icon-todo::after { content: '✅'; position: absolute; font-size: 18px; left: 8px; top: 6px; }
+.smi-icon.icon-todo::before { width: 24px; height: 24px; left: 2px; top: 2px; }
+.smi-icon.icon-todo::after { font-size: 14px; left: 5px; top: 5px; }
+
+.icon-stickynotes { position: relative; }
+.icon-stickynotes::before { content: ''; position: absolute; width: 34px; height: 34px; background: linear-gradient(135deg, #fef08a, #facc15); border-radius: 2px; border: 1px solid #eab308; box-shadow: 2px 2px 3px rgba(0,0,0,0.2); }
+.icon-stickynotes::after { content: '📝'; position: absolute; font-size: 18px; left: 8px; top: 6px; }
+.smi-icon.icon-stickynotes::before { width: 24px; height: 24px; left: 2px; top: 2px; }
+.smi-icon.icon-stickynotes::after { font-size: 14px; left: 5px; top: 5px; }
