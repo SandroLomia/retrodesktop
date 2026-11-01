@@ -148,6 +148,16 @@
       && !/[\\/]/.test(name);
   }
 
+
+  function escapeHtml(text) {
+          return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
   function getNode(pathStr) {
     const normalized = normalizePath(pathStr);
     if (normalized === '/') return fileSystem;
@@ -681,11 +691,56 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = {};
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+    } catch (e) {
+      notes = {};
+    }
+
+    function createNoteWindow(id, text) {
+      createWindow({
+        title: 'Sticky Note', width: 250, height: 250, tbIcon: '📝',
+        body: '<div class="sticky-body" style="width:100%;height:100%;display:flex;flex-direction:column;background:#fff9b1;"><textarea class="sticky-textarea" style="flex:1;resize:none;border:none;background:transparent;padding:10px;font-family:\'Comic Sans MS\', cursive, sans-serif;outline:none;"></textarea></div>',
+        statusbar: false,
+        onReady: (winId) => {
+          const body = document.getElementById(winId + '-body');
+          const textarea = body.querySelector('.sticky-textarea');
+          textarea.value = text || '';
+          textarea.addEventListener('input', () => {
+            notes[id] = textarea.value;
+            localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          });
+        },
+        onClose: () => {
+          if (!notes[id] || notes[id].trim() === '') {
+            delete notes[id];
+            localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          }
+        }
+      });
+    }
+
+    const entries = Object.entries(notes);
+    if (entries.length === 0) {
+      const newId = 'note_' + Date.now();
+      notes[newId] = '';
+      createNoteWindow(newId, '');
+    } else {
+      for (const [id, text] of entries) {
+        createNoteWindow(id, text);
+      }
+    }
   }
 
   // ======= TERMINAL =======
@@ -4490,7 +4545,7 @@ ${getAgentDesktopState()}`
               cmd: openTerminal, terminal: openTerminal, notepad: openNotepad, calc: openCalculator, calculator: openCalculator,
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
-              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
+              winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE, stickynotes: openStickyNotes,
               snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
             };
             const appCmd = val.toLowerCase();
@@ -4925,15 +4980,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
