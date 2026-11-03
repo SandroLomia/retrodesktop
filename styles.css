@@ -286,6 +286,7 @@ body {
 }
 
 /* SVG Icon Styles - Pixel Art Style */
+.icon-stickynotes { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="12" y="12" width="40" height="40" fill="%23fef08a"/><path d="M12 12 h40 v8 h-40 z" fill="%23facc15"/><path d="M42 52 l10 -10 v10 z" fill="%23eab308"/></svg>'); }
 .icon-mycomputer {
   background: conic-gradient(from 180deg, #c0c0c0 0%, #e0e0e0 25%, #c0c0c0 50%, #a0a0a0 75%, #c0c0c0 100%);
   border-radius: 4px;
