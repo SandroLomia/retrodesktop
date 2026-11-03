@@ -2,6 +2,15 @@
 (function () {
   'use strict';
 
+  function escapeHtml(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   let windowId = 0;
   let activeWindowId = null;
   let dragState = null;
@@ -66,7 +75,7 @@
         el.className = 'desktop-icon user-desktop-item';
         el.dataset.name = name;
         el.dataset.isdir = isDir;
-        el.innerHTML = `<div class="explorer-item-icon" style="font-size:32px;margin-bottom:4px">${getFileIcon(name, val)}</div><span style="word-break:break-word;text-align:center">${name}</span>`;
+        el.innerHTML = `<div class="explorer-item-icon" style="font-size:32px;margin-bottom:4px">${getFileIcon(name, val)}</div><span style="word-break:break-word;text-align:center">${escapeHtml(name)}</span>`;
         el.setAttribute('draggable', 'true');
         el.addEventListener('dragstart', (e) => {
           e.dataTransfer.setData('text/plain', JSON.stringify({ name: name, isDir: isDir, fromPath: '/home/user/Desktop' }));
@@ -681,7 +690,7 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
@@ -4584,6 +4593,97 @@ ${getAgentDesktopState()}`
     });
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = {};
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+    } catch (e) {
+      notes = {};
+    }
+
+    if (Object.keys(notes).length === 0) {
+      notes['note_' + Date.now()] = { text: 'Welcome to Sticky Notes!', x: 100, y: 100, color: '#fef08a' };
+    }
+
+    function saveNotes() {
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+    }
+
+    Object.entries(notes).forEach(([id, note]) => {
+      createStickyNote(id, note);
+    });
+
+    function createStickyNote(id, note) {
+      const winId = 'sticky-' + id;
+      if (openWindows[winId]) return;
+      createWindow({
+        title: 'Sticky Note', width: 220, height: 220, tbIcon: '📌',
+        x: note.x, y: note.y,
+        statusbar: false,
+        body: `<div style="background: ${note.color}; width: 100%; height: 100%; display: flex; flex-direction: column;">
+                 <div style="display: flex; justify-content: flex-end; padding: 4px; background: rgba(0,0,0,0.05); gap: 4px;">
+                   <div class="color-picker" data-color="#fef08a" style="width: 14px; height: 14px; background: #fef08a; cursor: pointer; border: 1px solid #ccc; border-radius: 50%;"></div>
+                   <div class="color-picker" data-color="#bbf7d0" style="width: 14px; height: 14px; background: #bbf7d0; cursor: pointer; border: 1px solid #ccc; border-radius: 50%;"></div>
+                   <div class="color-picker" data-color="#bfdbfe" style="width: 14px; height: 14px; background: #bfdbfe; cursor: pointer; border: 1px solid #ccc; border-radius: 50%;"></div>
+                   <div class="color-picker" data-color="#fbcfe8" style="width: 14px; height: 14px; background: #fbcfe8; cursor: pointer; border: 1px solid #ccc; border-radius: 50%;"></div>
+                   <div class="add-note" style="margin-left: auto; cursor: pointer; font-size: 14px; line-height: 1;">➕</div>
+                 </div>
+                 <textarea class="sticky-textarea" style="flex: 1; background: transparent; border: none; outline: none; padding: 8px; font-family: 'Tahoma', sans-serif; resize: none;"></textarea>
+               </div>`,
+        onReady: (winId) => {
+          const body = document.getElementById(winId + '-body');
+          const ta = body.querySelector('.sticky-textarea');
+          ta.value = note.text || '';
+          const winEl = body.closest('.window');
+
+          winEl.style.backgroundColor = note.color;
+
+          ta.addEventListener('input', () => {
+            notes[id].text = ta.value;
+            saveNotes();
+          });
+
+          body.querySelectorAll('.color-picker').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const c = e.target.dataset.color;
+              note.color = c;
+              body.firstElementChild.style.background = c;
+              winEl.style.backgroundColor = c;
+              notes[id].color = c;
+              saveNotes();
+            });
+          });
+
+          body.querySelector('.add-note').addEventListener('click', () => {
+            const newId = 'note_' + Date.now();
+            notes[newId] = { text: '', x: parseInt(winEl.style.left) + 20, y: parseInt(winEl.style.top) + 20, color: '#fef08a' };
+            saveNotes();
+            createStickyNote(newId, notes[newId]);
+          });
+
+          // Hook into the window drag to save position
+          const observer = new MutationObserver(() => {
+            notes[id].x = parseInt(winEl.style.left);
+            notes[id].y = parseInt(winEl.style.top);
+            saveNotes();
+          });
+          observer.observe(winEl, { attributes: true, attributeFilter: ['style'] });
+
+          // Cleanup on close
+          registerWindowCleanup(winId, () => {
+            observer.disconnect();
+            if (ta.value.trim() === '') {
+              delete notes[id];
+              saveNotes();
+            }
+          });
+        }
+      });
+    }
+  }
+
   // ======= SETTINGS =======
   function openSettings() {
     const currentBg = localStorage.getItem('retro_bg') || 'classic';
@@ -4925,15 +5025,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
