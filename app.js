@@ -2,6 +2,16 @@
 (function () {
   'use strict';
 
+
+        function escapeHtml(text) {
+          return String(text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
   let windowId = 0;
   let activeWindowId = null;
   let dragState = null;
@@ -54,6 +64,18 @@
     return icons[ext] || '📄';
   }
 
+
+  // Restore sticky notes on boot
+  function initStickyNotes() {
+    let notes = {};
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+    } catch(e) {}
+    Object.keys(notes).forEach(id => {
+      openStickyNotes(id);
+    });
+  }
+
   function updateDesktopIcons() {
     const desktopEl = document.getElementById('desktop-icons');
     if (!desktopEl) return;
@@ -66,7 +88,7 @@
         el.className = 'desktop-icon user-desktop-item';
         el.dataset.name = name;
         el.dataset.isdir = isDir;
-        el.innerHTML = `<div class="explorer-item-icon" style="font-size:32px;margin-bottom:4px">${getFileIcon(name, val)}</div><span style="word-break:break-word;text-align:center">${name}</span>`;
+        el.innerHTML = `<div class="explorer-item-icon" style="font-size:32px;margin-bottom:4px">${getFileIcon(name, val)}</div><span style="word-break:break-word;text-align:center">${escapeHtml(name)}</span>`;
         el.setAttribute('draggable', 'true');
         el.addEventListener('dragstart', (e) => {
           e.dataTransfer.setData('text/plain', JSON.stringify({ name: name, isDir: isDir, fromPath: '/home/user/Desktop' }));
@@ -357,6 +379,7 @@
     document.getElementById('desktop').style.display = 'block';
     playSound('boot');
     updateDesktopIcons();
+    initStickyNotes();
     updateClock();
     setInterval(updateClock, 1000);
     document.getElementById('clock').addEventListener('click', () => openApp('clock'));
@@ -683,7 +706,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -1916,7 +1939,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
             content.innerHTML = sorted.map(([name, val]) => {
               const icon = getFileIcon(name, val);
               const isDir = isDirectory(val);
-              return `<div class="explorer-item" draggable="true" data-name="${name}" data-isdir="${isDir}"><div class="explorer-item-icon">${icon}</div><div class="explorer-item-name">${name}</div></div>`;
+              return `<div class="explorer-item" draggable="true" data-name="${escapeHtml(name)}" data-isdir="${isDir}"><div class="explorer-item-icon">${icon}</div><div class="explorer-item-name">${escapeHtml(name)}</div></div>`;
             }).join('');
           }
           if (statusBar) statusBar.textContent = `${entries.length} object(s)`;
@@ -2207,7 +2230,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
             content.innerHTML = trashBin.map((item, idx) => `
               <div class="explorer-item" data-idx="${idx}">
                 <div class="explorer-item-icon">${getFileIcon(item.name, item.content)}</div>
-                <div class="explorer-item-name">${item.name}<br><small style="color:#888">From: ${item.from}</small></div>
+                <div class="explorer-item-name">${escapeHtml(item.name)}<br><small style="color:#888">From: ${escapeHtml(item.from)}</small></div>
               </div>`).join('');
           }
           if (statusBar) statusBar.textContent = trashBin.length + ' object(s)';
@@ -2360,7 +2383,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
         const file = element.querySelector('.cs-tab.active .cs-tab-name')?.textContent || 'none';
         detail = `Project: ${workspace} | File: ${file}`;
       } else if (/System Settings/i.test(title)) {
-        detail = element.querySelector('#toggle-sound')?.checked ? 'sound on' : 'sound off';
+        detail = element.querySelector('.toggle-sound')?.checked ? 'sound on' : 'sound off';
       }
 
       return {
@@ -3178,7 +3201,7 @@ MiB Mem:   2048.0 total,   812.4 free,   840.2 used,   395.4 buff/cache
                               : normalized === 'agent_send'
                                 ? element.querySelector('#agent-send-btn')
                                 : normalized === 'settings_sound_toggle'
-                                  ? element.querySelector('#toggle-sound')
+                                  ? element.querySelector('.toggle-sound')
                                   : null;
             if (targetEl) return { record, element: targetEl };
           }
@@ -4451,6 +4474,66 @@ ${getAgentDesktopState()}`
     }
   }
 
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes(noteId = null) {
+    createWindow({
+      title: 'Sticky Notes', width: 300, height: 250, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display:flex; flex-direction:column; height: 100%; background: #fef08a;">
+        <div style="background: #fde047; padding: 4px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ca8a04;">
+          <button class="sn-add-btn" style="border: none; background: transparent; cursor: pointer; font-size: 16px; font-weight: bold;">+</button>
+          <button class="sn-del-btn" style="border: none; background: transparent; cursor: pointer; font-size: 14px;">🗑️</button>
+        </div>
+        <textarea class="sn-textarea" spellcheck="false" style="flex:1; width:100%; border:none; background:transparent; padding:10px; font-family: 'Comic Sans MS', cursive, sans-serif; resize:none; font-size: 14px; color: #333; outline: none;"></textarea>
+      </div>`,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const ta = body.querySelector('.sn-textarea');
+        const addBtn = body.querySelector('.sn-add-btn');
+        const delBtn = body.querySelector('.sn-del-btn');
+
+        // Handle localStorage state
+        let notes = {};
+        try {
+          notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+        } catch(e) {}
+
+        let currentNoteId = noteId || winId;
+
+        // Load data if available
+        if (notes[currentNoteId]) {
+          ta.value = notes[currentNoteId];
+        } else {
+          // Check if this is the first note
+          const existingKeys = Object.keys(notes);
+          if (existingKeys.length > 0 && !notes[winId]) {
+            // Note: In a real app we'd load based on an ID passed to openStickyNotes, but here we'll just save it under winId
+          }
+        }
+
+        ta.addEventListener('input', () => {
+          let latestNotes = {};
+          try { latestNotes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+          latestNotes[currentNoteId] = ta.value;
+          localStorage.setItem('retro_stickynotes', JSON.stringify(latestNotes));
+        });
+
+        addBtn.addEventListener('click', () => {
+          openStickyNotes();
+        });
+
+        delBtn.addEventListener('click', () => {
+          let latestNotes = {};
+          try { latestNotes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+          delete latestNotes[currentNoteId];
+          localStorage.setItem('retro_stickynotes', JSON.stringify(latestNotes));
+          closeWindow(winId);
+        });
+      }
+    });
+  }
+
   // ======= RUN DIALOG =======
   function openRun() {
     createWindow({
@@ -4463,18 +4546,18 @@ ${getAgentDesktopState()}`
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
           <label style="font-size: 12px; font-weight: bold;">Open:</label>
-          <input type="text" id="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
+          <input type="text" class="run-input" style="flex: 1; padding: 4px; font-family: 'Tahoma', sans-serif;">
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
-          <button id="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
-          <button id="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
+          <button class="run-ok-btn" style="padding: 4px 16px; min-width: 75px;">OK</button>
+          <button class="run-cancel-btn" style="padding: 4px 16px; min-width: 75px;">Cancel</button>
         </div>
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const input = body.querySelector('#run-input');
-        const okBtn = body.querySelector('#run-ok-btn');
-        const cancelBtn = body.querySelector('#run-cancel-btn');
+        const input = body.querySelector('.run-input');
+        const okBtn = body.querySelector('.run-ok-btn');
+        const cancelBtn = body.querySelector('.run-cancel-btn');
 
         input.focus();
 
@@ -4491,7 +4574,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4593,12 +4676,12 @@ ${getAgentDesktopState()}`
       body: `<div style="padding: 20px; font-family: 'Tahoma', sans-serif;">
         <h3 style="margin-top:0; font-size: 16px;">Audio Settings</h3>
         <label style="display:flex; align-items:center; gap: 8px; cursor: pointer; font-size: 13px; margin-top: 15px;">
-          <input type="checkbox" id="toggle-sound" ${soundEnabled ? 'checked' : ''}>
+          <input type="checkbox" class="toggle-sound" ${soundEnabled ? 'checked' : ''}>
           Enable System Sounds
         </label>
 
         <h3 style="margin-top:20px; font-size: 16px;">Desktop Background</h3>
-        <select id="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
+        <select class="bg-selector" style="margin-top: 10px; padding: 4px; width: 100%; font-family: 'Tahoma';">
           <option value="classic" ${currentBg === 'classic' ? 'selected' : ''}>Classic Retro</option>
           <option value="bliss" ${currentBg === 'bliss' ? 'selected' : ''}>Windows Bliss</option>
           <option value="teal" ${currentBg === 'teal' ? 'selected' : ''}>Solid Teal</option>
@@ -4607,12 +4690,12 @@ ${getAgentDesktopState()}`
       </div>`,
       onReady: (winId) => {
         const body = document.getElementById(winId + '-body');
-        const cb = body.querySelector('#toggle-sound');
+        const cb = body.querySelector('.toggle-sound');
         cb.addEventListener('change', (e) => {
           soundEnabled = e.target.checked;
           if (soundEnabled) playSound('click');
         });
-        const bgSel = body.querySelector('#bg-selector');
+        const bgSel = body.querySelector('.bg-selector');
         bgSel.addEventListener('change', (e) => {
           const bg = e.target.value;
           localStorage.setItem('retro_bg', bg);
@@ -4925,15 +5008,6 @@ ${getAgentDesktopState()}`
           termState: { cwd: '/home/user', agentMode: false, agentHistory: [] }
         };
         let suppressInput = false;
-
-        function escapeHtml(text) {
-          return String(text ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-        }
 
         function stashTokens(text, rules) {
           const tokens = [];
