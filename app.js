@@ -681,11 +681,76 @@
       terminal: openTerminal, notepad: openNotepad, calculator: openCalculator,
       paint: openPaint, mycomputer: openMyComputer, mydocuments: openMyDocuments, files: openMyDocuments,
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
-      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
+      minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent, stickynotes: openStickyNotes, todolist: openTodoList,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
       run: openRun, help: openHelp, clock: openClockSettings
     };
     if (launchers[name]) launchers[name]();
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    const id = createWindow({
+      title: 'Sticky Notes', width: 280, height: 320, tbIcon: '📝',
+      body: '<div class="stickynotes-body" style="width: 100%; height: 100%; background: #fdfd96; display: flex; flex-direction: column; font-family: \'Comic Sans MS\', cursive, sans-serif; box-sizing: border-box; padding: 10px;"><textarea class="stickynotes-text" style="width: 100%; height: 100%; border: none; background: transparent; resize: none; outline: none; font-size: 16px; font-family: inherit; line-height: 1.5; color: #333;"></textarea></div>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const textarea = body.querySelector('.stickynotes-text');
+
+        let savedNotes = '';
+        try { savedNotes = localStorage.getItem('retro_stickynotes') || ''; } catch (e) {}
+
+        textarea.value = savedNotes;
+        textarea.addEventListener('input', () => { localStorage.setItem('retro_stickynotes', textarea.value); });
+      }
+    });
+  }
+
+
+  // ======= TO-DO LIST =======
+  function openTodoList() {
+    const id = createWindow({
+      title: 'To-Do List', width: 350, height: 450, tbIcon: '☑️',
+      body: '<div class="todo-body" style="width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; font-family: Tahoma, sans-serif; box-sizing: border-box;"><div style="padding: 10px; border-bottom: 1px solid #ccc; background: #f0f0f0; display: flex; gap: 5px;"><input type="text" class="todo-input" placeholder="Add a new task..." style="flex: 1; padding: 5px; border: 1px solid #7f9db9;"><button class="todo-add-btn" style="padding: 4px 10px;">Add</button></div><div class="todo-list" style="flex: 1; overflow-y: auto; padding: 10px; margin: 0; list-style: none;"></div></div>',
+      statusbar: false,
+      onReady: (winId) => {
+        const body = document.getElementById(winId + '-body');
+        const input = body.querySelector('.todo-input');
+        const addBtn = body.querySelector('.todo-add-btn');
+        const list = body.querySelector('.todo-list');
+
+        let todos = [];
+        try { const saved = localStorage.getItem('retrotodo'); if (saved) todos = JSON.parse(saved); } catch (e) { todos = []; }
+
+        function render() {
+          list.innerHTML = '';
+          todos.forEach((todo, idx) => {
+            const item = document.createElement('div');
+            item.style.display = 'flex'; item.style.alignItems = 'center'; item.style.marginBottom = '5px'; item.style.padding = '5px'; item.style.borderBottom = '1px dashed #eee';
+
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = todo.done; cb.style.marginRight = '10px';
+            cb.addEventListener('change', () => { todo.done = cb.checked; save(); render(); });
+
+            const text = document.createElement('div'); text.textContent = todo.text; text.style.flex = '1'; text.style.textDecoration = todo.done ? 'line-through' : 'none'; text.style.color = todo.done ? '#888' : '#000';
+
+            const delBtn = document.createElement('button'); delBtn.textContent = 'X'; delBtn.style.padding = '0 5px'; delBtn.style.color = 'red'; delBtn.style.border = 'none'; delBtn.style.background = 'transparent'; delBtn.style.cursor = 'pointer';
+            delBtn.addEventListener('click', () => { todos.splice(idx, 1); save(); render(); });
+
+            item.appendChild(cb); item.appendChild(text); item.appendChild(delBtn); list.appendChild(item);
+          });
+        }
+        function save() { localStorage.setItem('retrotodo', JSON.stringify(todos)); }
+        function addTask() {
+          const val = input.value.trim();
+          if (val) { todos.push({ text: val, done: false }); save(); render(); input.value = ''; }
+        }
+        addBtn.addEventListener('click', addTask);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addTask(); });
+        render();
+      }
+    });
   }
 
   // ======= TERMINAL =======
@@ -4491,7 +4556,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes, todolist: openTodoList
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
