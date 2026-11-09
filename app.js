@@ -683,7 +683,7 @@
       internet: openInternet, recyclebin: openRecycleBin, mediaplayer: openMediaPlayer,
       minesweeper: openMinesweeper, settings: openSettings, ide: openIDE, agent: openAIAgent,
       snake: openSnake, tetris: openTetris, game2048: open2048, tictactoe: openTicTacToe,
-      run: openRun, help: openHelp, clock: openClockSettings
+      run: openRun, help: openHelp, clock: openClockSettings, stickynotes: openStickyNotes
     };
     if (launchers[name]) launchers[name]();
   }
@@ -4491,7 +4491,7 @@ ${getAgentDesktopState()}`
               mspaint: openPaint, paint: openPaint, explorer: openMyDocuments,
               iexplore: openInternet, wmplayer: openMediaPlayer,
               winmine: openMinesweeper, minesweeper: openMinesweeper, settings: openSettings, code: openIDE,
-              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe
+              snake: openSnake, tetris: openTetris, '2048': open2048, tictactoe: openTicTacToe, stickynotes: openStickyNotes
             };
             const appCmd = val.toLowerCase();
             if (launchers[appCmd]) {
@@ -4580,6 +4580,123 @@ ${getAgentDesktopState()}`
         updateDisplay();
         const interval = setInterval(updateDisplay, 1000);
         registerWindowCleanup(winId, () => clearInterval(interval));
+      }
+    });
+  }
+
+
+  // ======= STICKY NOTES =======
+  function openStickyNotes() {
+    let notes = {};
+    try {
+      notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {};
+    } catch (e) {
+      notes = {};
+    }
+
+    // Create at least one note if empty
+    if (Object.keys(notes).length === 0) {
+      notes['note_1'] = { text: 'Welcome to Sticky Notes!', color: '#fef3c7', x: 100, y: 100, width: 250, height: 250 };
+    }
+
+    // Open a window for each note
+    Object.entries(notes).forEach(([noteId, noteData]) => {
+      createStickyNoteWindow(noteId, noteData);
+    });
+  }
+
+  function createStickyNoteWindow(noteId, noteData) {
+    const saveNote = (winId, text, width, height) => {
+      let notes = {};
+      try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+
+      // Try to get position if window exists
+      const winEl = document.getElementById(winId);
+      let x = noteData.x, y = noteData.y;
+      if (winEl) {
+        x = parseInt(winEl.style.left) || x;
+        y = parseInt(winEl.style.top) || y;
+      }
+
+      notes[noteId] = { text, color: noteData.color || '#fef3c7', x, y, width, height };
+      localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+    };
+
+    const winId = createWindow({
+      title: 'Sticky Note', width: noteData.width || 250, height: noteData.height || 250, tbIcon: '📝',
+      statusbar: false,
+      body: `<div style="display: flex; flex-direction: column; height: 100%; background-color: ${noteData.color};">
+        <div class="sticky-toolbar" style="padding: 4px; display: flex; gap: 4px; background: rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.1);">
+          <button class="add-note-btn" style="background: none; border: 1px solid transparent; cursor: pointer; border-radius: 2px;">➕</button>
+          <div style="flex: 1;"></div>
+          <button class="color-btn" data-color="#fef3c7" style="width: 16px; height: 16px; background: #fef3c7; border: 1px solid #ccc; cursor: pointer;"></button>
+          <button class="color-btn" data-color="#dcfce7" style="width: 16px; height: 16px; background: #dcfce7; border: 1px solid #ccc; cursor: pointer;"></button>
+          <button class="color-btn" data-color="#e0e7ff" style="width: 16px; height: 16px; background: #e0e7ff; border: 1px solid #ccc; cursor: pointer;"></button>
+          <button class="color-btn" data-color="#fce7f3" style="width: 16px; height: 16px; background: #fce7f3; border: 1px solid #ccc; cursor: pointer;"></button>
+        </div>
+        <textarea class="sticky-textarea" style="flex: 1; border: none; background: transparent; padding: 10px; font-family: 'Comic Sans MS', cursive, sans-serif; font-size: 14px; resize: none; outline: none;"></textarea>
+      </div>`,
+      onReady: (wId) => {
+        const win = document.getElementById(wId);
+        if (win) {
+          win.style.left = noteData.x + 'px';
+          win.style.top = noteData.y + 'px';
+          // Simplify sticky note title bar
+          const tb = win.querySelector('.window-titlebar');
+          if (tb) tb.style.background = noteData.color;
+        }
+
+        const body = document.getElementById(wId + '-body');
+        const textarea = body.querySelector('.sticky-textarea');
+        textarea.value = noteData.text || '';
+
+        let typingTimer;
+        textarea.addEventListener('input', () => {
+          clearTimeout(typingTimer);
+          typingTimer = setTimeout(() => {
+            saveNote(wId, textarea.value, win.offsetWidth, win.offsetHeight);
+          }, 500);
+        });
+
+        // Add new note
+        body.querySelector('.add-note-btn').addEventListener('click', () => {
+          const newId = 'note_' + Date.now();
+          const newData = { text: '', color: '#fef3c7', x: noteData.x + 20, y: noteData.y + 20, width: 250, height: 250 };
+          let notes = {};
+          try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+          notes[newId] = newData;
+          localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
+          createStickyNoteWindow(newId, newData);
+        });
+
+        // Change color
+        body.querySelectorAll('.color-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const color = e.target.getAttribute('data-color');
+            noteData.color = color;
+            body.querySelector('div').style.backgroundColor = color;
+            if (win) {
+              const tb = win.querySelector('.window-titlebar');
+              if (tb) tb.style.background = color;
+            }
+            saveNote(wId, textarea.value, win.offsetWidth, win.offsetHeight);
+          });
+        });
+
+        // Handle window move/resize
+        const observer = new MutationObserver(() => {
+          saveNote(wId, textarea.value, win.offsetWidth, win.offsetHeight);
+        });
+        if (win) {
+          observer.observe(win, { attributes: true, attributeFilter: ['style'] });
+        }
+      },
+      onClose: () => {
+        // Remove from local storage
+        let notes = {};
+        try { notes = JSON.parse(localStorage.getItem('retro_stickynotes')) || {}; } catch(e) {}
+        delete notes[noteId];
+        localStorage.setItem('retro_stickynotes', JSON.stringify(notes));
       }
     });
   }
